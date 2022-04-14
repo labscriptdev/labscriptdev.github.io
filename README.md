@@ -1,2 +1,0 @@
-# scriptlabdev
-ScriptLab.dev Webpage
