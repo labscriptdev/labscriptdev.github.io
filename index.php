@@ -25,9 +25,8 @@
         </div>
     </div>
 
-    <?php $random = rand(0, 2); ?>
 
-    <?php if ($random==0): ?>
+    <?php $vantas[] = function() { ?>
     <script src="//unpkg.com/p5@1.4.1/lib/p5.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.trunk.min.js"></script>
     <script>
@@ -40,18 +39,20 @@
         minWidth: 200.00,
         scale: 1.00,
         scaleMobile: 1.00,
-        color: 0xff00ff,
+        color: 0x874687,
         spacing: 10.00,
         chaos: 10.00
     });
     </script>
+    <?php } ?>
 
-    <?php elseif ($random==1): ?>
+
+    <?php $vantas[] = function() { ?>
     <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r119/three.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.net.min.js"></script>
     <script>
     VANTA.NET({
-    el: "#vantabg",
+        el: "#vantabg",
         mouseControls: true,
         touchControls: true,
         gyroControls: false,
@@ -59,15 +60,16 @@
         minWidth: 200.00,
         scale: 1.00,
         scaleMobile: 1.00,
-        backgroundColor: 0x0,
-        points: 20.00,
-        maxDistance: 25.00,
-        spacing: 14.00
+        color: 0x874687,
+        backgroundColor: 0x000000,
+        points: 9.00,
+        maxDistance: 22.00
     });
     </script>
-    
-    
-    <?php elseif ($random==2): ?>
+    <?php } ?>
+
+
+    <?php $vantas[] = function() { ?>
     <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r119/three.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.globe.min.js"></script>
     <script>
@@ -80,13 +82,61 @@
         minWidth: 200.00,
         scale: 1.00,
         scaleMobile: 1.00,
-        color: 0xff00ff,
-        color2: 0xff00ff,
+        color: 0x874687,
+        // color2: 0x874687,
         backgroundColor: 0x000000
     });
     </script>
+    <?php } ?>
+    
+    
+    <?php $vantas[] = function() { ?>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r119/three.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.waves.min.js"></script>
+    <script>
+    VANTA.WAVES({
+        el: "#vantabg",
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        scale: 1.00,
+        scaleMobile: 1.00,
+        color: 0x874687,
+        shininess: 34.00,
+        waveHeight: 14.50,
+        zoom: 0.78
+    });
+    </script>
+    <?php } ?>
+    
+    
+    <?php $vantas[] = function() { ?>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r119/three.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.dots.min.js"></script>
+    <script>
+    VANTA.DOTS({
+        el: "#vantabg",
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        scale: 1.00,
+        scaleMobile: 1.00,
+        color: 0x874687,
+        color2: 0x874687,
+        backgroundColor: 0x000000,
+        size: 2.60,
+        spacing: 30.00
+    });
+    </script>
+    <?php } ?>
 
-
-    <?php endif; ?>
+    <?php
+    $index = array_rand($vantas);
+    call_user_func($vantas[$index]);
+    ?>
 </body>
 </html>
