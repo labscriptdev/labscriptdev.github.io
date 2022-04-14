@@ -9,7 +9,7 @@
     <title>Document</title>
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@500&display=swap');
-    html, body {font-family: 'Exo 2', sans-serif;}
+    html, body {font-family: 'Exo 2', sans-serif; overflow:hidden;}
     </style>
 </head>
 <body>
