@@ -11,6 +11,10 @@
     @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@500&display=swap');
     html, body {font-family: 'Exo 2', sans-serif; overflow:hidden;}
     </style>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KLZ83WH406"></script>
+    <script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-KLZ83WH406');</script>
 </head>
 <body>
     <div class="d-flex align-items-center justify-content-center" id="vantabg" style="height:100vh;">
