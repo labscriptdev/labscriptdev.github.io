@@ -24,10 +24,19 @@
             <h3>Estaremos disponíveis em breve</h3>
             <div class="mb-4"></div>
             <a href="https://wa.me/message/NG7A2SW25XIEI1" target="_blank" class="mx-2" style="color:inherit;"><i class="fa-brands fa-whatsapp fa-2xl"></i></a>
-            <a href="mailto:labscript.dev@gmail.com" target="_blank" class="mx-2" style="color:inherit;"><i class="fa-solid fa-envelope fa-2xl"></i></a>
+            <a href="javascript:mailto();" class="mx-2" style="color:inherit;"><i class="fa-solid fa-envelope fa-2xl"></i></a>
             <a href="https://github.com/labscriptdev" target="_blank" class="mx-2" style="color:inherit;"><i class="fa-brands fa-github fa-2xl"></i></a>
         </div>
     </div>
+
+    <script>
+    const mailto = () => {
+        Object.assign(document.createElement('a'), {
+            target: '_blank',
+            href: 'mailto:'+atob('bGFic2NyaXB0LmRldkBnbWFpbC5jb20='),
+        }).click();
+    };
+    </script>
 
 
     <?php $vantas[] = function() { ?>
