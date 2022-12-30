@@ -1,5 +1,5 @@
 <template>
-  <div>
-    Labscript.dev
-  </div>
+  <v-app>
+    <nuxt-page />
+  </v-app>
 </template>

@@ -9,7 +9,10 @@
     "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
+    "@mdi/font": "^7.1.96",
+    "axios": "^1.2.2",
     "gh-pages": "^4.0.0",
-    "nuxt": "3.0.0"
+    "nuxt": "3.0.0",
+    "vuetify": "^3.0.6"
   }
 }
