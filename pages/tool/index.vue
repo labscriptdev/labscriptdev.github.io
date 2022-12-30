@@ -1,16 +1,18 @@
 <template>
-  <v-layout>
+  <v-layout class="bg-grey-lighten-3">
     <nuxt-page />
 
-    <div style="position:fixed; bottom:15px; right:15px;">
+    <div style="position:fixed; bottom:15px; right:15px; z-index:999!important;">
       <v-menu :close-on-content-click="false">
-        <div class="mb-4 border" style="width:350px; max-width:90vh;">
+        <div class="mb-4" style="width:350px; max-width:90vh;">
           <v-card>
             <v-text-field
               v-model="filter"
               label="Filtro"
               :hide-details="true"
+              class="ma-2"
             />
+            <v-divider />
             <div style="max-height:calc(70vh - 70px); overflow:auto;">
               <v-list lines="two">
                 <v-list-item
@@ -47,9 +49,14 @@
         <template #activator="{ props }">
           <v-btn
             v-bind="props"
-            icon="mdi-menu"
-            color="primary"
-          />
+            icon
+            size="55"
+            flat
+          >
+            <v-avatar size="50">
+              <v-img src="/assets/labscript.dev.png" />
+            </v-avatar>
+          </v-btn>
         </template>
       </v-menu>
     </div>
@@ -69,11 +76,17 @@
     data: () => ({
       filter: '',
       items: [
-      {
+        {
           id: 'bookapp',
           name: 'Gerador app bookmark',
           description: 'Gere aplicações que rodam diretamente da barra de favoritos',
           icon: 'mdi-bookmark-plus-outline',
+        },
+        {
+          id: 'calcdiv',
+          name: 'Calculadora de gastos',
+          description: 'Calculadora de gastos com divisão por pessoas e tempo de uso',
+          icon: 'mdi-calculator',
         },
         // {
         //   id: 'brainjs',

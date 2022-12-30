@@ -15,15 +15,23 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 		components: vuetifyComponents,
 		directives: vuetifyDirectives,
 		icons: { defaultSet: 'mdi' },
-		defaults: {
-      global: {
-        density: 'compact',
-      },
-      VBtn: { density: 'default' },
-      VTextField: { density: 'default' },
-      VTextarea: { density: 'default' },
-      VSelect: { density: 'default' },
-    },
+		defaults: (() => {
+			let inputs = {
+				density: 'comfortable',
+				variant: 'outlined',
+			};
+
+			return {
+				global: {
+					density: 'compact',
+				},
+				VBtn: { density: 'default' },
+				VTextField: { ...inputs },
+				VTextarea: { ...inputs },
+				VSelect: { ...inputs },
+				VCombobox: { ...inputs },
+			};
+		})(),
 		theme: {
 			defaultTheme: 'light',
 			themes: {

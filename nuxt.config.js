@@ -6,4 +6,11 @@ export default defineNuxtConfig({
     '@mdi/font/css/materialdesignicons.css',
     // 'leaflet/dist/leaflet.css',
   ],
+
+  modules: [
+
+    // https://vueuse.org/guide/
+    ['@vueuse/nuxt', {}],
+
+  ],
 });
