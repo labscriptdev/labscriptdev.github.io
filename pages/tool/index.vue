@@ -27,7 +27,7 @@
             </div>
             <v-btn
               block
-              :href="`https://github.com/labscriptdev/labscriptdev.github.io/tree/main${$route.path}/`"
+              :href="`https://github.com/labscriptdev/labscriptdev.github.io/tree/main/docs${$route.path}/`"
               target="_blank"
               color="primary"
               rounded="0"
