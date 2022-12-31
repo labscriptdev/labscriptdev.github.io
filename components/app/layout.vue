@@ -9,7 +9,7 @@
       <slot name="drawer" v-bind="slotBind()"></slot>
     </v-navigation-drawer>
     <v-app-bar elevation="1" ref="header">
-      <v-container :fluid="headerFluid">
+      <v-container :fluid="fluid" class="px-0">
         <div class="d-flex align-center flex-grow-1 px-2" style="gap:10px;">
           <v-btn
             icon="mdi-menu"
@@ -23,7 +23,9 @@
     </v-app-bar>
     <v-main>
       <div class="pa-3" :style="`height:calc(100vh - ${headerHeight}px); overflow:auto;`">
-        <slot v-bind="slotBind()"></slot>
+        <v-container :fluid="fluid">
+          <slot v-bind="slotBind()"></slot>
+        </v-container>
       </div>
     </v-main>
   </v-layout>
@@ -47,7 +49,7 @@
         type: [Number],
         default: 300,
       },
-      headerFluid: {
+      fluid: {
         type: Boolean,
         default: true,
       },
