@@ -121,7 +121,7 @@
           <v-col cols="12">
             <v-text-field
               label="À receber"
-              :model-value="results.amountTotal"
+              :model-value="$filter.numberFormat(results.amountTotal)"
               :suffix="useStorage.currencyTo"
               readonly
             ></v-text-field>
