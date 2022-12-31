@@ -1,17 +1,29 @@
 <template>
   <div>
-    <v-table>
+    <v-table class="rounded">
       <template #default>
         <thead>
+          <tr class="bg-primary">
+            <td colspan="7" class="pa-0">
+              <div class="d-flex align-center pa-2 border">
+                <v-btn flat :size="30" icon="mdi-chevron-left" @click="monthAdd(-1)"></v-btn>
+                <div
+                  class="flex-grow-1 text-center text-uppercase"
+                  style="font-size:16px; line-height:20px; white-space:nowrap; font-weight:bold;"
+                >
+                  {{ month.year }} {{ month.monthName }}
+                </div>
+                <v-btn flat :size="30" icon="mdi-chevron-right" @click="monthAdd(1)"></v-btn>
+              </div>
+            </td>
+          </tr>
           <tr>
-            <th colspan="2" class="p-0 text-left">
-              <v-btn flat :size="30" icon="mdi-chevron-left" @click="monthAdd(-1)"></v-btn>  
-            </th>
-            <th colspan="3" class="p-0 text-center">
-              {{ month.year }} {{ month.monthName }}
-            </th>
-            <th colspan="2" class="p-0 text-right">
-              <v-btn flat :size="30" icon="mdi-chevron-right" @click="monthAdd(1)"></v-btn>  
+            <th
+              v-for="wd in month.weekdays"
+              :key="wd"
+              class="text-center text-uppercase px-0 py-3"
+            >
+              {{ wd }}
             </th>
           </tr>
         </thead>
@@ -38,7 +50,8 @@
     props: {
       modelValue: {
         type: [Boolean, String],
-        default: dayjs().format('YYYY-MM-DD'),
+        // default: this.$dayjs().format('YYYY-MM-DD'),
+        default: false,
       },
       dates: {
         type: Array,
@@ -49,7 +62,7 @@
       month: {
         set(value) {},
         get() {
-          const d = dayjs(this.modelValue);
+          const d = this.$dayjs(this.modelValue);
           const r = {};
           r.date = d.format('YYYY-MM-DD');
           r.year = d.format('YYYY');
@@ -58,7 +71,7 @@
           r.monthName = d.format('MMMM');
           r.daysInMonth = d.daysInMonth();
           r.firstDay = d.startOf("month").day();
-          r.weekdays = dayjs.weekdays().map(weekday => weekday.substring(0, 3));
+          r.weekdays = this.$dayjs.weekdays().map(weekday => weekday.substring(0, 3));
           r.days = (() => {
             const dayDefault = {id:null, day:null, dayName:null, dayAbbr:null, dates:[]};
             let days=[];
@@ -72,7 +85,7 @@
               day.id = dd.format();
               day.date = dd.format('YYYY-MM-DD');
               day.day = dd.format('DD');
-              day.dayName = dayjs.weekdays()[ dd.day() ];
+              day.dayName = this.$dayjs.weekdays()[ dd.day() ];
               day.dayAbbr = day.dayName.substring(0, 3);
               days.push(day);
             }
@@ -94,7 +107,7 @@
     },
     methods: {
       monthAdd(n) {
-        const month = dayjs(this.modelValue).add(n, 'month').format('YYYY-MM-DD');
+        const month = this.$dayjs(this.modelValue).add(n, 'month').format('YYYY-MM-DD');
         this.$emit('update:modelValue', month);
       },
       slotBind(merge = {}) {

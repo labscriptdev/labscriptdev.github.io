@@ -947,6 +947,15 @@
     "@unhead/ssr" "^1.0.9"
     "@unhead/vue" "^1.0.9"
 
+"@vueuse/integrations@^9.9.0":
+  version "9.9.0"
+  resolved "https://registry.yarnpkg.com/@vueuse/integrations/-/integrations-9.9.0.tgz#fe1c0bdcbba92983a8f6f93386377ed5b3da7302"
+  integrity sha512-/wr3jrMlzbPNd38dO85NOT4j7vga9+eQewEZFXHJAFEvKnRxBy/Ytp1pt4Sz8dVOLLYMBHfSaVAra91ftfIh0w==
+  dependencies:
+    "@vueuse/core" "9.9.0"
+    "@vueuse/shared" "9.9.0"
+    vue-demi "*"
+
 "@vueuse/metadata@9.9.0":
   version "9.9.0"
   resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-9.9.0.tgz#d3f3f40dcedb6a045e7940a1fba78828a70d9b7e"

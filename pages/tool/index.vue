@@ -2,7 +2,7 @@
   <v-layout class="bg-grey-lighten-3">
     <nuxt-page />
 
-    <div style="position:fixed; bottom:15px; right:15px; z-index:999!important;">
+    <div style="position:fixed; bottom:30px; right:30px; z-index:999!important;">
       <v-menu :close-on-content-click="false">
         <div class="mb-4" style="width:350px; max-width:90vh;">
           <v-card>
