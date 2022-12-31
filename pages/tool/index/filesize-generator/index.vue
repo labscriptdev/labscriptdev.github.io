@@ -1,23 +1,21 @@
 <template>
-  <v-main>
-    <v-container>
-      <v-row>
-        <v-col cols="12" md="4">
-          <v-combobox label="Tipo de arquivo" :items="extensions" v-model="params.ext" :hide-details="true" />
-        </v-col>
-        <v-col cols="12" md="4">
-          <v-text-field type="number" label="Tamanho do arquivo" v-model="params.size" suffix="MB" :hide-details="true" />
-        </v-col>
-        <v-col cols="12" md="4">
-          <v-text-field label="Nome" suffix=".json" v-model="params.name" :hide-details="true" />
-        </v-col>
-      </v-row>
-      <div class="d-flex mt-5">
-        <v-spacer></v-spacer>
-        <v-btn color="success" @click="download()">Download</v-btn>
-      </div>
-    </v-container>
-  </v-main>
+  <app-layout title="Gerador de arquivos" v-bind="{ drawerShow: false, fluid: false }">
+    <v-row>
+      <v-col cols="12" md="4">
+        <v-combobox label="Tipo de arquivo" :items="extensions" v-model="params.ext" :hide-details="true" />
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-text-field type="number" label="Tamanho do arquivo" v-model="params.size" suffix="MB" :hide-details="true" />
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-text-field label="Nome" suffix=".json" v-model="params.name" :hide-details="true" />
+      </v-col>
+    </v-row>
+    <div class="d-flex mt-5">
+      <v-spacer></v-spacer>
+      <v-btn color="success" @click="download()">Download</v-btn>
+    </div>
+  </app-layout>
 </template>
 
 <script>
