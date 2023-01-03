@@ -5,17 +5,27 @@
       :permanent="true"
       width="300"
     >
-      <v-card-title>Lotto Simulation</v-card-title>
-      <v-divider></v-divider>
+      <v-card-title>Loteria</v-card-title>
+      
+      <v-divider />
+      <v-list>
+        <v-list-item
+          v-for="_type in lottoTypes.response"
+          :key="_type.id"
+          :to="`/tool/lotto/${_type.id}`"
+        >{{ _type.name }}</v-list-item>
+      </v-list>
+      
+      <!-- <v-divider />
       <v-card-text>
         <v-text-field type="number" label="numberStart" v-model.number="lotto.numberStart"></v-text-field>
         <v-text-field type="number" label="numberFinal" v-model.number="lotto.numberFinal"></v-text-field>
         <v-text-field type="number" label="numberLines" v-model.number="lotto.numberLines"></v-text-field>
-      </v-card-text>
+      </v-card-text> -->
     </v-navigation-drawer>
 
     <v-main style="height:100vh; overflow:auto;">
-      <v-table>
+      <!-- <v-table>
         <template #default>
           <tbody>
             <tr v-for="ns in lottoNumbers">
@@ -34,7 +44,8 @@
             </tr>
           </tbody>
         </template>
-      </v-table>
+      </v-table> -->
+      <nuxt-page />
     </v-main>
   </v-layout>
 </template>
@@ -43,6 +54,11 @@
   export default {
     data() {
       return {
+        lottoTypes: this.$request({
+          url: 'https://raw.githubusercontent.com/labscriptdev/static-api/main/data/loteria/index.json',
+          autoSubmit: true,
+          response: [],
+        }),
         lotto: {
           numberStart: 1,
           numberFinal: 60,
