@@ -31,7 +31,7 @@ export default defineNuxtConfig({
       const pathFrom = path.join(__dirname, '.output', 'public');
       const pathTo = path.join(__dirname, 'docs');
       await fs.rmSync(pathTo, { recursive: true, force: true });
-      await fs.moveSync(pathFrom, pathTo);
+      await fs.copySync(pathFrom, pathTo);
     },
   },
 });
