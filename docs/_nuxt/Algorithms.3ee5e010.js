@@ -1,0 +1,1 @@
+class e{constructor(s){this.name="",this.goods=[],this.bads=[],this.onInit(s)}onInit(s=[]){}}class n extends e{onInit(s){this.name="Test 1"}}class a extends e{onInit(s){this.name="Test 2"}}class i{constructor(s){this.analysis=[new n(s),new a(s)],this.rattles=s}}export{i as default};
