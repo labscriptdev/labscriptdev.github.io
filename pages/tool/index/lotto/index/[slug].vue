@@ -1,6 +1,7 @@
 <template>
   <div>
-    <v-table>
+    <pre>lotto: {{ lotto }}</pre>
+    <!-- <v-table>
       <colgroup>
         <col width="100px" >
         <col width="150px" >
@@ -32,20 +33,22 @@
           </td>
         </tr>
       </tbody>
-    </v-table>
+    </v-table> -->
   </div>
 </template>
 
 <script>
+  import Algorithms from '../Algorithms';
+  
   export default {
     data() {
       return {
         lotto: this.$request({
           url: `https://raw.githubusercontent.com/labscriptdev/static-api/main/data/loteria/${this.$route.params.slug}/all.json`,
           autoSubmit: true,
-          response: [],
+          response: new Algorithms([]),
           onResponse(resp) {
-            return resp.reverse();
+            return new Algorithms(resp);
           },
         }),
       };
