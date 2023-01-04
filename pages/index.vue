@@ -1,6 +1,6 @@
 <template>
-  <v-app id="inspire">
-    <div style="position:sticky; top:0;">
+  <v-app>
+    <div class="d-flex flex-column" style="height:100vh; overflow:auto;">
       <v-app-bar flat>
         <v-container class="d-flex align-center">
           <v-avatar
@@ -21,18 +21,13 @@
           </v-btn>
         </v-container>
       </v-app-bar>
-    </div>
 
-    <v-main class="bg-grey-lighten-3">
-      <v-container>
-        <div
-          v-for="n in 200"
-          :key="n"
-        >
-          Text {{ n }}
-        </div>
-      </v-container>
-    </v-main>
+      <div class="flex-grow-1">
+        <v-container>
+          Aaa
+        </v-container>
+      </div>
+    </div>
   </v-app>
 </template>
 
