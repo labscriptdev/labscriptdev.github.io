@@ -2,13 +2,14 @@ class Base {
   name = 'No name';
 
   constructor(lotto, rattles) {
-    this.rangeStart = lotto.rangeStart;
-    this.rangeFinal = lotto.rangeFinal;
-    this.rangePerRow = lotto.rangePerRow;
+    this.tests = [];
     this.goods = [];
     this.bads = [];
     if (Array.isArray(rattles) && typeof lotto=='object') {
       this.onInit(lotto, rattles);
+      this.goods = this.getGoods(lotto, rattles);
+      this.bads = this.getBads(lotto, rattles);
+      this.tests = this.getTests(lotto, rattles);
     }
   }
 
@@ -24,49 +25,95 @@ class Base {
 
     return numbers;
   }
+
+  getTests(lotto, rattles) {
+    rattles = rattles.reverse();
+
+    let test = {
+      goods: {
+        tests: 0,
+        success: 0,
+        percent: 0,
+      },
+      bads: {
+        tests: 0,
+        success: 0,
+        percent: 0,
+      },
+    };
+
+    for(let i=0; i<=rattles.length; i++) {
+      let rattlesOld = rattles.filter((rattle, index) => {
+        return index <= i;
+      });
+      if (rattlesOld.length==0) continue;
+
+      let rattleNext = rattles[ i+1 ] || false;
+      if (!rattleNext) continue;
+
+      const intersection = (a, b) => {
+        const s = new Set(b);
+        return [...new Set(a)].filter(x => s.has(x));
+      };
+
+      let goods = this.getGoods(lotto, rattlesOld);
+      let goodsIntersecs = intersection(goods, rattleNext.numbers);
+      test.goods.tests++;
+      if (goodsIntersecs.length>0) test.goods.success++;
+
+      let bads = this.getBads(lotto, rattlesOld);
+      let badsIntersecs = intersection(bads, rattleNext.numbers);
+      test.bads.tests++;
+      if (badsIntersecs.length>0) test.bads.success++;
+    }
+
+    test.goods.percent = (100 * test.goods.success) / test.goods.tests;
+    test.bads.percent = (100 * test.bads.success) / test.bads.tests;
+
+    return [
+      { name: 'Previsão de "Numeros bons" contendo acertos', percent: test.goods.percent },
+      { name: 'Previsão de "Numeros ruins" contendo acertos', percent: test.bads.percent },
+    ];
+  }
 }
 
 class AnalysisProbability extends Base {
-  name = 'Mais e menos prováveis';
+  name = 'Mais provaveis dos últimos 3 sorteios, menos provaveis dos últimos 10 sorteios';
+  rangeSizeGoods = 3;
+  rangeSizeBads = 10;
 
-  onInit(lotto, rattles) {
-    const rangeSize = 5;
-    this.getGoods(rangeSize, rattles, lotto);
-    this.getBads(rangeSize, rattles);
-  }
-
-  getGoods(rangeSize, rattles, lotto) {
-    let range = {};
+  getGoods(lotto, rattles) {
+    let count = {};
     for(let i=lotto.rangeStart; i<=lotto.rangeFinal; i++) {
-      range[i] = 0;
+      count[i] = 0;
     }
-
-    this.getRawNumbers(lotto, 0, rangeSize).forEach(n => {
-      range[n]++;
+    
+    this.getRawNumbers(rattles, 0, this.rangeSizeGoods).forEach(n => {
+      count[n]++;
     });
 
     let numbers = [];
-    for(let i in range) {
-      if (range[i] > 0) continue;
+    for(let i in count) {
+      if (count[i] > 0) continue;
       numbers.push(parseInt(i));
     }
 
-    this.goods = numbers;
+    return numbers;
   }
 
-  getBads(rangeSize, rattles) {
+  getBads(lotto, rattles) {
     const getDuplicates = arry => arry.filter((item, index) => arry.indexOf(item) !== index);
-    let numbers = this.getRawNumbers(rattles, 0, rangeSize);
-    this.bads = getDuplicates(numbers);
+    let numbers = this.getRawNumbers(rattles, 0, this.rangeSizeBads);
+    return getDuplicates(numbers);
   }
 }
 
 export default class Analysis {
   constructor(lotto, rattles) {
-    this.average = {
-      goods: [],
-      bads: [],
-    };
+    // this.average = {
+    //   goods: [],
+    //   bads: [],
+    // };
     this.types = [
       new AnalysisProbability(lotto, rattles),
     ];
