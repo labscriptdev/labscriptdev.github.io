@@ -1,0 +1,11 @@
+Model Information:
+* title:	Test track
+* source:	https://sketchfab.com/3d-models/test-track-09cc058f3b384cf1a1b25b509f080a82
+* author:	geoek (https://sketchfab.com/geoek)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Test track" (https://sketchfab.com/3d-models/test-track-09cc058f3b384cf1a1b25b509f080a82) by geoek (https://sketchfab.com/geoek) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

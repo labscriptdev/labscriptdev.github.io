@@ -1,5 +1,8 @@
 <template>
-  <div ref="game" id="game" style="width:100%; height:600px;"></div>
+  <div>
+    <div ref="game" id="game" style="width:100%; height:600px;"></div>
+    <pre>{{ game }}</pre>
+  </div>
 </template>
 
 <script>
@@ -7,6 +10,9 @@
   import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
   export default {
+    data: () => ({
+      game: {},
+    }),
     mounted() {
       this.gameInit();
     },
@@ -16,13 +22,22 @@
           init() {
             // console.log('init');
           }
+
           preload() {
-            // console.log('preload');
+            // https://github.com/enable3d/enable3d-website/blob/master/src/examples/car-using-physics-constraints.html#L34
+            // this.load.preload('testTrack', '/assets/models/test-track/scene.gltf');
           }
-          create() {
-            this.warpSpeed();
-            this.physics.debug.enable();
-            // this.physics.add.box({ y: 30 }, { lambert: { color: 'hotpink' } });
+
+          async create() {
+            console.clear();
+            this.warpSpeed('-ground');
+            // this.physics.debug.enable();
+            this.scene.add(new THREE.AxesHelper(5));
+            
+            this.physics.add.sphere(
+              { radius: 0.5, x: 2, y: 5, z: 2, mass: .2 },
+              { lambert: { color: 'hotpink' } }
+            );
 
             // this.physics.add.existing((() => {
             //   const geometry = new THREE.SphereGeometry(0.8, 16, 16);
@@ -32,23 +47,23 @@
             //   this.scene.add(obj);
             //   return obj;
             // })());
-
             
-            const loader = new GLTFLoader().load('/assets/models/map/scene.gltf', (gltf) => {
-              const scene = gltf.scene.children[0];
+            const loader = new GLTFLoader().load('/assets/models/test-track/scene.gltf', (gltf) => {
+              const child = gltf.scene.children[0];
+              child.position.set(-25, -95, 0);
 
-              // scene.traverse(child => {
-              //   if (child.isMesh) {
-              //     child.castShadow = child.receiveShadow = false;
-              //     child.material.metalness = 0;
-              //     child.material.roughness = 1;
-              //   }
-              // })
+              child.traverse(child => {
+                if (child.isMesh) {
+                  child.castShadow = child.receiveShadow = true;
+                  child.material.metalness = 0;
+                  child.material.roughness = 1;
+                }
+              });
 
-              this.scene.add(scene);
-              this.physics.add.existing(this.scene, {
+              this.scene.add(child);
+              this.physics.add.existing(child, {
                 mass: 0,
-                shape: 'convex',
+                shape: 'concaveMesh',
               });
             });
           }

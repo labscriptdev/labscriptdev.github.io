@@ -62,9 +62,18 @@ const request = (params = {}) => {
   return { ...params, loading, submit, response };
 };
 
+const debounce = (callback, time=1000) => {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { callback.apply(this, args); }, time);
+  };
+};
+
 export {
   log,
   axios,
   dayjs,
   request,
+  debounce,
 };
