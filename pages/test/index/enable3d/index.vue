@@ -6,8 +6,11 @@
 </template>
 
 <script>
+  import Mousetrap from 'mousetrap';
   import { Project, Scene3D, PhysicsLoader, THREE } from 'enable3d';
   import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+
+  import Car from './Car';
 
   export default {
     data: () => ({
@@ -32,9 +35,9 @@
             console.clear();
             this.warpSpeed('-ground');
             // this.physics.debug.enable();
-            this.scene.add(new THREE.AxesHelper(5));
+            // this.scene.add(new THREE.AxesHelper(5));
             
-            this.physics.add.sphere(
+            this.ball = this.physics.add.sphere(
               { radius: 0.5, x: 2, y: 5, z: 2, mass: .2 },
               { lambert: { color: 'hotpink' } }
             );
@@ -50,7 +53,9 @@
             
             const loader = new GLTFLoader().load('/assets/models/test-track/scene.gltf', (gltf) => {
               const child = gltf.scene.children[0];
-              child.position.set(-25, -95, 0);
+              child.scale.set(5, 5, 5);
+              // child.scale.x = child.scale.y = child.scale.z = 5;
+              child.position.set(-25, -420, 0);
 
               child.traverse(child => {
                 if (child.isMesh) {
@@ -65,10 +70,17 @@
                 mass: 0,
                 shape: 'concaveMesh',
               });
+
+              this.car = new Car(this);
             });
+
+            // Mousetrap.bind('up', (ev) => {
+            //   console.log(ev);
+            // });
           }
+
           update() {
-            // 
+            // this.camera.lookAt(this.ball.position.clone());
           }
         }
 

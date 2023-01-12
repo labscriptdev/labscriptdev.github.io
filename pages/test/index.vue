@@ -25,10 +25,18 @@
           eager: true,
         }));
         
-        return files.map(file => {
+        files = files.map(file => {
           const name = file.__file.replace(/.+\/index\/(.+?)\/index.vue/g, '$1');
           return { name, to: `/test/${name}`};
         });
+
+        return [
+          {
+            name: 'index',
+            to: '/test',
+          },
+          ...files
+        ];
       })(),
     }),
   };

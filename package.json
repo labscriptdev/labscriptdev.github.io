@@ -20,6 +20,7 @@
     "@vueuse/integrations": "^9.9.0",
     "@vueuse/nuxt": "^9.9.0",
     "axios": "^1.2.2",
+    "brain.js": "^2.0.0-beta.18",
     "cannon-es": "^0.20.0",
     "dayjs": "^1.11.7",
     "emmet-monaco-es": "^5.1.2",
@@ -29,6 +30,7 @@
     "matter-js": "^0.18.0",
     "monaco-editor": "0.34.1",
     "monaco-editor-webpack-plugin": "^7.0.1",
+    "mousetrap": "^1.6.5",
     "nuxt": "3.0.0",
     "three": "^0.148.0",
     "vuetify": "^3.0.6"
