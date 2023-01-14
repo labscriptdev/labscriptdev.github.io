@@ -16,7 +16,7 @@
             @click="showDrawer=true"
             v-if="!useDisplay.lgAndUp && drawerShow"
           ></v-btn>
-          <v-app-bar-title v-if="title">{{ title }}</v-app-bar-title>
+          <!-- <v-app-bar-title v-if="title">{{ title }}</v-app-bar-title> -->
           <slot name="header" v-bind="slotBind()"></slot>
         </div>
       </v-container>
@@ -24,7 +24,21 @@
     <v-main>
       <div class="pa-3" :style="`height:calc(100vh - ${headerHeight}px); overflow:auto;`">
         <v-container :fluid="fluid" class="pa-0">
-          <slot v-bind="slotBind()"></slot>
+          <v-card class="mt-3" v-if="containerCard">
+            <template v-if="title">
+              <v-card-title>
+                {{ title }}
+              </v-card-title>
+              <v-divider />
+            </template>
+            <v-card-text>
+              <slot v-bind="slotBind()"></slot>
+            </v-card-text>
+          </v-card>
+
+          <template v-if="!containerCard">
+            <slot v-bind="slotBind()"></slot>
+          </template>
         </v-container>
       </div>
     </v-main>
@@ -50,6 +64,10 @@
         default: 300,
       },
       fluid: {
+        type: Boolean,
+        default: true,
+      },
+      containerCard: {
         type: Boolean,
         default: true,
       },

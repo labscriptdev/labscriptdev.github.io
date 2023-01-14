@@ -18,7 +18,7 @@
               <v-row no-gutters>
                 <v-col
                   v-for="_item in itemsFilter()"
-                  cols="12"
+                  cols="6"
                   md="4"
                   class="pa-1"
                 >
