@@ -1,6 +1,6 @@
 <template>
   <app-layout title="Ferramentas de texto" :fluid="false">
-    <v-textarea v-model="text" label="Texto" auto-grow></v-textarea>
+    <v-textarea v-model="text" label="Texto"></v-textarea>
     <nuxt-page :text="text" />
 
     <template #drawer>

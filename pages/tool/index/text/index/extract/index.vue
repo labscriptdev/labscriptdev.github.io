@@ -26,14 +26,6 @@
         </template>
       </v-col>
     </v-row>
-
-    <!-- <div class="d-flex flex-wrap">
-      <template v-for="className in colorClasses">
-        <div :class="className" style="width:calc(100% / 16); padding:5px;">
-          {{ className }}
-        </div>
-      </template>
-    </div> -->
   </div>
 </template>
 
@@ -62,20 +54,6 @@
         }
 
         return results;
-      },
-
-      colorClasses() {
-        let colors = [];
-        for(let color of ['primary', 'black', 'grey', 'red', 'pink', 'purple', 'deep-purple', 'indigo', 'blue', 'light-blue', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey', 'grey']) {
-          colors.push(`bg-${color}`);
-
-          for(let type of ['lighten', 'darken', 'accent']) {
-            for(let n of [1, 2, 3, 4, 5]) {
-              colors.push(`bg-${color}-${type}-${n}`);
-            }
-          }
-        }
-        return colors;
       },
     },
 
