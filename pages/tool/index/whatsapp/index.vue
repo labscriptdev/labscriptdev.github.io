@@ -6,46 +6,53 @@
       fluid: false,
     }"
   >
-    <v-row>
-      <v-col cols="12" md="3">
-        <v-select
-          v-model="params.dial_code"
-          label="País"
-          :items="phoneCodes"
-          item-title="name"
-          item-value="dial_code"
-          :hide-details="true"
-        ></v-select>
-      </v-col>
-      <v-col cols="12" md="9">
-        <v-text-field
-          label="Número"
-          v-model="params.number"
-          :hide-details="true"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12">
-        <v-textarea
-          label="Texto"
-          v-model="params.text"
-          :hide-details="true"
-        ></v-textarea>
-      </v-col>
-      <v-col cols="12" class="d-flex" style="gap:20px;" v-if="numberLink">
-        <v-btn :href="numberLink" target="_blank" color="primary">
-          <v-icon class="mr-2">mdi-link</v-icon> Acessar
-        </v-btn>
-        <v-spacer></v-spacer>
-        <v-btn @click="useClipboard.copy(numberLink)">
-          <v-icon class="mr-2">mdi-content-copy</v-icon>
-          COPIAR
-        </v-btn>
-        <v-btn @click="params = paramsDefault()">
-          <v-icon class="mr-2">mdi-close</v-icon>
-          LIMPAR
-        </v-btn>
-      </v-col>
-    </v-row>
+    <v-card>
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" md="3">
+            <v-select
+              v-model="params.dial_code"
+              label="País"
+              :items="phoneCodes"
+              item-title="name"
+              item-value="dial_code"
+              :hide-details="true"
+            ></v-select>
+          </v-col>
+          <v-col cols="12" md="9">
+            <v-text-field
+              label="Número"
+              v-model="params.number"
+              :hide-details="true"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-textarea
+              label="Texto"
+              v-model="params.text"
+              :hide-details="true"
+            ></v-textarea>
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <template v-if="numberLink">
+        <v-divider />
+        <v-card-actions>
+          <v-btn :href="numberLink" target="_blank" color="primary">
+            <v-icon class="mr-2">mdi-link</v-icon> Acessar
+          </v-btn>
+          <v-spacer />
+          <v-btn @click="useClipboard.copy(numberLink)">
+            <v-icon class="mr-2">mdi-content-copy</v-icon>
+            COPIAR
+          </v-btn>
+          <v-btn @click="params = paramsDefault()">
+            <v-icon class="mr-2">mdi-close</v-icon>
+            LIMPAR
+          </v-btn>
+        </v-card-actions>
+      </template>
+    </v-card>
 
     <app-alert :model-value="useClipboard.copied">
       Texto copiado
