@@ -7,7 +7,7 @@
 <script>
   export default {
     mounted() {
-      this.$router.push('/tool/whatsapp');
+      // this.$router.push('/tool/whatsapp');
     },
   };
 </script>

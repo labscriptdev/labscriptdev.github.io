@@ -1,6 +1,7 @@
 <template>
   <v-layout class="bg-grey-lighten-3">
     <nuxt-page />
+    <!-- <pre>{{ items2 }}</pre> -->
 
     <div style="position:fixed; bottom:30px; right:30px; z-index:999!important;">
       <v-menu :close-on-content-click="false">
@@ -13,17 +14,23 @@
               class="ma-2"
             />
             <v-divider />
-            <div style="max-height:calc(70vh - 70px); overflow:auto;">
-              <v-list lines="two">
-                <v-list-item
+            <div class="pa-2" style="max-height:calc(70vh - 70px); overflow:auto;">
+              <v-row no-gutters>
+                <v-col
                   v-for="_item in itemsFilter()"
-                  :key="_item.id"
-                  :title="_item.name"
-                  :subtitle="_item.description"
-                  :prepend-icon="_item.icon"
-                  :to="`/tool/${_item.id}`"
-                />
-              </v-list>
+                  cols="12"
+                  md="4"
+                  class="pa-1"
+                >
+                  <v-btn block style="height:100px;" :to="_item.to">
+                    <div class="text-center">
+                      <v-icon>{{ _item.icon }}</v-icon>
+                      <div class="my-1"></div>
+                      <small style="font-size:8px; white-space:normal;">{{ _item.name }}</small>
+                    </div>
+                  </v-btn>
+                </v-col>
+              </v-row>
             </div>
             <v-btn
               block
@@ -75,116 +82,25 @@
     },
     data: () => ({
       filter: '',
-      items: [
-        {
-          id: 'bookapp',
-          name: 'Gerador app bookmark',
-          description: 'Gere aplicações que rodam diretamente da barra de favoritos',
-          icon: 'mdi-bookmark-plus-outline',
-        },
-        {
-          id: 'calcdiv',
-          name: 'Calculadora de gastos',
-          description: 'Calculadora de gastos com divisão por pessoas e tempo de uso',
-          icon: 'mdi-calculator',
-        },
-        // {
-        //   id: 'brainjs',
-        //   name: 'BrainJS',
-        //   description: 'Simulação de AI',
-        //   icon: 'mdi-check',
-        // },
-        // {
-        //   id: 'championship',
-        //   name: 'Championship',
-        //   description: 'Gerador de campeonato',
-        //   icon: 'mdi-check',
-        // },
-        {
-          id: 'clockify',
-          name: 'Clockify',
-          description: 'Gerenciamento e cálculo de horas trabalhadas utilizando o app Clockify',
-          icon: 'mdi-alarm-check',
-        },
-        {
-          id: 'diff',
-          name: 'Ferramenta diff',
-          description: 'Comparação de códigos, textos e afins',
-          icon: 'mdi-set-left',
-        },
-        {
-          id: 'filesize-generator',
-          name: 'Gerador de arquivo',
-          description: 'Aplicação para gerar arquivos com tamanhos exatos',
-          icon: 'mdi-file-download-outline',
-        },
-        {
-          id: 'laramake',
-          name: 'Gerador Laravel',
-          description: 'Criar arquivos para o frameworl Laravel baseado em estrutura de banco de dados',
-          icon: 'mdi-laravel',
-        },
-        {
-          id: 'map',
-          name: 'Mapa',
-          description: 'Visualizador de mapa',
-          icon: 'mdi-map-search',
-        },
-        {
-          id: 'lotto',
-          name: 'Loteria',
-          description: 'Aplicação de simulação lotérica',
-          icon: 'mdi-slot-machine',
-        },
-        // {
-        //   id: 'meme',
-        //   name: 'Gerador de memes',
-        //   description: 'Aplicação para gerar memes de maneira rápida',
-        //   icon: 'mdi-emoticon-poop',
-        // },
-        // {
-        //   id: 'openapi',
-        //   name: 'OpenAPI',
-        //   description: 'Alternativa para visualização e consumo de endpoints de API',
-        //   icon: 'mdi-check',
-        // },
-        // {
-        //   id: 'paste',
-        //   name: 'Paste',
-        //   description: 'Cole, edite e baixe arquivos de maneira rápida',
-        //   icon: 'mdi-content-paste',
-        // },
-        // {
-        //   id: 'print3d',
-        //   name: 'Print 3D Simulator',
-        //   description: 'Aplicação para simular artes em ambientes tridimensionais',
-        //   icon: 'mdi-cube',
-        // },
-        {
-          id: 'qrcode',
-          name: 'QR Code',
-          description: 'Gerador dos principais tipos de QRcode',
-          icon: 'mdi-qrcode',
-        },
-        // {
-        //   id: 'search',
-        //   name: 'Busca global',
-        //   description: 'Ferramenta para auxiliar na busca de qualquer coisa: de pessoas à produtos',
-        //   icon: 'mdi-magnify',
-        // },
-        {
-          id: 'text',
-          name: 'Ferramentas de texto',
-          description: 'Conversores, analisadores e ferramentas úteis para gerencimento de texto',
-          icon: 'mdi-text-box-edit-outline',
-        },
-        {
-          id: 'whatsapp',
-          name: 'Gerador link whatsapp',
-          description: 'Gerar link para whatsapp de maneira rápida e fácil',
-          icon: 'mdi-whatsapp',
-        },
-      ],
+      items: (() => {
+        let files = Object.entries(import.meta.glob('./**/info.js', {
+          import: 'default',
+          eager: true,
+        }));
+
+        files = files.map(([path, json]) => {
+          return {
+            active: false,
+            icon: false,
+            name: '',
+            description: '',
+            to: '/tool/'+ path.replace(/.+index\/(.+?)\/info.js/g, '$1'),
+            ...json
+          };
+        });
+
+        return files.filter(file => file.active);
+      })(),
     }),
   };
 </script>
