@@ -24,7 +24,7 @@
     <v-main>
       <div class="pa-3" :style="`height:calc(100vh - ${headerHeight}px); overflow:auto;`">
         <v-container :fluid="fluid" class="pa-0">
-          <v-card class="mt-3" v-if="containerCard">
+          <v-card class="mt-1" v-if="containerCard">
             <template v-if="title">
               <v-card-title>
                 {{ title }}
