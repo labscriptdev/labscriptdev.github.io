@@ -1,5 +1,5 @@
 <template>
-  <app-layout title="Gerador de arquivos" v-bind="{ drawerShow: false, fluid: false }">
+  <app-layout title="Gerador de arquivos" v-bind="{ drawerShow: false, fluid: false, containerStyle: 'max-width:800px'}">
     <v-row>
       <v-col cols="12" md="4">
         <v-combobox label="Tipo de arquivo" :items="extensions" v-model="params.ext" :hide-details="true" />

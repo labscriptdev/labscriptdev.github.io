@@ -1,5 +1,5 @@
 <template>
-  <app-layout title="Diff tool" v-bind="{ drawerShow: false, fluid: false }">
+  <app-layout title="Diff" v-bind="{ drawerShow: false, fluid: false }">
     <v-row>
       <v-col cols="12" md="6">
         <div>Original</div>

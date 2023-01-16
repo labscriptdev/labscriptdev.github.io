@@ -1,13 +1,13 @@
 <template>
   <div>
-    Default tool
+    Default demo
   </div>
 </template>
 
 <script>
   export default {
     mounted() {
-      this.$router.push('/tool/whatsapp');
+      this.$router.push('/demo/whatsapp');
     },
   };
 </script>

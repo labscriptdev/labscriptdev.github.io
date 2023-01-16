@@ -9,7 +9,7 @@
           <v-btn icon="mdi-whatsapp" variant="plain" href="https://wa.me/message/NG7A2SW25XIEI1" target="_blank"></v-btn>
           <v-btn icon="mdi-email" variant="plain" href="mailto:labscript.dev@gmail.com"></v-btn>
         </div>
-        <v-btn to="/tool" variant="plain">Ferramentas</v-btn>
+        <v-btn to="/demo" variant="plain">Demos</v-btn>
       </div>
     </div>
   </v-app>

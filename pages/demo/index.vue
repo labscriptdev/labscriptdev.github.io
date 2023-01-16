@@ -34,7 +34,7 @@
             </div>
             <v-btn
               block
-              :href="`https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/tool/index/${$route.path.replace('/tool/', '')}`"
+              :href="`https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/demo/index/${$route.path.replace('/demo/', '')}`"
               target="_blank"
               color="primary"
               rounded="0"
@@ -94,7 +94,7 @@
             icon: false,
             name: '',
             description: '',
-            to: '/tool/'+ path.replace(/.+index\/(.+?)\/info.js/g, '$1'),
+            to: '/demo/'+ path.replace(/.+index\/(.+?)\/info.js/g, '$1'),
             ...json
           };
         });

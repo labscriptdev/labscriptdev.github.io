@@ -23,7 +23,7 @@
     </v-app-bar>
     <v-main>
       <div class="pa-3" :style="`height:calc(100vh - ${headerHeight}px); overflow:auto;`">
-        <v-container :fluid="fluid" class="pa-0">
+        <v-container :fluid="fluid" class="pa-0" :style="containerStyle">
           <v-card class="mt-1" v-if="containerCard">
             <template v-if="title">
               <v-card-title>
@@ -70,6 +70,10 @@
       containerCard: {
         type: Boolean,
         default: true,
+      },
+      containerStyle: {
+        type: Object,
+        default: () => ({}),
       },
     },
 

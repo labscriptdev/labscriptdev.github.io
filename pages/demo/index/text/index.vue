@@ -1,18 +1,18 @@
 <template>
-  <app-layout title="Ferramentas de texto" :fluid="false">
+  <app-layout title="Ferramentas de texto" :fluid="false" container-style="max-width:1000px;">
     <v-textarea v-model="text" label="Texto"></v-textarea>
     <nuxt-page :text="text" />
 
     <template #drawer>
       <v-list>
         <v-list-item
-          v-for="(_tool, i) in tools"
+          v-for="(_demo, i) in demos"
           :key="i"
-          :prepend-icon="_tool.icon"
-          :to="_tool.to"
+          :prepend-icon="_demo.icon"
+          :to="_demo.to"
         >
           <v-list-item-title>
-            {{ _tool.name }}
+            {{ _demo.name }}
           </v-list-item-title>
         </v-list-item>
       </v-list>
@@ -25,7 +25,7 @@
     data() {
       return {
         text: '',
-        tools: (() => {
+        demos: (() => {
           let files = Object.entries(import.meta.glob('./index/**/info.js', {
             import: 'default',
             eager: true,
@@ -34,7 +34,7 @@
           files = files.map(([file, info]) => {
             return {
               icon: false,
-              to: file.replace(/.+index\/(.+?)\/.+/g, `/tool/text/$1`),
+              to: file.replace(/.+index\/(.+?)\/.+/g, `/demo/text/$1`),
               name: '',
               ...info
             };

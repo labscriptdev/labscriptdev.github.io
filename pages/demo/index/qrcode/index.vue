@@ -1,5 +1,5 @@
 <template>
-  <app-layout title="QR Code" :container-card="false">
+  <app-layout title="QR Code" :container-card="false" container-style="max-width: 1000px;">
     <v-card>
       <v-card-title>
         <v-icon>{{ type.icon }}</v-icon>
