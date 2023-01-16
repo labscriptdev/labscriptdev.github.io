@@ -1,5 +1,5 @@
 <template>
-  <v-app class="bg-blue-grey">
+  <v-app class="bg-blue-grey-darken-4">
     <div class="d-flex align-center justify-center h-100">
       <div class="d-flex flex-column text-center" style="gap:15px;">
         <v-img src="/assets/labscript.dev.png" width="200px" class="mx-auto" />

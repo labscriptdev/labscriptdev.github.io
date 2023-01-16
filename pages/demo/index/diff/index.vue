@@ -13,9 +13,6 @@
         <div>Diff</div>
         <app-monaco-diff style="height:40vh;" :model-value="original" :modified="modified"></app-monaco-diff>
       </v-col>
-      <v-col cols="12">
-        <pre>{{ $data }}</pre>
-      </v-col>
     </v-row>
   </app-layout>
 </template>
