@@ -2,39 +2,51 @@
   <app-layout>
     <div class="d-flex align-center" style="gap:20px;">
       <div>Arraste para sua área de bookmarks: </div>
-      <v-btn :href="`javascript:${app.build()}(true)`">{{ app.name || 'Bookapp' }}</v-btn>
+      <v-btn :href="`javascript:${app.build()}`">{{ app.name || 'Bookapp' }}</v-btn>
     </div>
 
-    <br>
-    
+    <!-- <br>
     <div class="d-flex align-center" style="gap:20px;">
       <div>Clique para testar em uma nova janela:</div>
       <v-btn @click="browserTest()">Test</v-btn>
-    </div>
+    </div> -->
 
     <br>
-
     <div class="py-5 text-center border" @drop.prevent="onDrop($event)" @dragenter.prevent @dragover.prevent>
       Drop here
     </div>
 
     <br>
 
-    <app-monaco
-      v-model="app.source"
-      language="javascript"
-    ></app-monaco>
+    <v-row>
+      <v-col cols="12" md="7">
+        <app-monaco
+          v-model="app.source"
+          language="javascript"
+        ></app-monaco>
+        <br>
 
-    <br>
+        <app-monaco
+          :model-value="app.build()"
+          language="javascript"
+          style="height:400px;"
+          word-wrap="on"
+        ></app-monaco>
+      </v-col>
+      <v-col cols="12" md="5">
+        <iframe
+          src="about:blank"
+          ref="iframe"
+          style="width:100%; height:100%; border:none;"
+          class="elevation-5 rounded"
+        ></iframe>
+      </v-col>
+    </v-row>
+
     <!-- <vv-dd v-model="app"></vv-dd> -->
     <!-- <div style="background:#222; color:lime; font-family:monospace;">{{ app.build() }}</div> -->
     <!-- <vv-dd :model-value="app.build()"></vv-dd> -->
-    <app-monaco
-      :model-value="app.build()"
-      language="javascript"
-      style="height:400px;"
-      word-wrap="on"
-    ></app-monaco>
+    
 
     <template #drawer>
       <v-card-text>
@@ -87,6 +99,7 @@
                     </div>
                   </template>
                 </vv-draggable>
+                <pre>{{ app }}</pre>
               </v-card-text>
               <v-divider></v-divider>
               <v-card-actions>
@@ -104,10 +117,14 @@
 
 <script>
   import { Bookapp } from './Bookapp';
+  import _ from 'lodash';
 
   export default {
+    mounted() {
+      this.iframeRefresh();
+    },
+
     methods: {
-      log: console.log,
       browserTest() {
         const win = window.open("", "_blank", "width=600,height=600");
         win.document.write('<!DOCTYPE html><html lang="en"><head></head><body><script>'+this.app.build()+'(true);</'+'script></body></html>');
@@ -115,10 +132,16 @@
       },
       onDrop(ev) {
         let source = ev.dataTransfer.getData('text/plain');
-        source = source.replace('javascript:', '').replace('(true)', '');
-        source = Function(`return ${source}`)()();
-        this.app = new Bookapp(source);
+        console.log(source);
+        // source = source.replace('javascript:', '').replace('(true)', '');
+        // source = Function(`return ${source}`)()();
+        // this.app = new Bookapp(source);
       },
+      iframeRefresh: _.debounce(function() {
+        this.$refs.iframe.src = 'javascript:'+ this.app.build() +'.run()';
+        console.log(this.$refs.iframe.src);
+        // console.log(this.$refs.iframe.contentDocument);
+      }, 1000),
     },
     data() {
       return {
