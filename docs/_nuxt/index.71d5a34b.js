@@ -1,1 +1,0 @@
-import{_ as o}from"./layout.bbb2374b.js";import{a,c as n,w as r,o as c,b as s,t as _}from"./entry.ae2d44a1.js";const p={};function l(t,u){const e=o;return c(),n(e,null,{default:r(()=>[s("pre",null,_(t.$route.path),1)]),_:1})}const m=a(p,[["render",l]]);export{m as default};
