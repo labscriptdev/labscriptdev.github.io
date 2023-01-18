@@ -34,6 +34,8 @@
       v-if="clockifyWorkspaceUserTimeEntriesReq.loading"
     ></v-progress-linear>
 
+    <pre>{{ clockify2 }}</pre>
+
     <template #drawer>
       <v-card-title>Clockify</v-card-title>
       <v-divider />

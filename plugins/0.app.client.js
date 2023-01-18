@@ -30,6 +30,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 					density: 'compact',
 				},
 				VBtn: { density: 'default' },
+				VAutocomplete: { ...inputs },
 				VTextField: { ...inputs },
 				VTextarea: { ...inputs },
 				VSelect: { ...inputs },
