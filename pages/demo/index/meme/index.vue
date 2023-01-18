@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <app-layout>
     <pre>{{ $route.path }}</pre>
-  </div>
+  </app-layout>
 </template>

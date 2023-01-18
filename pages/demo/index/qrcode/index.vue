@@ -3,14 +3,14 @@
     :container-card="false"
     container-style="max-width: 1000px;"
   >
-    <template #app-bar>
+    <template #appbar>
       <v-toolbar-title>
         <v-icon>{{ type.icon }}</v-icon>
         <span class="ms-3">{{ type.name }}</span>
       </v-toolbar-title>
     </template>
 
-    <v-row no-gutters class="align-center">
+    <v-row class="align-center">
       <v-col cols="12" md="7">
         <v-window
           :model-value="$route.query.type || 'text'"

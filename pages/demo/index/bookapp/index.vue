@@ -1,5 +1,5 @@
 <template>
-  <app-layout>
+  <app-layout title="Bookapp">
     <div class="d-flex align-center" style="gap:20px;">
       <div>Arraste para sua área de bookmarks: </div>
       <v-btn :href="`javascript:${app.build()}`">{{ app.name || 'Bookapp' }}</v-btn>

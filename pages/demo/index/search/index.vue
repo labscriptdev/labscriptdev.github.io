@@ -6,6 +6,7 @@
           label="Termo"
           v-model="params.search"
           append-inner-icon="mdi-magnify"
+          :hide-details="true"
         />
       </v-col>
       <v-col cols="12" lg="6">
@@ -13,13 +14,14 @@
           label="Local"
           v-model="params.place"
           append-inner-icon="mdi-map-marker"
+          :hide-details="true"
         />
       </v-col>
     </v-row>
 
     <v-row>
       <template v-for="_search in result.searchs">
-        <v-col cols="12" lg="2">
+        <v-col cols="6" sm="4" md="3" lg="2">
           <v-btn
             class="d-flex align-center justify-center"
             style="display:block; width:100%; height:100px;"
