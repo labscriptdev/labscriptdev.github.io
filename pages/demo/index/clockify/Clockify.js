@@ -2,6 +2,8 @@ import axios from 'axios';
 import _ from 'lodash';
 import { useStorage } from '@vueuse/core';
 
+const DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.000z';
+
 export default class {
   constructor(params = {}) {
     const { $dayjs } = useNuxtApp();
@@ -17,6 +19,7 @@ export default class {
       currencyTo: "BRL",
     });
 
+    this.clockActive = false;
     this.user = false;
 
     this.workspace = {
@@ -40,6 +43,12 @@ export default class {
     };
   }
 
+  destroy() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+  }
+
   async init() {
     this.ready = false;
     await this.userLoad();
@@ -47,6 +56,16 @@ export default class {
     await this.timeEntryLoad();
     await this.currenciesLoad();
     this.ready = true;
+    this.interval = setInterval(async () => {
+      const { $dayjs } = useNuxtApp();
+
+      if (0 == parseInt($dayjs().format('s'))) {
+        await this.timeEntryLoad();
+        await this.currenciesLoad();
+      }
+
+      this.timeEntryInterval();
+    }, 1000);
   }
 
   async request(params) {
@@ -95,8 +114,8 @@ export default class {
       const { data } = await this.request({
         url: `/workspaces/${this.workspace.item.id}/user/${this.user.id}/time-entries`,
         params: {
-          start: $dayjs(this.date).startOf('month').format('YYYY-MM-DDTHH:mm:ss.000z'),
-          end: $dayjs(this.date).endOf('month').format('YYYY-MM-DDTHH:mm:ss.000z'),
+          start: $dayjs(this.date).startOf('month').format(DATE_FORMAT),
+          end: $dayjs(this.date).endOf('month').format(DATE_FORMAT),
         },
       });
   
@@ -114,23 +133,24 @@ export default class {
     }, 1000);
   }
 
+  async timeEntryInterval() {
+    const { $dayjs } = useNuxtApp();
+    const dateNow = $dayjs();
+
+    this.clockActive = false;
+    this.timeEntry.items.forEach(entry => {
+      if (entry.timeInterval.end) return;
+      const diff = dateNow.diff(entry.timeInterval.start) / 1000 / 60;
+      entry.workedMinutes = diff;
+      this.clockActive = true;
+    });
+  }
+
   async currenciesLoad() {
     this.currency.loading = true;
     const { data } = await axios.get(`https://api.exchangerate.host/latest?base=${this.storage.currencyFrom}`);
     this.currency.items = Object.entries(data.rates).map(([code, value]) => ({ code, value }));
     this.currency.loading = false;
-  }
-
-  amountConvert(value) {
-    const from = {code:'AUD', value:1.43};
-    const to = {code:'BRL', value:5.10};
-    // const from = _.head(this.currency.items.filter(item => item.code == this.storage.currencyFrom)) || {code:'000', value:1};
-    // const to = _.head(this.currency.items.filter(item => item.code == this.storage.currencyTo)) || {code:'000', value:1};
-    const expected = 2752.16;
-    const result = value * to.value / from.value;
-    console.clear();
-    console.log(JSON.stringify({ value, expected, result, from, to }, ' ', 2));
-    return value;
   }
 
   result() {

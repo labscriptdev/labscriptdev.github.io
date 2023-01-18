@@ -96,6 +96,10 @@
             :suffix="result.to.currency"
             readonly
           />
+
+          <v-alert icon="mdi-clock-outline" color="success" v-if="clockify.clockActive">
+            Tarefa em andamento
+          </v-alert>
         </v-card-text>
     </template>
   </app-layout>
@@ -107,6 +111,10 @@
   export default {
     mounted() {
       this.clockify.init();
+    },
+
+    beforeUnmount() {
+      this.clockify.destroy();
     },
 
     computed: {
