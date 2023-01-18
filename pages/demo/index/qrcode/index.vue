@@ -1,77 +1,78 @@
 <template>
-  <app-layout title="QR Code" :container-card="false" container-style="max-width: 1000px;">
-    <v-card>
-      <v-card-title>
+  <app-layout
+    :container-card="false"
+    container-style="max-width: 1000px;"
+  >
+    <template #app-bar>
+      <v-toolbar-title>
         <v-icon>{{ type.icon }}</v-icon>
-        <span class="ms-2">{{ type.name }}</span>
-      </v-card-title>
-      <v-divider></v-divider>
-      <v-card-text>
-        <v-row no-gutters>
-          <v-col cols="12" md="7">
-            <v-window
-              :model-value="$route.query.type || 'text'"
-              @update:modelValue="type.onChange(type)"
-              class="pt-1"
-            >
-              <v-window-item value="text" @group:selected="type.onChange(type)">
-                <v-text-field
-                  v-model="type.text"
-                  label="Texto"
-                  @input="type.onChange(type)"
-                ></v-text-field>
-              </v-window-item>
-              <v-window-item value="url">
-                <v-text-field
-                  v-model="type.url"
-                  label="URL"
-                  @input="type.onChange(type)"
-                ></v-text-field>
-              </v-window-item>
-              <v-window-item value="wifi">
-                <v-text-field
-                  v-model="type.ssid"
-                  label="SSID"
-                  @input="type.onChange(type)"
-                ></v-text-field>
-                <v-text-field
-                  v-model="type.type"
-                  label="Type"
-                  @input="type.onChange(type)"
-                ></v-text-field>
-                <v-text-field
-                  v-model="type.pass"
-                  label="Password"
-                  type="password"
-                  @input="type.onChange(type)"
-                ></v-text-field>
-              </v-window-item>
-              <v-window-item value="vcard">
-                <pre>vcard: {{ type }}</pre>
-              </v-window-item>
-              <v-window-item value="event">
-                <pre>event: {{ type }}</pre>
-              </v-window-item>
-              <v-window-item value="sms">
-                <pre>sms: {{ type }}</pre>
-              </v-window-item>
-              <v-window-item value="phone">
-                <pre>phone: {{ type }}</pre>
-              </v-window-item>
-              <v-window-item value="geo">
-                <pre>geo: {{ type }}</pre>
-              </v-window-item>
-              <v-window-item value="pix">
-                <pre>pix: {{ type }}</pre>
-              </v-window-item>
-            </v-window>
-          </v-col>
-          <v-col cols="12" md="5">
-            <app-qrcode v-model="qrtext" width="100%" />
-          </v-col>
-        </v-row>
-      </v-card-text>
-    </v-card>
+        <span class="ms-3">{{ type.name }}</span>
+      </v-toolbar-title>
+    </template>
+
+    <v-row no-gutters class="align-center">
+      <v-col cols="12" md="7">
+        <v-window
+          :model-value="$route.query.type || 'text'"
+          @update:modelValue="type.onChange(type)"
+          class="pt-1"
+        >
+          <v-window-item value="text" @group:selected="type.onChange(type)">
+            <v-text-field
+              v-model="type.text"
+              label="Texto"
+              @input="type.onChange(type)"
+            ></v-text-field>
+          </v-window-item>
+          <v-window-item value="url">
+            <v-text-field
+              v-model="type.url"
+              label="URL"
+              @input="type.onChange(type)"
+            ></v-text-field>
+          </v-window-item>
+          <v-window-item value="wifi">
+            <v-text-field
+              v-model="type.ssid"
+              label="SSID"
+              @input="type.onChange(type)"
+            ></v-text-field>
+            <v-text-field
+              v-model="type.type"
+              label="Type"
+              @input="type.onChange(type)"
+            ></v-text-field>
+            <v-text-field
+              v-model="type.pass"
+              label="Password"
+              type="password"
+              @input="type.onChange(type)"
+            ></v-text-field>
+          </v-window-item>
+          <v-window-item value="vcard">
+            <pre>vcard: {{ type }}</pre>
+          </v-window-item>
+          <v-window-item value="event">
+            <pre>event: {{ type }}</pre>
+          </v-window-item>
+          <v-window-item value="sms">
+            <pre>sms: {{ type }}</pre>
+          </v-window-item>
+          <v-window-item value="phone">
+            <pre>phone: {{ type }}</pre>
+          </v-window-item>
+          <v-window-item value="geo">
+            <pre>geo: {{ type }}</pre>
+          </v-window-item>
+          <v-window-item value="pix">
+            <pre>pix: {{ type }}</pre>
+          </v-window-item>
+        </v-window>
+      </v-col>
+      <v-col cols="12" md="5">
+        <app-qrcode v-model="qrtext" width="100%" />
+      </v-col>
+    </v-row>
 
 
     <template #drawer>

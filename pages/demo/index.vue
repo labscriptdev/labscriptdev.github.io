@@ -1,7 +1,6 @@
 <template>
   <v-layout class="bg-grey-lighten-3">
     <nuxt-page />
-    <!-- <pre>{{ items2 }}</pre> -->
 
     <div style="position:fixed; bottom:30px; right:30px; z-index:999!important;">
       <v-menu :close-on-content-click="false">
@@ -80,27 +79,31 @@
         });
       },
     },
-    data: () => ({
-      filter: '',
-      items: (() => {
-        let files = Object.entries(import.meta.glob('./**/info.js', {
-          import: 'default',
-          eager: true,
-        }));
+    data() {
+      return {
+        filter: '',
+        items: (() => {
+          const showInactive = this.$dev;
 
-        files = files.map(([path, json]) => {
-          return {
-            active: false,
-            icon: false,
-            name: '',
-            description: '',
-            to: '/demo/'+ path.replace(/.+index\/(.+?)\/info.js/g, '$1'),
-            ...json
-          };
-        });
+          let files = Object.entries(import.meta.glob('./*/*/info.js', {
+            import: 'default',
+            eager: true,
+          }));
 
-        return files.filter(file => file.active);
-      })(),
-    }),
+          files = files.map(([path, json]) => {
+            return {
+              active: false,
+              icon: false,
+              name: '',
+              description: '',
+              to: '/demo/'+ path.replace(/.+index\/(.+?)\/info.js/g, '$1'),
+              ...json
+            };
+          });
+
+          return files.filter(file => showInactive? true: file.active);
+        })(),
+      };
+    },
   };
 </script>

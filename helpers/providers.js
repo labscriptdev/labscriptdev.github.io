@@ -1,16 +1,29 @@
 import { ref } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 
-import axios from 'axios';
 
-import dayjs from 'dayjs';
+// this.$axios
+import axiosRequest from 'axios';
+export const axios = axiosRequest;
+
+
+// this.$dayjs
+import dayjsImport from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
-dayjs.extend(localeData);
+dayjsImport.extend(localeData);
+export const dayjs = dayjsImport;
 
-const log = console.log;
+
+// this.$dev
+export const dev = process.env.NODE_ENV !== 'production';
+
+
+// this.$log
+export const log = console.log;
+
 
 // this.$request({ ...data })
-const request = (params = {}) => {
+export const request = (params = {}) => {
   const loading = ref(false);
   const response = ref((() => {
     if (Array.isArray(params.response)) {
@@ -62,18 +75,12 @@ const request = (params = {}) => {
   return { ...params, loading, submit, response };
 };
 
-const debounce = (callback, time=1000) => {
+
+// this.$debounce(() => {}, 1000)
+export const debounce = (callback, time=1000) => {
   let timer;
   return (...args) => {
     clearTimeout(timer);
     timer = setTimeout(() => { callback.apply(this, args); }, time);
   };
-};
-
-export {
-  log,
-  axios,
-  dayjs,
-  request,
-  debounce,
 };

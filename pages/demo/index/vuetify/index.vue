@@ -1,5 +1,5 @@
 <template>
-  <v-main>
+  <app-layout>
     <!-- <v-card>
       <v-tabs v-model="tab">
         <template v-for="t in [{name:'Background', field:'bg'}, {name:'Text', field:'text'}]">
@@ -53,12 +53,28 @@
           </v-card-actions>
         </v-card>
       </v-col>
+
+      <v-col cols="12" md="9">
+        --
+      </v-col>
     </v-row>
 
     <app-alert v-model="useClipboard.copied" type="snackbar" color="success">
       Texto copiado: {{ useClipboard.text }}
     </app-alert>
-  </v-main>
+
+    <template #drawer>
+      <div class="d-flex flex-wrap">
+        <div
+          v-for="c in colorClasses()"
+          :class="[c.bg, 'py-1', 'px-2']"
+          @click="useClipboard.copy(c.name)"
+        >
+          {{ c.bg }}
+        </div>
+      </div>
+    </template>
+  </app-layout>
 </template>
 
 <script>
@@ -67,23 +83,32 @@
   export default {
     methods: {
       colorClasses() {
-        let colors = [];
-        for(let color of ['primary', 'black', 'grey', 'red', 'pink', 'purple', 'deep-purple', 'indigo', 'blue', 'light-blue', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey', 'grey']) {
-          colors.push({
+        const classes = [];
+        const aliasColors = ['primary', 'secondary', 'warning', 'error', 'info'];
+        const colors = [ ...aliasColors, 'black', 'grey', 'red', 'pink', 'purple', 'deep-purple', 'indigo', 'blue', 'light-blue', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey', 'grey'];
+
+        for(let color of colors) {
+          classes.push({
+            name: `${color}`,
             bg: `bg-${color}`,
             text: `text-${color}`,
           });
 
           for(let type of ['lighten', 'darken', 'accent']) {
             for(let n of [1, 2, 3, 4, 5]) {
-              colors.push({
+
+              if (aliasColors.includes(color) && ['lighten', 'accent'].includes(type)) continue;
+              if (aliasColors.includes(color) && ['darken'].includes(type) && [2, 3, 4, 5].includes(n)) continue;
+
+              classes.push({
+                name: `${color}-${type}-${n}`,
                 bg: `bg-${color}-${type}-${n}`,
                 text: `text-${color}-${type}-${n}`,
               });
             }
           }
         }
-        return colors;
+        return classes;
       },
     },
 

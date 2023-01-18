@@ -1,5 +1,5 @@
 <template>
-  <app-layout title="Clockify">
+  <app-layout title="Clockify" container-width="100%">
     <app-calendar
       v-model="clockify.date"
       :dates="clockify.timeEntry.items.map(item => ({ date: item.timeInterval.start, ...item }))"

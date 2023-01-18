@@ -1,10 +1,8 @@
 <template>
-  <v-layout>
-    <v-navigation-drawer
-      :model-value="true"
-      :permanent="true"
-      width="300"
-    >
+  <app-layout title="Loteria" container-width="100%">
+    <nuxt-page />
+
+    <template #drawer>
       <v-card-title>Loteria</v-card-title>
       
       <v-divider />
@@ -15,39 +13,8 @@
           :to="`/demo/lotto/${_type.id}`"
         >{{ _type.name }}</v-list-item>
       </v-list>
-      
-      <!-- <v-divider />
-      <v-card-text>
-        <v-text-field type="number" label="numberStart" v-model.number="lotto.numberStart"></v-text-field>
-        <v-text-field type="number" label="numberFinal" v-model.number="lotto.numberFinal"></v-text-field>
-        <v-text-field type="number" label="numberLines" v-model.number="lotto.numberLines"></v-text-field>
-      </v-card-text> -->
-    </v-navigation-drawer>
-
-    <v-main style="height:100vh; overflow:auto;">
-      <!-- <v-table>
-        <template #default>
-          <tbody>
-            <tr v-for="ns in lottoNumbers">
-              <td v-for="n in ns" class="py-0 px-1">
-                <v-btn
-                  block
-                  flat
-                  @click="lottoBetToggle(n.number)"
-                  :color="n.selected? 'success': null"
-                  class="ma-0"
-                  rounded="0"
-                >
-                  {{ n.number }}
-                </v-btn>
-              </td>
-            </tr>
-          </tbody>
-        </template>
-      </v-table> -->
-      <nuxt-page />
-    </v-main>
-  </v-layout>
+    </template>
+  </app-layout>
 </template>
 
 <script>
