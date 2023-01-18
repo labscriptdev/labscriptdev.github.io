@@ -17,18 +17,23 @@
       </v-col>
     </v-row>
 
-    <v-table>
-      <colgroup>
-        <col width="200px">
-        <col width="*">
-      </colgroup>
-      <tbody>
-        <tr v-for="_search in result.searchs">
-          <td>{{ _search.name }}</td>
-          <td><a :href="_search.url" target="_blank" style="color:#444!important;">{{ _search.url }}</a></td>
-        </tr>
-      </tbody>
-    </v-table>
+    <v-row>
+      <template v-for="_search in result.searchs">
+        <v-col cols="12" lg="2">
+          <v-btn
+            class="d-flex align-center justify-center"
+            style="display:block; width:100%; height:100px;"
+            :href="_search.url"
+            target="_blank"
+          >
+            <div class="text-center">
+              <v-icon class="text-h4">{{ _search.icon }}</v-icon>
+              <div class="mt-3">{{ _search.name }}</div>
+            </div>
+          </v-btn>
+        </v-col>
+      </template>
+    </v-row>
   </app-layout>
 </template>
 
@@ -59,36 +64,43 @@
 
         const searchs = [
           {
+            icon: 'mdi-google',
             name: 'Google',
             url: `https://www.google.com/search?q=${query}`,
             categories: ['general'],
           },
           {
+            icon: 'mdi-twitter',
             name: 'Twitter',
             url: `https://twitter.com/search?q=${query}&src=typed_query`,
             categories: ['social'],
           },
           {
+            icon: 'mdi-facebook',
             name: 'Facebook',
             url: `https://www.facebook.com/search/people/?q=${query}`,
             categories: ['social'],
           },
           {
+            icon: 'mdi-linkedin',
             name: 'Linkedin',
             url: `https://www.linkedin.com/search/results/all/?keywords=${query}&origin=GLOBAL_SEARCH_HEADER&sid=9Do`,
             categories: ['social'],
           },
           {
+            icon: 'mdi-cart',
             name: 'OLX',
             url: `https://www.olx.com.br/brasil?q=${query}`,
             categories: ['shop'],
           },
           {
+            icon: 'mdi-xml',
             name: 'Can I Use?',
             url: `http://caniuse.com/#search=${search}`,
             categories: ['dev'],
           },
           {
+            icon: 'mdi-codepen',
             name: 'Codepen',
             url: `https://codepen.io/search/pens?q=${search}`,
             categories: ['dev'],
