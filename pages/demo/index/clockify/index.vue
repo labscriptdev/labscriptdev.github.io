@@ -1,98 +1,73 @@
 <template>
   <app-layout title="Clockify">
-    <div style="overflow:auto;">
-      <app-calendar
-        :model-value="$route.query.date || dateDefault"
-        @update:model-value="redirectQuery({ date: $event })"
-        :dates="clockifyUserTimeEntriesItemsCalendar()"
-        style="min-width:600px;"
-      >
-        <template #day="d">
-          <div class="py-4">
-            <div class="text-h3">{{ d.day }}</div>
-
-            <v-tooltip>
-              <template #activator="{ props }">
-                <div v-bind="props" v-if="d.dates.length>0">
-                  {{ (d.dates.map(dd => dd.timeInterval.durationSeconds).reduce((partial, a) => partial+a)/60/60).toFixed(1) }} hours
-                </div>
-              </template>
-
-              <div
-                v-for="dd in d.dates"
-              >
-                {{ dd.description }}
-              </div>
-            </v-tooltip>
-          </div>
-        </template>
-      </app-calendar>
-    </div>
-
-    <v-progress-linear
-      indeterminate
-      v-if="clockifyWorkspaceUserTimeEntriesReq.loading"
-    ></v-progress-linear>
-
-    <pre>{{ clockify2 }}</pre>
+    <app-calendar
+      v-model="clockify.date"
+      :dates="clockify.timeEntry.items.map(item => ({ date: item.timeInterval.start, ...item }))"
+    >
+      <template #day="d">
+        <div class="text-h3 py-4">{{ d.day }}</div>
+        <div>
+          {{ (d.dates.reduce((total, dd) => (total+dd.workedMinutes), 0) / 60).toFixed(2) }}
+        </div>
+      </template>
+    </app-calendar>
+    <!-- <app-dd v-model="clockify"></app-dd> -->
 
     <template #drawer>
-      <v-card-title>Clockify</v-card-title>
-      <v-divider />
+      <template v-if="clockify.ready">
+        <v-card-text>
+          <div class="fw-bold">{{ clockify.user.name }}</div>
+        </v-card-text>
+        <v-divider />
+      </template>
 
+      <!-- Settings -->
       <v-card-text>
-        <v-dialog :persistent="true">
+        <v-dialog>
           <template #activator="{ props }">
-            <v-btn v-bind="props" block ref="settingsBtn">Configurações</v-btn>
+            <v-btn block v-bind="props" ref="settings">
+              <v-icon class="me-2">mdi-cog</v-icon>
+              Settings
+            </v-btn>
           </template>
-  
-          <div class="mx-auto" style="width:400px;">
+
+          <div style="width:90vw; max-width:600px!important; margin:0 auto;">
             <v-card>
-              <v-card-title>Settings</v-card-title>
-              <v-divider />
               <v-card-text>
-                Get your access token <a href="https://app.clockify.me/user/settings" target="_blank">here</a>.
+                Get your access token <a href="https://app.clockify.me/user/settings" target="_blank">here</a>. <br><br>
                 <v-text-field
-                  v-model="useStorage.token"
-                  label="Clockify token"
-                  class="mt-3"
-                  type="password"
+                  label="Token"
+                  v-model="clockify.storage.token"
                 />
-                <!-- @input="clockifyUserReq.submit()" -->
 
-                <v-select
-                  v-model="useStorage.currencyFrom"
-                  label="Currency from"
-                  :items="exchangeReq.response"
-                  item-value="value"
-                  item-title="title"
-                  append-icon="mdi-refresh"
-                  @click:append="exchangeReq.submit()"
-                  :loading="exchangeReq.loading"
-                />
-                <!-- @update:modelValue="settingsCurrencyChange(); exchangeReq.submit();" -->
-                
-                <v-select
-                  v-model="useStorage.currencyTo"
-                  label="Currency to"
-                  :items="exchangeReq.response"
-                  item-value="value"
-                  item-title="title"
-                />
-                <!-- @update:modelValue="settingsCurrencyChange()" -->
+                <div class="d-flex align-center" style="gap:15px;">
+                  <v-text-field
+                    label="Converter de"
+                    v-model.number="clockify.storage.amountPerHour"
+                    type="number"
+                    :hide-details="true"
+                  />
 
-                <v-text-field
-                  v-model.number="useStorage.amountPerHour"
-                  label="Amount per hour"
-                  type="number"
-                  :suffix="`${useStorage.currencyFrom} / Hour`"
-                />
+                  <v-autocomplete
+                    v-model="clockify.storage.currencyFrom"
+                    :items="clockify.currency.items.map(item => item.code)"
+                    :hide-details="true"
+                    style="width:150px;"
+                  ></v-autocomplete>
+
+                  <v-autocomplete
+                    label="Para"
+                    v-model="clockify.storage.currencyTo"
+                    :items="clockify.currency.items.map(item => item.code)"
+                    :hide-details="true"
+                    style="width:150px;"
+                  ></v-autocomplete>
+                </div>
               </v-card-text>
               <v-divider />
               <v-card-actions>
-                <v-btn @click="useStorage = useStorageDefault()">Reset</v-btn>
                 <v-spacer />
-                <v-btn @click="$refs.settingsBtn.$el.click(); clockifyWorkspacesReq.submit();">Ok</v-btn>
+                <v-btn @click="$refs.settings.$el.click(); clockify.init();">Ok</v-btn>
               </v-card-actions>
             </v-card>
           </div>
@@ -100,370 +75,42 @@
       </v-card-text>
 
       <v-divider />
-
       <v-card-text>
-        <v-row>
-          <v-col cols="12">
-            <v-select
-              label="Workspace"
-              :model-value="$route.query.workspaceId || null"
-              :items="clockifyWorkspacesReq.response"
-              item-value="id"
-              item-title="name"
-              :loading="clockify.workspace.loading"
-              @update:model-value="redirectQuery({ workspaceId: $event })"
-              :hide-details="true"
-            ></v-select>
-          </v-col>
-          <v-col cols="12">
-            <v-card>
-              <app-calendar
-                :model-value="$route.query.date || dateDefault"
-                @update:model-value="redirectQuery({ date: $event })"
-              ></app-calendar>
-            </v-card>
-          </v-col>
-          <v-col cols="12">
-            <v-text-field
-              label="À receber"
-              :model-value="$filter.numberFormat(results.amountTotal)"
-              :suffix="useStorage.currencyTo"
-              readonly
-            ></v-text-field>
-          </v-col>
-        </v-row>
+        <app-calendar
+          v-model="clockify.date"
+          @update:modelValue="clockify.timeEntryLoad()"
+        ></app-calendar>
 
-        <v-dialog>
-          <template #activator="{ props }">
-            <v-btn v-bind="props" block>Emissão</v-btn>
-          </template>
+        <br>
 
-          <div class="mx-auto" style="width:800px;">
-            <v-card>
-              <v-card-title>Invoice</v-card-title>
-              <v-divider />
-              <v-card-text>
-                <v-row>
-                  <v-col cols="12">
-                    <v-textarea
-                      v-model="useStorage.invoiceContractorInfo"
-                      v-bind="{
-                        label: 'Bill To',
-                        hideDetails: true,
-                        variant: 'outlined',
-                        autoGrow: true,
-                        rows: 1,
-                      }"
-                    />
-                  </v-col>
-      
-                  <v-col cols="12">
-                    <v-textarea
-                      v-model="useStorage.invoiceProviderInfo"
-                      v-bind="{
-                        label: 'Service provider',
-                        hideDetails: true,
-                        variant: 'outlined',
-                        autoGrow: true,
-                        rows: 1,
-                      }"
-                    />
-                  </v-col>
-      
-                  <v-col cols="12">
-                    <table class="w-100">
-                      <colgroup>
-                        <col width="*">
-                        <col width="200px">
-                        <col width="180px">
-                      </colgroup>
-                      <thead>
-                        <tr>
-                          <th class="text-left text-uppercase">Description</th>
-                          <th class="text-left text-uppercase">Details</th>
-                          <th class="text-left text-uppercase">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>
-                            <v-text-field
-                              v-model="useStorage.invoiceProviderServiceDescription"
-                              v-bind="{
-                                hideDetails: true,
-                                variant: 'plain',
-                                density: 'compact',
-                              }"
-                            />
-                          </td>
-                          <td>
-                            {{ parseInt(results.durationHours) }} worked hours
-                          </td>
-                          <td class="py-2">
-                            {{ $filter.numberFormat(results.amountTotalFrom) }}
-                            {{ useStorage.currencyFrom }}
-                            <br>
-                            {{ $filter.numberFormat(results.amountTotalTo) }}
-                            {{ useStorage.currencyTo }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <v-text-field
-                              v-model="useStorage.invoiceProviderFeeDescription"
-                              v-bind="{
-                                hideDetails: true,
-                                variant: 'plain',
-                                density: 'compact',
-                              }"
-                            />
-                          </td>
-                          <td>
-                            <v-text-field
-                              v-model="useStorage.amountFeePercent"
-                              v-bind="{
-                                hideDetails: true,
-                                variant: 'plain',
-                                density: 'compact',
-                                type: 'number',
-                                suffix: '%',
-                                class: 'text-right',
-                              }"
-                            />
-                          </td>
-                          <td class="py-2">
-                            {{ $filter.numberFormat(results.amountTotalFromFee) }}
-                            {{ useStorage.currencyFrom }}
-                            <br>
-                            {{ $filter.numberFormat(results.amountTotalToFee) }}
-                            {{ useStorage.currencyTo }}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </v-col>
-                </v-row>
-                <pre>{{ results }}</pre>
-              </v-card-text>
-            </v-card>
-          </div>
-        </v-dialog>
+        <v-text-field
+          label="À receber"
+          :model-value="$filter.numberFormat(result.amount)"
+          :suffix="clockify.storage.currencyFrom"
+          readonly
+        ></v-text-field>
       </v-card-text>
     </template>
   </app-layout>
 </template>
 
 <script>
-  import axios from 'axios';
-  import { useBreakpoints, breakpointsVuetify } from '@vueuse/core';
-  import { useStorage, useDebounceFn } from '@vueuse/core';
+  import Clockify from './Clockify';
 
   export default {
-    // watch: {
-    //   $route: {deep:true, handler(value, old) {
-    //     this.clockifyRouteChange(value, old);
-    //   }},
-    // },
-
-    computed: {
-      results() {
-        const {
-          currencyFrom,
-          currencyTo,
-          amountPerHour,
-          invoiceProviderServiceDescription,
-          invoiceProviderFeeDescription,
-          amountFeePercent,
-        } = this.useStorage;
-
-        const durationSeconds = this.clockifyWorkspaceUserTimeEntriesReq.response.durationSeconds;
-        const durationHours = durationSeconds / 60 / 60;
-
-        let currencyToAmount = this.exchangeReq.response.filter(item => item.value == currencyTo);
-        currencyToAmount = currencyToAmount[0] ? currencyToAmount[0].amount : 1;
-
-        const amountTotalFrom = durationHours * amountPerHour;
-        const amountTotalTo = amountTotalFrom * currencyToAmount;
-        const amountTotal = durationHours * amountPerHour * currencyToAmount;
-
-        // Fee
-        const amountTotalFromFee = amountTotalFrom * (amountFeePercent/100);
-        const amountTotalToFee = amountTotalFromFee * currencyToAmount;
-
-        return {
-          currencyFrom,
-          currencyTo,
-          amountPerHour,
-          durationSeconds,
-          durationHours,
-          currencyToAmount,
-          amountTotal,
-          amountTotalFrom,
-          amountTotalFromFee,
-          amountTotalTo,
-          amountTotalToFee,
-        };
-      },
+    mounted() {
+      this.clockify.init();
     },
 
-    methods: {
-      useStorageDefault() {
-        return {
-          token: '',
-          userId: '',
-          amountPerHour: 10,
-          amountFeePercent: 2,
-          currencyFrom: 'BRL',
-          currencyTo: 'BRL',
-          invoiceContractorInfo: '',
-          invoiceProviderInfo: '',
-          invoiceProviderServiceDescription: '',
-          invoiceProviderFeeDescription: '',
-        };
-      },
-
-      clockifyRouteChange(value, old) {
-        const start = this.$dayjs(value.query.date).format('YYYY-MM-01T00:00:00.000z');
-        this.clockifyWorkspaceUserTimeEntriesReq.params.start = start;
-
-        const end = this.$dayjs(value.query.date).endOf('month').format('YYYY-MM-DDT23:59:59.000z');
-        this.clockifyWorkspaceUserTimeEntriesReq.params.end = end;
-
-        this.clockifyWorkspaceUserTimeEntriesReq.submit();
-      },
-
-      clockifyUserTimeEntriesItemsCalendar() {
-        let dates = [];
-
-        this.clockifyWorkspaceUserTimeEntriesReq.response.items.forEach(item => {
-          dates.push({ date: item.timeInterval.start, ...item });
-        });
-
-        return dates;
-      },
-
-      redirectQuery(query={}) {
-        query = { ...this.$route.query, ...query };
-        this.$router.push({ ...this.$route, query });
-      },
-
-      settingsCurrencyChange() {
-        const { currencyFrom, currencyTo } = this.useStorage;
-        this.exchangeReq.params.base = this.useStorage.currencyFrom;
+    computed: {
+      result() {
+        return this.clockify.result();
       },
     },
 
     data() {
-      const useStorageRef = useStorage('clockify', this.useStorageDefault());
       return {
-        breakpoints: useBreakpoints(breakpointsVuetify),
-        dateDefault: this.$dayjs().format('YYYY-MM-DD'),
-        useStorage: useStorageRef,
-
-        // Currencies
-        exchangeReq: this.$request({
-          autoSubmit: true,
-          url: 'https://api.exchangerate.host/latest',
-          params: { base: useStorageRef.value.currencyFrom },
-          response: [],
-          onResponse: (data) => {
-            this.settingsCurrencyChange();
-            let items = Object.keys(data.rates).map(attr => {
-              return {
-                title: `${attr} ${data.rates[ attr ]}`,
-                value: attr,
-                amount: data.rates[ attr ],
-              };
-            });
-            return items.sort((a, b) => {
-              if (a.name < b.name) return -1;
-              if (a.name > b.name) return 1;
-              return 0;
-            });
-          },
-        }),
-
-        // Workspaces
-        clockifyWorkspacesReq: this.$request({
-          autoSubmit: true,
-          url: 'clockify://workspaces',
-          response: [],
-          onBeforeRequest: () => {
-            const { workspaceId } = this.$route.query;
-            return workspaceId || false;
-          },
-        }),
-
-        // Logged user
-        clockifyUserReq: this.$request({
-          url: 'clockify://user',
-          onResponse: (data) => {
-            this.useStorage.userId = data.id;
-            return data;
-          },
-        }),
-
-        // Time entries
-        clockifyWorkspaceUserTimeEntriesReq: this.$request({
-          autoSubmit: true,
-          url: () => {
-            const { workspaceId } = this.$route.query || {};
-            const { userId } = this.useStorage;
-            return `clockify://workspaces/${workspaceId}/user/${userId}/time-entries`;
-          },
-          params: () => {
-            const dateDefault = this.$route.date || this.$dayjs().format();
-            let start = this.$dayjs(dateDefault).format('YYYY-MM-01T00:00:00.000z');
-            let end = this.$dayjs(dateDefault).endOf('month').format('YYYY-MM-DDT23:59:59.000z');
-            return { start, end };
-          },
-          response: {
-            durationSeconds: 0,
-            items: [],
-          },
-          onBeforeRequest: () => {
-            const { workspaceId } = this.$route.query || {};
-            const { userId } = this.useStorage;
-            return workspaceId && userId;
-          },
-          onResponse: (data) => {
-            let durationSeconds = 0;
-
-            data = data.map((item) => {
-              item.timeInterval.durationSeconds = (() => {
-                if (!item.timeInterval.end) return 0;
-                let diff = this.$dayjs(item.timeInterval.start).diff(item.timeInterval.end);
-                return Math.max(diff, diff*-1) / 1000;
-              })();
-              
-              durationSeconds += item.timeInterval.durationSeconds;
-              return item;
-            });
-
-            return {
-              durationSeconds,
-              items: data,
-            };
-          },
-        }),
-
-        clockify: {
-          workspace: {
-            loading: false,
-            item: false,
-            items: [],
-          },
-          userTimeEntries: {
-            loading: false,
-            total: {seconds:0, amount:0, currency:'BRL'},
-            params: {
-              start: '2022-11-30T00:00:00.000z',
-              end: '2022-12-31T00:00:00.000z',
-            },
-            item: false,
-            items: [],
-          },
-        },
+        clockify: new Clockify(),
       };
     },
   };
