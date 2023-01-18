@@ -11,7 +11,6 @@
         </div>
       </template>
     </app-calendar>
-    <!-- <app-dd v-model="clockify"></app-dd> -->
 
     <template #drawer>
       <template v-if="clockify.ready">
@@ -80,16 +79,24 @@
           v-model="clockify.date"
           @update:modelValue="clockify.timeEntryLoad()"
         ></app-calendar>
-
-        <br>
-
-        <v-text-field
-          label="À receber"
-          :model-value="$filter.numberFormat(result.amount)"
-          :suffix="clockify.storage.currencyFrom"
-          readonly
-        ></v-text-field>
       </v-card-text>
+
+        <v-divider />
+        <v-card-text>
+          <v-text-field
+            label="À receber"
+            :model-value="$filter.numberFormat(result.from.amount)"
+            :suffix="result.from.currency"
+            readonly
+          />
+          
+          <v-text-field
+            label="À receber"
+            :model-value="$filter.numberFormat(result.to.amount)"
+            :suffix="result.to.currency"
+            readonly
+          />
+        </v-card-text>
     </template>
   </app-layout>
 </template>

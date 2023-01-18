@@ -116,7 +116,7 @@ export default class {
 
   async currenciesLoad() {
     this.currency.loading = true;
-    const { data } = await axios.get('https://api.exchangerate.host/latest?base=USD');
+    const { data } = await axios.get(`https://api.exchangerate.host/latest?base=${this.storage.currencyFrom}`);
     this.currency.items = Object.entries(data.rates).map(([code, value]) => ({ code, value }));
     this.currency.loading = false;
   }
@@ -135,12 +135,23 @@ export default class {
 
   result() {
     const minutes = this.timeEntry.items.reduce((total, item) => total + item.workedMinutes, 0);
-    const amount = this.storage.amountPerHour * (minutes / 60);
-    // worked.amountConverted = this.amountConvert(worked.amount);
+    
+    const from = {
+      amount: this.storage.amountPerHour * (minutes / 60),
+      currency: this.storage.currencyFrom,
+    };
+
+    const currencyTo = _.head(this.currency.items.filter(item => item.code == this.storage.currencyTo)) || {code:'000', value:1};
+    
+    const to = {
+      amount: from.amount * currencyTo.value,
+      currency: this.storage.currencyTo,
+    };
 
     return {
       minutes,
-      amount,
+      from,
+      to,
     };
   }
 };
