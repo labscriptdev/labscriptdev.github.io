@@ -14,6 +14,7 @@
 
   // Loaders
   import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+  import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 
   export default {
     props: {
@@ -189,7 +190,7 @@
               };
   
               if (load.type=='obj') {
-                load.loader = new THREE.OBJLoader(manager);
+                load.loader = new OBJLoader(manager);
                 load.loader.load(load.url, (obj) => {
                   load.onLoad(obj);
                   modelValue[ name ] = obj;
