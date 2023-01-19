@@ -96,7 +96,7 @@
               icon: false,
               name: '',
               description: '',
-              to: '/demo/'+ path.replace(/.+index\/(.+?)\/info.js/g, '$1'),
+              to: '/lab/'+ path.replace(/.+index\/(.+?)\/info.js/g, '$1'),
               ...json
             };
           });

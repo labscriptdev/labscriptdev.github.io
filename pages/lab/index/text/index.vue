@@ -34,7 +34,7 @@
           files = files.map(([file, info]) => {
             return {
               icon: false,
-              to: file.replace(/.+index\/(.+?)\/.+/g, `/demo/text/$1`),
+              to: file.replace(/.+index\/(.+?)\/.+/g, `/lab/text/$1`),
               name: '',
               ...info
             };
