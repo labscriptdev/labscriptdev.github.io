@@ -31,11 +31,21 @@
         :style="{maxWidth: containerWidth}"
         style="height:100%; overflow:auto;"
       >
-        <v-card :style="{height: (useDisplay.lgAndUp? 'auto': '100%')}">
+        <v-card
+          :style="{height: (useDisplay.lgAndUp? 'auto': '100%')}"
+          v-if="containerCard"
+        >
           <v-card-text>
             <slot></slot>
           </v-card-text>
         </v-card>
+
+        <div
+          v-if="!containerCard"
+          :style="{height: (useDisplay.lgAndUp? 'auto': '100%')}"
+        >
+          <slot></slot>
+        </div>
       </v-container>
     </v-main>
   </v-app>
@@ -58,6 +68,10 @@
       containerWidth: {
         type: String,
         default: '1280px',
+      },
+      containerCard: {
+        type: Boolean,
+        default: true,
       },
     },
 
