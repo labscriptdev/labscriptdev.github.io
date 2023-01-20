@@ -1,11 +1,14 @@
 import * as THREE from 'three';
 import Mousetrap from 'mousetrap';
 
+import Car from './Car';
+import Car3 from './Car3';
+
 export default {
   options: {
     fps: 60,
-    // debug: false,
-    gridHelper: true,
+    debug: true,
+    // gridHelper: true,
     orbitControls: true,
   },
 
@@ -13,12 +16,43 @@ export default {
 
   preload() {
     return {
-      track: { type: 'gltf', url: '/assets/models/test-track/scene.gltf' },
+      track: { type: 'gltf', url: '/assets/threejs/models/test-track/scene.gltf' },
       woodbox: { type: 'texture', url: '/assets/threejs/textures/wood-box.png' },
+      tire: { type: 'texture', url: '/assets/threejs/textures/tire.jpg' },
     };
   },
 
-  onCreate(game) {
+  onCreate() {
+    const game = this.getData();
+    this.createMap();
+    // this.createBoxes();
+    this.createCar();
+  },
+  
+  onUpdate() {
+    const { scene, camera } = this.getData();
+    // this.car.accelerate();
+    // camera.lookAt(this.car.getPosition());
+  },
+
+  createMap() {
+    const game = this.getData();
+
+    this.track.scale.set(8, 8, 8);
+    this.track.position.set(-25, -670, 0);
+    this.track.traverse(child => {
+      if (!child.isMesh) return;
+      child.castShadow = child.receiveShadow = true;
+      child.material.metalness = 0;
+      child.material.roughness = 1;
+    });
+
+    game.scene.add(this.track);
+    game.physics.add.existing(this.track, { mass: 0, shape: 'concaveMesh' });
+  },
+
+  createBoxes() {
+    const game = this.getData();
 
     let offset = 3;
     Array(10).fill(null).map((_, i) => i*offset).forEach(x => {
@@ -32,28 +66,12 @@ export default {
         game.physics.add.existing(obj, { mass: 1 });
       });
     });
-
-
-    this.track.scale.set(5, 5, 5);
-    this.track.position.set(-25, -420, 0);
-    this.track.traverse(child => {
-      if (!child.isMesh) return;
-      child.castShadow = child.receiveShadow = true;
-      child.material.metalness = 0;
-      child.material.roughness = 1;
-    });
-
-    game.scene.add(this.track);
-    game.physics.add.existing(this.track, { mass: 0, shape: 'concaveMesh' });
-
-    
-
-    // this.car = new Car(this);
   },
-  
-  onUpdate(game) {
-    // console.log(game.name);
-    // console.log('onUpdate', game.clock.getDelta());
-    // console.log(game.canvas.width);
+
+
+  createCar() {
+    const game = this.getData();
+    // game.scene.add(this.car = new Car({ game }));
+    game.scene.add(this.car = new Car3({ game }));
   },
 };

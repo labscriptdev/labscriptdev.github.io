@@ -1,5 +1,5 @@
 <template>
-  <div style="position:relative; width:100%; height:500px;">
+  <div style="position:relative; width:100%; height:600px;">
     <!--  -->
   </div>
 </template>
@@ -24,14 +24,14 @@
       },
     },
 
-    watch: {
-      modelValue: {
-        deep: true,
-        handler(value) {
-          console.log(value);
-        },
-      },
-    },
+    // watch: {
+    //   modelValue: {
+    //     deep: true,
+    //     handler(value) {
+    //       console.log(value);
+    //     },
+    //   },
+    // },
 
     data() {
       return {
@@ -87,7 +87,7 @@
           modelValue.clock = new THREE.Clock();
 
           // Basic light
-          modelValue.scene.add(modelValue.light = new THREE.AmbientLight(0xffffff));
+          modelValue.scene.add(modelValue.light = new THREE.DirectionalLight(0xffffff, 3));
 
           // Renderer
           modelValue.renderer = (() => {
@@ -103,12 +103,14 @@
           modelValue.effectComposer = new EffectComposer(modelValue.renderer);
 
           // Physics
-          modelValue.physics = (() => {
-            const physics = new AmmoPhysics(modelValue.scene);
-            if (modelValue.options.debug) physics.debug.enable(true);
-            return physics;
-          })();
+          modelValue.physics = new AmmoPhysics(modelValue.scene);
 
+          // Debug
+          if (modelValue.options.debug) {
+            modelValue.physics.debug.enable();
+            // modelValue.physics.debug.mode(2);
+          }
+          
           // Grid helper
           if (modelValue.options.gridHelper) {
             modelValue.scene.add(modelValue.gridHelper = new THREE.GridHelper(10, 10));
@@ -121,6 +123,10 @@
             return new OrbitControls(modelValue.camera, modelValue.renderer.domElement);
           })();
 
+          modelValue.getData = function() {
+            return this;
+          };
+
           const onResize = () => {
             const { width, height } = getCanvasSize();
             modelValue.canvas.width = width;
@@ -132,7 +138,13 @@
           };
 
           const onAnimate = () => {
-            modelValue.onUpdate(modelValue);
+            modelValue.onUpdate();
+
+            modelValue.scene.traverse(child => {
+              const onUpdate = child.onUpdate || child.userData.onUpdate || false;
+              if (typeof onUpdate=='function') onUpdate.call(child);
+            });
+
             modelValue.physics.update(modelValue.clock.getDelta() * 1000);
             modelValue.renderer.render(modelValue.scene, modelValue.camera);
             if (modelValue.orbitControls) modelValue.orbitControls.update();
@@ -141,7 +153,12 @@
           };
 
           const gameInit = () => {
-            modelValue.onCreate(modelValue);
+            modelValue.onCreate();
+
+            modelValue.scene.traverse(child => {
+              const onCreate = child.onCreate || child.userData.onCreate || false;
+              if (typeof onCreate=='function') onCreate.call(child);
+            });
 
             const ti = setInterval(onAnimate, 1000 / modelValue.options.fps);
             window.addEventListener('resize', onResize);
@@ -162,18 +179,14 @@
             }
 
             const manager = Object.assign(new THREE.LoadingManager(), {
-              onStart: (url, itemsLoaded, itemsTotal) => {
-                // console.log('onStart', { url, itemsLoaded, itemsTotal });
-              },
+              onStart: (url, itemsLoaded, itemsTotal) => {},
               onProgress: (url, itemsLoaded, itemsTotal) => {
                 const percent = itemsLoaded / itemsTotal;
                 modelValue.loaded = percent;
                 emit(modelValue);
                 modelValue.onProgress({ percent, url, itemsLoaded, itemsTotal });
               },
-              // onError: (url) => {
-              //   // console.log('onError', { url });
-              // },
+              onError: (url) => {},
               onLoad: () => {
                 modelValue.loaded = 1;
                 gameInit();

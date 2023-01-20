@@ -1,6 +1,7 @@
 <template>
   <app-layout :container-card="false">
     <threejs-scene v-model="test" />
+    <a href="">Refresh</a>
     <!-- <app-dd v-model="test"></app-dd> -->
     
     <v-text-field v-model="test.name" />
