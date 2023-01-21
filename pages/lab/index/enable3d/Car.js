@@ -4,12 +4,17 @@ export default class extends ExtendedObject3D {
   constructor({ game }) {
     super();
     this.game = game;
-    this.physics = false;
-    this.modelInit();
+    this.physics = true;
   }
 
-  modelInit() {
+  onCreate() {
     this.carInit();
+  }
+
+  onUpdate() {
+    // const { camera } = this.game.getData();
+    // camera.lookAt(this.getPosition());
+    this.accelerate();
   }
 
   carInit() {
@@ -65,12 +70,6 @@ export default class extends ExtendedObject3D {
     physics.add.constraints.dof(this.plate.body, this.axisFrontOne.body, { ...dofSettings, offset: { y: -0.9 } });
     this.m0.left.enableAngularMotor(true, 0, 1000);
     this.m0.right.enableAngularMotor(true, 0, 1000);
-  }
-
-  onUpdate() {
-    const { camera } = this.game.getData();
-    camera.lookAt(this.getPosition());
-    this.accelerate();
   }
 
   getPosition() {
@@ -133,7 +132,8 @@ export default class extends ExtendedObject3D {
 
     const plate = physics.add.box(
       { y: 1, width: 1.8, depth: 4.7, mass, height: 0.25 },
-      { lambert: { wireframe: true } }
+      { lambert: { color: 'blue', transparent: .5, opacity: 0.5 } }
+      // { lambert: { wireframe: true } }
     );
 
     return plate;

@@ -46,6 +46,7 @@
 
           const emit = (value) => {
             this.$emit('update:modelValue', value);
+            this.$parent.$forceUpdate();
           };
 
           const getCanvasSize = () => {
@@ -62,7 +63,8 @@
             onProgress: () => {},
             onCreate: () => {},
             onUpdate: () => {},
-            ...this.modelValue
+            ...this.modelValue,
+            input: {},
           };
 
           modelValue.options = {
@@ -104,6 +106,8 @@
 
           // Physics
           modelValue.physics = new AmmoPhysics(modelValue.scene);
+          modelValue.physics.debug?.enable();
+          modelValue.physics.debug?.mode(2048 + 4096);
 
           // Debug
           if (modelValue.options.debug) {
@@ -137,6 +141,20 @@
             emit(modelValue);
           };
 
+          const onKeyboard = (ev) => {
+            if (ev.type=='keydown') {
+              modelValue.input[ev.key] = true;
+              modelValue.input[ev.code] = true;
+              modelValue.input[ev.keyCode] = true;
+            }
+            else {
+              modelValue.input[ev.key] = false;
+              modelValue.input[ev.code] = false;
+              modelValue.input[ev.keyCode] = false;
+            }
+            emit(modelValue);
+          };
+
           const onAnimate = () => {
             modelValue.onUpdate();
 
@@ -162,9 +180,13 @@
 
             const ti = setInterval(onAnimate, 1000 / modelValue.options.fps);
             window.addEventListener('resize', onResize);
+            window.addEventListener('keyup', onKeyboard);
+            window.addEventListener('keydown', onKeyboard);
 
             this.onBeforeUnmount = () => {
               window.removeEventListener('resize', onResize);
+              window.removeEventListener('keyup', onResize);
+              window.removeEventListener('keydown', onResize);
               clearInterval(ti);
             };
           };

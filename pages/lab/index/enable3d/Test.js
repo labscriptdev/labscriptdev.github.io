@@ -9,7 +9,7 @@ export default {
     fps: 60,
     debug: true,
     // gridHelper: true,
-    orbitControls: true,
+    // orbitControls: true,
   },
 
   name: 'Hello',
@@ -49,6 +49,7 @@ export default {
 
     game.scene.add(this.track);
     game.physics.add.existing(this.track, { mass: 0, shape: 'concaveMesh' });
+    this.track.body.setFriction(1);
   },
 
   createBoxes() {
@@ -57,11 +58,12 @@ export default {
     let offset = 3;
     Array(10).fill(null).map((_, i) => i*offset).forEach(x => {
       Array(10).fill(null).map((_, i) => i*offset).forEach(z => {
+        const offset = -10;
         const material = new THREE.MeshBasicMaterial({
           map: this.woodbox,
         });
         const obj = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
-        obj.position.set(x, 1, z);
+        obj.position.set(x+offset, 1, z+offset);
         game.scene.add(obj);
         game.physics.add.existing(obj, { mass: 1 });
       });
@@ -71,7 +73,14 @@ export default {
 
   createCar() {
     const game = this.getData();
+
     // game.scene.add(this.car = new Car({ game }));
-    game.scene.add(this.car = new Car3({ game }));
+    // this.car.position.z = 100;
+
+    // game.scene.add(this.car3 = new Car3({ game }));
+    // game.scene.add(this.car3 = new Car3({ game, x: 2, y: 0, z: -1 }));
+    game.scene.add(this.car3 = new Car3({ game, x: -10, y: 0, z: -1 }));
+    // this.car3.position.set(-20, -1, 0);
+    // this.car3.position.set(2, 0, -1);
   },
 };
