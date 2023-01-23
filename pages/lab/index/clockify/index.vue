@@ -39,7 +39,7 @@
                   v-model="clockify.storage.token"
                 />
 
-                <div class="d-flex align-center" style="gap:15px;">
+                <div class="d-flex align-center mb-6" style="gap:15px;">
                   <v-text-field
                     label="Converter de"
                     v-model.number="clockify.storage.amountPerHour"
@@ -62,6 +62,13 @@
                     style="width:150px;"
                   ></v-autocomplete>
                 </div>
+
+                <v-text-field
+                  label="Meta"
+                  v-model.number="clockify.storage.amountGoal"
+                  type="number"
+                  :hide-details="true"
+                />
               </v-card-text>
               <v-divider />
               <v-card-actions>
@@ -96,6 +103,10 @@
             :suffix="result.to.currency"
             readonly
           />
+
+          <v-progress-linear color="#ccc" height="22" :model-value="result.amountGoalPercent">Meta: {{ $filter.numberFormat(clockify.storage.amountGoal) }}</v-progress-linear>
+          <div class="my-1"></div>
+          <v-progress-linear color="#ccc" height="22" :model-value="result.amountDaysPercent">Fim do mês</v-progress-linear>
 
           <v-alert icon="mdi-clock-outline" color="success" v-if="clockify.clockActive">
             Tarefa em andamento

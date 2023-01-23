@@ -15,6 +15,7 @@ export default class {
       token: '',
       amountPerHour: 13,
       amountCurrency: "BRL",
+      amountGoal: 1000,
       currencyFrom: "AUD",
       currencyTo: "BRL",
     });
@@ -154,6 +155,7 @@ export default class {
   }
 
   result() {
+    const { $dayjs } = useNuxtApp();
     const minutes = this.timeEntry.items.reduce((total, item) => total + item.workedMinutes, 0);
     
     const from = {
@@ -168,10 +170,15 @@ export default class {
       currency: this.storage.currencyTo,
     };
 
+    const amountGoalPercent = to.amount / this.storage.amountGoal * 100;
+    const amountDaysPercent = $dayjs().date() / $dayjs().daysInMonth() * 100;
+
     return {
       minutes,
       from,
       to,
+      amountGoalPercent,
+      amountDaysPercent,
     };
   }
 };
