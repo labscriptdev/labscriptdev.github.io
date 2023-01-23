@@ -64,10 +64,11 @@
                 </div>
 
                 <v-text-field
-                  label="Meta"
+                  :label="`Meta (${clockify.storage.currencyFrom})`"
                   v-model.number="clockify.storage.amountGoal"
                   type="number"
                   :hide-details="true"
+                  :suffix="`${$filter.numberFormat(clockify.currencyConverted(clockify.storage.amountGoal))} ${clockify.storage.currencyTo}`"
                 />
               </v-card-text>
               <v-divider />
@@ -91,22 +92,27 @@
         <v-divider />
         <v-card-text>
           <v-text-field
-            label="À receber"
-            :model-value="$filter.numberFormat(result.from.amount)"
-            :suffix="result.from.currency"
-            readonly
-          />
-          
-          <v-text-field
-            label="À receber"
-            :model-value="$filter.numberFormat(result.to.amount)"
-            :suffix="result.to.currency"
+            :label="`À receber (${clockify.storage.currencyFrom})`"
+            :model-value="$filter.numberFormat(result.amount)"
+            :suffix="`${$filter.numberFormat(clockify.currencyConverted(result.amount))} ${clockify.storage.currencyTo}`"
             readonly
           />
 
-          <v-progress-linear color="#ccc" height="22" :model-value="result.amountGoalPercent">Meta: {{ $filter.numberFormat(clockify.storage.amountGoal) }}</v-progress-linear>
-          <div class="my-1"></div>
-          <v-progress-linear color="#ccc" height="22" :model-value="result.amountDaysPercent">Fim do mês</v-progress-linear>
+          <div class="d-flex flex-column mb-5" style="gap: 15px;">
+            <v-progress-linear
+              :model-value="result.amountGoalPercent"
+              :color="result.amountGoalPercent>result.amountDaysPercent? 'success': 'error'"
+              height="22"
+            >Meta: {{ $filter.numberFormat(clockify.storage.amountGoal) }} {{ clockify.storage.currencyFrom }}</v-progress-linear>
+
+            <v-progress-linear
+              :model-value="result.amountDaysPercent"
+              color="success"
+              height="22"
+            >Fim do mês</v-progress-linear>
+
+            <v-alert>Você precisa trabalhar <strong>{{ result.goalWorkDaysAvg }} horas por dia</strong> para bater a meta.</v-alert>
+          </div>
 
           <v-alert icon="mdi-clock-outline" color="success" v-if="clockify.clockActive">
             Tarefa em andamento
@@ -122,6 +128,10 @@
   export default {
     mounted() {
       this.clockify.init();
+
+      definePageMeta({
+        title: 'Aaa'
+      });
     },
 
     beforeUnmount() {

@@ -6,6 +6,20 @@ import fs from 'fs-extra';
 export default defineNuxtConfig({
   ssr: false,
 
+  app: {
+    head: {
+      charset: 'utf-16',
+      // viewport: 'width=500, initial-scale=1',
+      titleTemplate: (title) => {
+        return [title, 'Labscript.dev'].filter(value => !!value).join(' | ');
+      },
+      // title: '',
+      meta: [
+        { name: 'description', content: 'Labscript.dev Website' },
+      ],
+    }
+  },
+
   css: [
     '@mdi/font/css/materialdesignicons.css',
     // 'leaflet/dist/leaflet.css',

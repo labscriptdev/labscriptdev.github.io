@@ -57,6 +57,7 @@ export default class {
     await this.timeEntryLoad();
     await this.currenciesLoad();
     this.ready = true;
+    if (this.interval) clearInterval(this.interval);
     this.interval = setInterval(async () => {
       const { $dayjs } = useNuxtApp();
 
@@ -154,31 +155,30 @@ export default class {
     this.currency.loading = false;
   }
 
+  currencyConverted(value, code=null) {
+    const currencyTo = _.head(this.currency.items.filter(item => item.code == this.storage.currencyTo)) || {code:'000', value:1};
+    return value * currencyTo.value;
+  }
+
   result() {
     const { $dayjs } = useNuxtApp();
-    const minutes = this.timeEntry.items.reduce((total, item) => total + item.workedMinutes, 0);
-    
-    const from = {
-      amount: this.storage.amountPerHour * (minutes / 60),
-      currency: this.storage.currencyFrom,
-    };
-
-    const currencyTo = _.head(this.currency.items.filter(item => item.code == this.storage.currencyTo)) || {code:'000', value:1};
-    
-    const to = {
-      amount: from.amount * currencyTo.value,
-      currency: this.storage.currencyTo,
-    };
-
-    const amountGoalPercent = to.amount / this.storage.amountGoal * 100;
+    const workedMinutes = this.timeEntry.items.reduce((total, item) => total + item.workedMinutes, 0);
+    const amount = this.storage.amountPerHour * (workedMinutes / 60);
+    const amountGoalPercent = amount / this.storage.amountGoal * 100;
     const amountDaysPercent = $dayjs().date() / $dayjs().daysInMonth() * 100;
+    const goalWorkDaysAvg = (() => {
+      const daysToEnd = $dayjs().daysInMonth() - $dayjs().date();
+      const amountMissing = this.storage.amountGoal - amount;
+      const hoursToWork = amountMissing / this.storage.amountPerHour;
+      return Math.ceil(hoursToWork / daysToEnd);
+    })();
 
     return {
-      minutes,
-      from,
-      to,
+      workedMinutes,
+      amount,
       amountGoalPercent,
       amountDaysPercent,
+      goalWorkDaysAvg,
     };
   }
 };
