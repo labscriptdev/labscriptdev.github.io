@@ -3,13 +3,14 @@ import Mousetrap from 'mousetrap';
 
 import Car from './Car';
 import Car3 from './Car3';
+import Car4 from './Car4';
 
 export default {
   options: {
     fps: 60,
     debug: true,
     // gridHelper: true,
-    // orbitControls: true,
+    orbitControls: true,
   },
 
   name: 'Hello',
@@ -17,6 +18,7 @@ export default {
   preload() {
     return {
       track: { type: 'gltf', url: '/assets/threejs/models/test-track/scene.gltf' },
+      // mercedes: { type: 'gltf', url: '/assets/threejs/models/vehicles/mercedes/scene.gltf' },
       woodbox: { type: 'texture', url: '/assets/threejs/textures/wood-box.png' },
       tire: { type: 'texture', url: '/assets/threejs/textures/tire.jpg' },
     };
@@ -73,14 +75,22 @@ export default {
 
   createCar() {
     const game = this.getData();
+    const { scene, physics } = game;
 
-    // game.scene.add(this.car = new Car({ game }));
+    // scene.add(this.car = new Car({ game }));
     // this.car.position.z = 100;
 
-    // game.scene.add(this.car3 = new Car3({ game }));
-    // game.scene.add(this.car3 = new Car3({ game, x: 2, y: 0, z: -1 }));
-    game.scene.add(this.car3 = new Car3({ game, x: -10, y: 0, z: -1 }));
+    // scene.add(this.car3 = new Car3({ game }));
+    // scene.add(this.car3 = new Car3({ game, x: 2, y: 0, z: -1 }));
+    // scene.add(this.car3 = new Car3({ game, x: -10, y: 0, z: -1 }));
     // this.car3.position.set(-20, -1, 0);
     // this.car3.position.set(2, 0, -1);
+    // scene.add(this.car4 = new Car4({ game, x: -10, y: 0, z: -1 }));
+    // scene.add(this.car4 = new Car4({ game, x: 2, y: 2, z: 1 }));
+    // scene.add(this.car4 = new Car4({ game, x: 0, y: 0, z: 0 }));
+    // scene.add(new Car4({ game, x: 0, y: 0, z: 0 }));
+    // scene.add(new Car4({ game, x: 5, y: 0, z: 0 }));
+    // scene.add(new Car4({ game, x: 0, y: 0, z: 5 }));
+    scene.add(new Car4({ game, x: 5, y: 0, z: 5 }));
   },
 };

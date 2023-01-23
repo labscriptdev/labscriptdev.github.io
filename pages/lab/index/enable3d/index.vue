@@ -11,7 +11,7 @@
         <v-text-field label="y" type="number" v-model.number="test.track.position.y" />
         <v-text-field label="z" type="number" v-model.number="test.track.position.z" />
       </div> -->
-      <pre>test.input: {{ test.input }}</pre>
+      <!-- <pre>test.input: {{ test.input }}</pre> -->
     </template>
 
     <!-- <div ref="game" id="game" style="width:100%; height:600px;"></div> -->

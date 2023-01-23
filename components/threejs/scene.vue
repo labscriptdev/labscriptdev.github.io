@@ -89,7 +89,7 @@
           modelValue.clock = new THREE.Clock();
 
           // Basic light
-          modelValue.scene.add(modelValue.light = new THREE.DirectionalLight(0xffffff, 3));
+          modelValue.scene.add(modelValue.light = new THREE.DirectionalLight(0xffffff, 2));
 
           // Renderer
           modelValue.renderer = (() => {
@@ -106,13 +106,11 @@
 
           // Physics
           modelValue.physics = new AmmoPhysics(modelValue.scene);
-          modelValue.physics.debug?.enable();
-          modelValue.physics.debug?.mode(2048 + 4096);
 
           // Debug
           if (modelValue.options.debug) {
-            modelValue.physics.debug.enable();
-            // modelValue.physics.debug.mode(2);
+            modelValue.physics.debug?.enable();
+            modelValue.physics.debug?.mode(2048 + 4096);
           }
           
           // Grid helper
@@ -166,6 +164,7 @@
             modelValue.physics.update(modelValue.clock.getDelta() * 1000);
             modelValue.renderer.render(modelValue.scene, modelValue.camera);
             if (modelValue.orbitControls) modelValue.orbitControls.update();
+            if (modelValue.options.debug) modelValue.physics.updateDebugger();
             modelValue.effectComposer.render();
             emit(modelValue);
           };
