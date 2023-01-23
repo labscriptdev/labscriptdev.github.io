@@ -8,10 +8,21 @@ export default class extends ExtendedObject3D {
     this.position.set(params.x || 0, params.y || 0, params.z || 0);
     this.carWidth = 2;
     this.carDepth = 4;
-    this.carMass = 100;
+    this.carMass = 10;
     this.axisDistanceBetween = 3.5;
-    this.axisDistanceTop = .5;
-    this.wheelRadios = .5;
+    this.wheelRadius = .4;
+    this.suspensionRestLength = .5;
+    this.suspensionStiffness = 50;
+    this.suspensionDamping = .5;
+    this.suspensionCompression = 4.4;
+    this.friction = 50;
+    this.rollInfluence = 0.01;
+  }
+
+  preload() {
+    return {
+      mercedes: { type: 'gltf', url: '/assets/threejs/models/vehicles/mercedes/scene.gltf' },
+    };
   }
 
   onCreate() {
@@ -37,7 +48,7 @@ export default class extends ExtendedObject3D {
       material: { lambert: { wireframe: true } },
       physics: { mass: this.carMass },
       callback: (mesh) => {
-        mesh.geometry.center();
+        // mesh.geometry.center();
         return mesh;
       },
     });
@@ -45,28 +56,28 @@ export default class extends ExtendedObject3D {
     this.wheels = [
       {
         x: -(this.carWidth/2),
-        y: -this.axisDistanceTop,
+        y: 0,
         z: (this.axisDistanceBetween / 2),
       },
       {
         x: (this.carWidth/2),
-        y: -this.axisDistanceTop,
+        y: 0,
         z: (this.axisDistanceBetween / 2),
       },
       {
         x: -(this.carWidth/2),
-        y: -this.axisDistanceTop,
+        y: 0,
         z: -(this.axisDistanceBetween / 2),
       },
       {
         x: (this.carWidth/2),
-        y: -this.axisDistanceTop,
+        y: 0,
         z: -(this.axisDistanceBetween / 2),
       },
     ].map((pos, ind) => {
       return this.meshCreate({
         type: 'cylinder',
-        data: { x: pos.x, y: pos.y, z: pos.z, radiusBottom: this.wheelRadios, radiusTop: this.wheelRadios, radiusSegments: 24, height: 0.35 },
+        data: { x: pos.x, y: pos.y, z: pos.z, radiusBottom: this.wheelRadius, radiusTop: this.wheelRadius, radiusSegments: 24, height: 0.35 },
         material: { lambert: { color: (ind<=1? 0x001100: 0x222200), transparent: true, opacity: 0.5 } },
         callback: (mesh) => {
           // mesh.rotateZ(Math.PI / 2);
@@ -100,20 +111,12 @@ export default class extends ExtendedObject3D {
       const pos = new Ammo.btVector3(p.x, p.y, p.z);
       const wheelDirectionCS0 = new Ammo.btVector3(0, -1, 0);
       const wheelAxleCS = new Ammo.btVector3(-1, 0, 0);
-      const suspensionRestLength = 0;
-      const radius = this.wheelRadios;
-      const suspensionStiffness = 50;
-      const suspensionDamping = 1;
-      const suspensionCompression = 4.4;
-      const friction = 50;
-      const rollInfluence = 0.01;
-
-      const wheelInfo = vehicle.addWheel(pos, wheelDirectionCS0, wheelAxleCS, suspensionRestLength, radius, tuning, isFront);
-      wheelInfo.set_m_suspensionStiffness(suspensionStiffness);
-      wheelInfo.set_m_wheelsDampingRelaxation(suspensionDamping);
-      wheelInfo.set_m_wheelsDampingCompression(suspensionCompression);
-      wheelInfo.set_m_frictionSlip(friction);
-      wheelInfo.set_m_rollInfluence(rollInfluence);
+      const wheelInfo = vehicle.addWheel(pos, wheelDirectionCS0, wheelAxleCS, this.suspensionRestLength, this.wheelRadius, tuning, isFront);
+      wheelInfo.set_m_suspensionStiffness(this.suspensionStiffness);
+      wheelInfo.set_m_wheelsDampingRelaxation(this.suspensionDamping);
+      wheelInfo.set_m_wheelsDampingCompression(this.suspensionCompression);
+      wheelInfo.set_m_frictionSlip(this.friction);
+      wheelInfo.set_m_rollInfluence(this.rollInfluence);
     });
   }
 
@@ -128,9 +131,9 @@ export default class extends ExtendedObject3D {
     let engineForce = 0;
     let breakingForce = 0;
     let steeringIncrement = 0.4;
-    let steeringClamp = 1;
-    let maxEngineForce = 100;
-    let maxBreakingForce = 100;
+    let steeringClamp = .8;
+    let maxEngineForce = 50;
+    let maxBreakingForce = 50;
     let vehicleSteering = 0;
 
     // front/back
@@ -143,11 +146,13 @@ export default class extends ExtendedObject3D {
       if (vehicleSteering < steeringClamp) {
         vehicleSteering += steeringIncrement;
       }
-    } else if (input.d) {
+    }
+    else if (input.d) {
       if (vehicleSteering > -steeringClamp) {
         vehicleSteering -= steeringIncrement;
       }
-    } else {
+    }
+    else {
       if (vehicleSteering > 0) {
         vehicleSteering -= steeringIncrement / 2;
       }
@@ -183,6 +188,7 @@ export default class extends ExtendedObject3D {
         let q = tm.getRotation();
         wheel.position.set(p.x(), p.y(), p.z());
         wheel.quaternion.set(q.x(), q.y(), q.z(), q.w());
+        wheel.rotateZ(Math.PI / 2);
       });
   
       let tm = this.vehicle.getChassisWorldTransform();

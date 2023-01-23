@@ -18,7 +18,6 @@ export default {
   preload() {
     return {
       track: { type: 'gltf', url: '/assets/threejs/models/test-track/scene.gltf' },
-      // mercedes: { type: 'gltf', url: '/assets/threejs/models/vehicles/mercedes/scene.gltf' },
       woodbox: { type: 'texture', url: '/assets/threejs/textures/wood-box.png' },
       tire: { type: 'texture', url: '/assets/threejs/textures/tire.jpg' },
     };
