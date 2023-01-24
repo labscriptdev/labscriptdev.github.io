@@ -98,7 +98,7 @@
             readonly
           />
 
-          <div class="d-flex flex-column mb-5" style="gap: 15px;">
+          <div class="d-flex flex-column" style="gap: 15px;">
             <v-progress-linear
               :model-value="result.amountGoalPercent"
               :color="result.amountGoalPercent>result.amountDaysPercent? 'success': 'error'"
@@ -112,11 +112,13 @@
             >Fim do mês</v-progress-linear>
 
             <v-alert>Você precisa trabalhar <strong>{{ result.goalWorkDaysAvg }} horas por dia</strong> para bater a meta.</v-alert>
+            
+            <v-alert icon="mdi-clock-outline" color="success" v-if="clockify.workingItem">
+              <div>Em andamento:</div>
+              <div class="text-uppercase"><strong>{{ clockify.workingItem.description }}</strong></div>
+              <div><small>{{ $filter.dateTimeago(clockify.workingItem.workedMinutes * 60) }}</small></div>
+            </v-alert>
           </div>
-
-          <v-alert icon="mdi-clock-outline" color="success" v-if="clockify.clockActive">
-            Tarefa em andamento
-          </v-alert>
         </v-card-text>
     </template>
   </app-layout>

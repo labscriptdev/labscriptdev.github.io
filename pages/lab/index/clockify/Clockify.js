@@ -20,7 +20,7 @@ export default class {
       currencyTo: "BRL",
     });
 
-    this.clockActive = false;
+    this.workingItem = false;
     this.user = false;
 
     this.workspace = {
@@ -139,12 +139,12 @@ export default class {
     const { $dayjs } = useNuxtApp();
     const dateNow = $dayjs();
 
-    this.clockActive = false;
+    this.workingItem = false;
     this.timeEntry.items.forEach(entry => {
       if (entry.timeInterval.end) return;
       const diff = dateNow.diff(entry.timeInterval.start) / 1000 / 60;
       entry.workedMinutes = diff;
-      this.clockActive = true;
+      this.workingItem = entry;
     });
   }
 
