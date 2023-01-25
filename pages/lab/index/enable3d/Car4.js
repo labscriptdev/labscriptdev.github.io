@@ -8,12 +8,14 @@ export default class extends ExtendedObject3D {
     this.position.set(params.x || 0, params.y || 0, params.z || 0);
     this.carWidth = 2;
     this.carDepth = 4;
-    this.carMass = 10;
-    this.axisDistanceBetween = 3.5;
+    this.carMass = 100;
+    this.axisDistanceBetween = 4;
     this.wheelRadius = .4;
-    this.suspensionRestLength = .5;
-    this.suspensionStiffness = 50;
-    this.suspensionDamping = .5;
+    this.maxEngineForce = 400;
+    this.maxBreakingForce = 400;
+    this.suspensionRestLength = .6;
+    this.suspensionStiffness = 10;
+    this.suspensionDamping = .1;
     this.suspensionCompression = 4.4;
     this.friction = 50;
     this.rollInfluence = 0.01;
@@ -35,8 +37,13 @@ export default class extends ExtendedObject3D {
 
     const { camera } = this.game.getData();
     this.chassi.add(camera);
-    camera.position.set(0, 1, -this.carDepth-2);
-    camera.lookAt(this.chassi.position.clone());
+    camera.position.set(0, 2, -this.carDepth-2);
+    const cameraLook = this.chassi.position.clone();
+    camera.lookAt(cameraLook);
+  }
+
+  getSpeed() {
+    return this.vehicle.getCurrentSpeedKmHour();
   }
 
   carCreateVisual() {
@@ -78,7 +85,7 @@ export default class extends ExtendedObject3D {
       return this.meshCreate({
         type: 'cylinder',
         data: { x: pos.x, y: pos.y, z: pos.z, radiusBottom: this.wheelRadius, radiusTop: this.wheelRadius, radiusSegments: 24, height: 0.35 },
-        material: { lambert: { color: (ind<=1? 0x001100: 0x222200), transparent: true, opacity: 0.5 } },
+        material: { lambert: { color: 0x000000 } },
         callback: (mesh) => {
           // mesh.rotateZ(Math.PI / 2);
           mesh.geometry.center();
@@ -132,13 +139,11 @@ export default class extends ExtendedObject3D {
     let breakingForce = 0;
     let steeringIncrement = 0.4;
     let steeringClamp = .8;
-    let maxEngineForce = 50;
-    let maxBreakingForce = 50;
     let vehicleSteering = 0;
 
     // front/back
-    if (input.w) engineForce = maxEngineForce;
-    else if (input.s) engineForce = -maxEngineForce;
+    if (input.w) engineForce = this.maxEngineForce;
+    else if (input.s) engineForce = -this.maxEngineForce;
     else engineForce = 0;
 
     // left/right
@@ -165,7 +170,7 @@ export default class extends ExtendedObject3D {
     }
     
     // break
-    if (input.space) breakingForce = maxBreakingForce;
+    if (input.space) breakingForce = this.maxBreakingForce;
     else breakingForce = 0;
 
     // Control
@@ -198,9 +203,6 @@ export default class extends ExtendedObject3D {
       this.chassi.position.set(p.x(), p.y(), p.z());
       this.chassi.quaternion.set(q.x(), q.y(), q.z(), q.w());
     })();
-
-    // const carSpeed = this.vehicle.getCurrentSpeedKmHour();
-    // console.log(carSpeed);
   }
 
   meshCreate(params = {}) {

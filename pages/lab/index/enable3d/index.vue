@@ -1,6 +1,8 @@
 <template>
   <app-layout :container-card="false" container-width="100%">
-    <threejs-scene v-model="test" />
+    <threejs-scene v-model="test" #default="{ game }">
+      <!-- <pre style="position:absolute; bottom:0; right:0;">{{ game.car.getSpeed() }}</pre> -->
+    </threejs-scene>
     <a href="">Refresh</a>
     <!-- <app-dd v-model="test"></app-dd> -->
     

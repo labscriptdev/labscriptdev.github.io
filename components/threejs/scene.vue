@@ -1,6 +1,6 @@
 <template>
   <div style="position:relative; width:100%; height:600px;">
-    <!--  -->
+    <slot :game="modelValue" />
   </div>
 </template>
 
@@ -11,6 +11,7 @@
   import * as THREE from 'three';
   import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+  import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 
   // Loaders
   import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -34,9 +35,7 @@
     // },
 
     data() {
-      return {
-        gameData: false,
-      };
+      return {};
     },
 
     methods: {
@@ -103,6 +102,7 @@
           })();
 
           modelValue.effectComposer = new EffectComposer(modelValue.renderer);
+          modelValue.effectComposer.addPass(new RenderPass(modelValue.scene, modelValue.camera));
 
           // Physics
           modelValue.physics = new AmmoPhysics(modelValue.scene);
