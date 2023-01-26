@@ -10,7 +10,7 @@
         <v-list-item
           v-for="_type in lottoTypes.response"
           :key="_type.id"
-          :to="`/demo/lotto/${_type.id}`"
+          :to="`/lab/lotto/${_type.id}`"
         >{{ _type.name }}</v-list-item>
       </v-list>
     </template>
