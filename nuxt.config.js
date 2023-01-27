@@ -29,6 +29,9 @@ export default defineNuxtConfig({
 
     // https://vueuse.org/guide/
     ['@vueuse/nuxt', {}],
+    
+    // https://content.nuxtjs.org/
+    ['@nuxt/content', {}],
 
   ],
 
