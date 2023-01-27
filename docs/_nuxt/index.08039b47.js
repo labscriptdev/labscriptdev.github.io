@@ -1,0 +1,1 @@
+import e from"./layout.db727205.js";import{Y as n,o as a,c as r,b as c,g as s,t as _}from"./entry.8100cb04.js";/* empty css                                               */const p={};function l(t,i){const o=e;return a(),r(o,null,{default:c(()=>[s("pre",null,_(t.$route.path),1)]),_:1})}const d=n(p,[["render",l]]);export{d as default};
