@@ -17,9 +17,14 @@
 </template>
 
 <script>
-  import { h } from 'vue';
-
   export default {
+    meta: {
+      active: false,
+      icon: 'mdi-map',
+      name: 'OSM',
+      description: 'Open Street Map',
+    },
+
     data() {
       return {
         pages: (() => {

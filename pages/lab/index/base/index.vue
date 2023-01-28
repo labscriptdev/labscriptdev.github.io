@@ -18,6 +18,13 @@
 
 <script>
   export default {
+    meta: {
+      active: false,
+      icon: 'mdi-globe',
+      name: 'Base',
+      description: 'Base file structure',
+    },
+
     data() {
       return {
         pages: (() => {

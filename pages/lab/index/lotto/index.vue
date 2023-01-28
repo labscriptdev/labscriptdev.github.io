@@ -19,6 +19,13 @@
 
 <script>
   export default {
+    meta: {
+      active: true,
+      icon: 'mdi-slot-machine',
+      name: 'Loteria',
+      description: 'Aplicação de simulação lotérica',
+    },
+
     data() {
       return {
         lottoTypes: this.$request({

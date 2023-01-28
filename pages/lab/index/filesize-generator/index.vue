@@ -20,6 +20,13 @@
 
 <script>
   export default {
+    meta: {
+      active: true,
+      icon: 'mdi-file-download-outline',
+      name: 'Gerador de arquivo',
+      description: 'Aplicação para gerar arquivos com tamanhos exatos',
+    },
+
     data: () => ({
       params: {
         size: 10,

@@ -48,6 +48,13 @@
 
 <script>
   export default {
+    meta: {
+      active: false,
+      icon: 'mdi-content-copy',
+      name: 'App Clone',
+      description: 'Vuetify app clone view',
+    },
+
     data() {
       return {
         style: {

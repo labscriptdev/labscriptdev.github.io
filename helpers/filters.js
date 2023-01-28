@@ -1,5 +1,16 @@
 // {{ $filter.method(param) }}
 
+// Array methods
+
+// $filter.arrayFilter('ap', ['apple', 'banana', 'grape])
+export const arrayFilter = (search, arr=[]) => {
+  if (!search) return arr;
+  search = search.toLowerCase();
+  return arr.filter(a => JSON.stringify(a).toLowerCase().includes(search));
+};
+
+// Date methods
+
 import dayjs, { months } from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 dayjs.extend(localeData);
@@ -27,11 +38,15 @@ export const dateTimeago = (seconds) => {
   return `${Math.round(seconds)} segundos`;
 };
 
-export const filesizeHuman = (size) => {
+// Human format methods
+
+export const humanFilesize = (size) => {
   if (!size || isNaN(size)) return '0kB';
   let i = Math.floor( Math.log(+size) / Math.log(1024) );
   return ( +size / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 };
+
+// Number methods
 
 export const numberFormat = (number, decimals=2, dsep=',', tsep='.') => {
   let [ n1, n2 ] = parseFloat(number).toFixed(decimals).split('.');

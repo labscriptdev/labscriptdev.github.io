@@ -19,6 +19,13 @@
 
 <script>
   export default {
+    meta: {
+      active: true,
+      icon: 'mdi-set-left',
+      name: 'Ferramenta diff',
+      description: 'Comparação de códigos, textos e afins',
+    },
+
     data: () => ({
       original: '',
       modified: '',

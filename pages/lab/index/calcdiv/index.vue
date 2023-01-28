@@ -59,6 +59,13 @@
   import Calculator from './Calculator';
 
   export default {
+    meta: {
+      active: false,
+      icon: 'mdi-calculator',
+      name: 'Calculadora de gastos',
+      description: 'Calculadora de gastos com divisão por pessoas e tempo de uso',
+    },
+
     mounted() {
       this.calculator.demo();
     },

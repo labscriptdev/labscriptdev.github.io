@@ -81,6 +81,13 @@
   import { useClipboard } from '@vueuse/core';
 
   export default {
+    meta: {
+      active: false,
+      icon: 'mdi-vuetify',
+      name: 'Vuetify',
+      description: 'Vuetify',
+    },
+    
     methods: {
       colorClasses() {
         const classes = [];

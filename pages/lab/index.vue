@@ -16,12 +16,12 @@
             <div class="pa-2" style="max-height:calc(70vh - 70px); overflow:auto;">
               <v-row no-gutters>
                 <v-col
-                  v-for="_item in itemsFilter()"
+                  v-for="_item in $filter.arrayFilter(filter, pages)"
                   cols="6"
                   md="4"
                   class="pa-1"
                 >
-                  <v-btn block style="height:100px;" :to="_item.to">
+                  <v-btn block style="height:100px;" :to="`/lab/${_item.slug}`">
                     <div class="text-center">
                       <v-icon>{{ _item.icon }}</v-icon>
                       <div class="my-1"></div>
@@ -71,37 +71,34 @@
 
 <script>
   export default {
-    methods: {
-      itemsFilter() {
-        let filter = this.filter.toLowerCase();
-        return this.items.filter(item => {
-          return JSON.stringify(item).toLowerCase().includes(filter);
-        });
-      },
-    },
     data() {
       return {
         filter: '',
-        items: (() => {
-          const showInactive = this.$dev;
-
-          let files = Object.entries(import.meta.glob('./*/*/info.js', {
+        pages: (() => {
+          let files = Object.entries(import.meta.glob('./index/*/*.vue', {
             import: 'default',
             eager: true,
+            // as: 'raw',
           }));
 
-          files = files.map(([path, json]) => {
-            return {
-              active: false,
-              icon: false,
-              name: '',
-              description: '',
-              to: '/lab/'+ path.replace(/.+index\/(.+?)\/info.js/g, '$1'),
-              ...json
-            };
-          });
-
-          return files.filter(file => showInactive? true: file.active);
+          console.clear();
+          return files
+            .filter(([path, file]) => !!file.meta)
+            .map(([path, file]) => {
+              return {
+                slug: file.__file.split('/').at(-2).replace(/^index$/g, ''),
+                icon: 'mdi-circle',
+                name: 'Default',
+                active: false,
+                order: 0,
+                ...(file.meta || {})
+              };
+            })
+            .sort((a, b) => {
+              if (a.order < b.order) return -1;
+              if (a.order > b.order) return 1;
+              return 0;
+            });
         })(),
       };
     },

@@ -93,6 +93,13 @@
 
 <script>
   export default {
+    meta: {
+      active: true,
+      icon: 'mdi-qrcode',
+      name: 'QR Code',
+      description: 'Gerador dos principais tipos de QRcode',
+    },
+
     computed: {
       type: {
         get() {
