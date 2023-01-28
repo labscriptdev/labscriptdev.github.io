@@ -88,7 +88,8 @@
           modelValue.clock = new THREE.Clock();
 
           // Basic light
-          modelValue.scene.add(modelValue.light = new THREE.DirectionalLight(0xffffff, 2));
+          modelValue.scene.add(modelValue.light = new THREE.DirectionalLight(0xffffff, 5));
+          // modelValue.scene.add(modelValue.light = new THREE.AmbientLight(0xffffff));
 
           // Renderer
           modelValue.renderer = (() => {

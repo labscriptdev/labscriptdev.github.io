@@ -6,6 +6,7 @@ import { RGBShiftShader } from 'three/addons/shaders/RGBShiftShader.js';
 import { DotScreenShader } from 'three/addons/shaders/DotScreenShader.js';
 import { SAOPass } from 'three/addons/postprocessing/SAOPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { HalftonePass } from 'three/addons/postprocessing/HalftonePass.js';
 
 import Car from './Car';
 import Car3 from './Car3';
@@ -24,7 +25,8 @@ export default {
   preload() {
     return {
       // track: { type: 'gltf', url: '/assets/threejs/models/test-track/scene.gltf' },
-      city: { type: 'gltf', url: '/assets/threejs/models/city/scene.gltf' },
+      road_design: { type: 'gltf', url: '/assets/threejs/models/road_design/scene.gltf' },
+      van: { type: 'gltf', url: '/assets/threejs/models/van/scene.gltf' },
       woodbox: { type: 'texture', url: '/assets/threejs/textures/wood-box.png' },
       tire: { type: 'texture', url: '/assets/threejs/textures/tire.jpg' },
     };
@@ -32,6 +34,7 @@ export default {
 
   onCreate() {
     const game = this.getData();
+    const { scene, camera } = game;
     this.createMap();
     // this.createBoxes();
     this.createCar();
@@ -40,7 +43,7 @@ export default {
   onUpdate() {
     const { scene, camera } = this.getData();
     // this.car.accelerate();
-    // camera.lookAt(this.car.getPosition());
+    // camera.lookAt(this.city.position.clone());
   },
 
   createMap() {
@@ -59,14 +62,35 @@ export default {
     // game.physics.add.existing(this.track, { mass: 0, shape: 'concaveMesh' });
     // this.track.body.setFriction(1);
 
-    // city model
+
+    // // city model
+    // (() => {
+    //   game.scene.add(this.city);
+    //   const scale = 1;
+    //   this.city.scale.set(scale, scale, scale);
+    //   this.city.position.set(0, 0, 0);
+    //   game.physics.add.existing(this.city, { mass: 0, shape: 'concaveMesh' });
+    //   this.city.body.setFriction(1);
+    // })();
+    
+    // // casa_city_logo
+    // (() => {
+    //   game.scene.add(this.casa_city_logo);
+    //   const scale = 100;
+    //   this.casa_city_logo.scale.set(scale, scale, scale);
+    //   this.casa_city_logo.position.set(0, 0, 0);
+    //   game.physics.add.existing(this.casa_city_logo, { mass: 0, shape: 'concaveMesh' });
+    //   this.casa_city_logo.body.setFriction(1);
+    // })();
+    
+    // road_design
     (() => {
-      game.scene.add(this.city);
-      const scale = 40;
-      this.city.scale.set(scale, scale, scale);
-      this.city.position.set(1100, -20, 1100);
-      game.physics.add.existing(this.city, { mass: 0, shape: 'concaveMesh' });
-      this.city.body.setFriction(1);
+      game.scene.add(this.road_design);
+      const scale = 3;
+      this.road_design.scale.set(scale, scale, scale);
+      this.road_design.position.set(0, -30, 0);
+      game.physics.add.existing(this.road_design, { mass: 0, shape: 'concaveMesh' });
+      this.road_design.body.setFriction(.2);
     })();
 
     // aaa
@@ -98,12 +122,30 @@ export default {
     // })();
 
     // unreal
+    (() => {
+      const bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
+      bloomPass.threshold = 0;
+      bloomPass.strength = 1;
+      bloomPass.radius = .5;
+      game.effectComposer.addPass(bloomPass);
+    })();
+    
+    // // HalftonePass
     // (() => {
-    //   const bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
-    //   bloomPass.threshold = 0;
-    //   bloomPass.strength = .3;
-    //   bloomPass.radius = 0;
-    //   game.effectComposer.addPass(bloomPass);
+    //   const { width, height } = game.canvas;
+    //   const halftonePass = new HalftonePass(width, height, {
+    //     shape: 1,
+    //     radius: 5,
+    //     rotateR: Math.PI / 12,
+    //     rotateB: Math.PI / 12 * 2,
+    //     rotateG: Math.PI / 12 * 3,
+    //     scatter: 0,
+    //     blending: 1,
+    //     blendingMode: 1,
+    //     greyscale: false,
+    //     disable: false,
+    //   });
+    //   game.effectComposer.addPass(halftonePass);
     // })();
   },
 
@@ -144,6 +186,7 @@ export default {
     // scene.add(new Car4({ game, x: 0, y: 0, z: 0 }));
     // scene.add(new Car4({ game, x: 5, y: 0, z: 0 }));
     // scene.add(new Car4({ game, x: 0, y: 0, z: 5 }));
-    scene.add(this.car = new Car4({ game, x: 5, y: 0, z: 15 }));
+    scene.add(this.car = new Car4({ game, x: 0, y: 5, z: 0 }));
+    this.car.add(this.van);
   },
 };

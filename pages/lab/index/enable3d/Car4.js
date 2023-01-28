@@ -19,6 +19,12 @@ export default class extends ExtendedObject3D {
     this.suspensionCompression = 4.4;
     this.friction = 50;
     this.rollInfluence = 0.01;
+
+    this.steerForce = .005;
+    this.steerMax = .7;
+
+    this._tireSteer = 0;
+    this._engineForce = 0;
   }
 
   preload() {
@@ -93,10 +99,6 @@ export default class extends ExtendedObject3D {
         },
       });
     });
-
-    // let positions = [ this.chassi.position ];
-    // this.wheels.forEach(mesh => positions.push(mesh.position));
-    // console.table(positions);
   }
 
   carCreatePhysics() {
@@ -135,55 +137,49 @@ export default class extends ExtendedObject3D {
     const BACK_LEFT = 2;
     const BACK_RIGHT = 3;
 
-    let engineForce = 0;
-    let breakingForce = 0;
-    let steeringIncrement = 0.4;
-    let steeringClamp = .8;
-    let vehicleSteering = 0;
 
-    // front/back
-    if (input.w) engineForce = this.maxEngineForce;
-    else if (input.s) engineForce = -this.maxEngineForce;
-    else engineForce = 0;
+    // accelerate break
+    (() => {
+      const lerpForce = .02;
 
-    // left/right
-    if (input.a) {
-      if (vehicleSteering < steeringClamp) {
-        vehicleSteering += steeringIncrement;
+      if (input.w) {
+        this._engineForce = THREE.MathUtils.lerp(this._engineForce, this.maxEngineForce, lerpForce);
       }
-    }
-    else if (input.d) {
-      if (vehicleSteering > -steeringClamp) {
-        vehicleSteering -= steeringIncrement;
-      }
-    }
-    else {
-      if (vehicleSteering > 0) {
-        vehicleSteering -= steeringIncrement / 2;
-      }
-      if (vehicleSteering < 0) {
-        vehicleSteering += steeringIncrement / 2;
-      }
-      if (Math.abs(vehicleSteering) <= steeringIncrement) {
-        vehicleSteering = 0;
-      }
-    }
-    
-    // break
-    if (input.space) breakingForce = this.maxBreakingForce;
-    else breakingForce = 0;
 
-    // Control
-    this.vehicle.applyEngineForce(engineForce, BACK_LEFT);
-    this.vehicle.applyEngineForce(engineForce, BACK_RIGHT);
+      if (input.s) {
+        this._engineForce = THREE.MathUtils.lerp(this._engineForce, -this.maxEngineForce, lerpForce);
+      }
 
-    this.vehicle.setSteeringValue(vehicleSteering, FRONT_LEFT);
-    this.vehicle.setSteeringValue(vehicleSteering, FRONT_RIGHT);
+      if (!input.w && !input.s) {
+        this._engineForce = THREE.MathUtils.lerp(this._engineForce, 0, lerpForce);
+      }
 
-    this.vehicle.setBrake(breakingForce / 2, FRONT_LEFT);
-    this.vehicle.setBrake(breakingForce / 2, FRONT_RIGHT);
-    this.vehicle.setBrake(breakingForce, BACK_LEFT);
-    this.vehicle.setBrake(breakingForce, BACK_RIGHT);
+      this.vehicle.applyEngineForce(this._engineForce, BACK_LEFT);
+      this.vehicle.applyEngineForce(this._engineForce, BACK_RIGHT);
+
+      // this.vehicle.setBrake(breakingForce / 2, FRONT_LEFT);
+      // this.vehicle.setBrake(breakingForce / 2, FRONT_RIGHT);
+      // this.vehicle.setBrake(breakingForce, BACK_LEFT);
+      // this.vehicle.setBrake(breakingForce, BACK_RIGHT);
+    })();
+
+    // left right
+    (() => {
+      if (input.a) {
+        this._tireSteer = THREE.MathUtils.lerp(this._tireSteer, this.steerMax, this.steerForce);
+      }
+      
+      if (input.d) {
+        this._tireSteer = THREE.MathUtils.lerp(this._tireSteer, -this.steerMax, this.steerForce);
+      }
+
+      if (!input.a && !input.d) {
+        this._tireSteer = THREE.MathUtils.lerp(this._tireSteer, 0, this.steerForce*3);
+      }
+
+      this.vehicle.setSteeringValue(this._tireSteer, FRONT_LEFT);
+      this.vehicle.setSteeringValue(this._tireSteer, FRONT_RIGHT);
+    })();
 
     // Car update isolation
     (() => {
@@ -203,6 +199,22 @@ export default class extends ExtendedObject3D {
       this.chassi.position.set(p.x(), p.y(), p.z());
       this.chassi.quaternion.set(q.x(), q.y(), q.z(), q.w());
     })();
+
+    // if (!this.aaa) { this.aaa = 0; }
+    // const lerpForce = .1;
+
+    // if (input.a) {
+    //   this.aaa = THREE.MathUtils.lerp(this.aaa, -3, lerpForce);
+    // }
+    // if (input.d) {
+    //   this.aaa = THREE.MathUtils.lerp(this.aaa, 3, lerpForce);
+    // }
+    
+    // if (!input.a && !input.d) {
+    //   this.aaa = THREE.MathUtils.lerp(this.aaa, 0, lerpForce);
+    // }
+
+    // console.log(this.aaa);
   }
 
   meshCreate(params = {}) {
