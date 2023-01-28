@@ -1,4 +1,4 @@
 export default {
   icon: 'mdi-whatsapp',
-  name: 'Whatsapp',
+  name: 'Whatsapp Web',
 };
