@@ -17,6 +17,8 @@
 </template>
 
 <script>
+  import { h } from 'vue';
+
   export default {
     data() {
       return {
