@@ -2,7 +2,7 @@
   <v-app>
     <v-main>
 
-      <div v-if="page">
+      <!-- <div v-if="page">
         <v-img :src="page.thumb" cover height="300" />
         <v-container>
           <h1>{{ page.title }}</h1>
@@ -17,7 +17,13 @@
           <v-btn to="/" variant="tonal">Ir para home</v-btn>
           <v-btn :href="$route.fullPath" variant="tonal">Atualizar</v-btn>
         </div>
-      </v-container>
+      </v-container> -->
+
+      <v-alert color="error">{{ error.message }}</v-alert>
+      <div class="d-flex mt-3" style="gap:15px;">
+        <v-btn to="/" variant="tonal">Ir para home</v-btn>
+        <v-btn :href="$route.fullPath" variant="tonal">Atualizar</v-btn>
+      </div>
       
       <v-container>
         <h2 class="mb-2">Blog Posts</h2>
@@ -53,9 +59,9 @@
 
 <script setup>
   const error = useError();
-  const route = useRoute();
-  const { data: page } = await useAsyncData('hello', () => queryContent(route.path).findOne());
-  const pages = (await queryContent('/blog/test').find()).reverse();
+  // const route = useRoute();
+  // const { data: page } = await useAsyncData('hello', () => queryContent(route.path).findOne());
+  // const pages = (await queryContent('/blog/test').find()).reverse();
 </script>
 
 <style>
