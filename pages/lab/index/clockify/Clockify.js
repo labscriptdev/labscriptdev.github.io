@@ -167,7 +167,7 @@ export default class {
     const amountGoalPercent = amount / this.storage.amountGoal * 100;
     const amountDaysPercent = $dayjs().date() / $dayjs().daysInMonth() * 100;
     const goalWorkDaysAvg = (() => {
-      const daysToEnd = $dayjs().daysInMonth() - $dayjs().date();
+      const daysToEnd = Math.max(1, $dayjs().daysInMonth() - $dayjs().date());
       const amountMissing = this.storage.amountGoal - amount;
       const hoursToWork = amountMissing / this.storage.amountPerHour;
       return Math.ceil(hoursToWork / daysToEnd);
