@@ -22,7 +22,7 @@ export default defineNuxtConfig({
 
   css: [
     '@mdi/font/css/materialdesignicons.css',
-    // 'leaflet/dist/leaflet.css',
+    'leaflet/dist/leaflet.css',
   ],
 
   modules: [

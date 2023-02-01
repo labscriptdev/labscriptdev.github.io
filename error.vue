@@ -12,8 +12,11 @@
       </div>
 
       <v-container v-if="!page">
-        <h1 class="mb-2">{{ error.message }}</h1>
-        <v-btn to="/" variant="tonal">Ir para home</v-btn>
+        <v-alert color="error">{{ error.message }}</v-alert>
+        <div class="d-flex mt-3" style="gap:15px;">
+          <v-btn to="/" variant="tonal">Ir para home</v-btn>
+          <v-btn :href="$route.fullPath" variant="tonal">Atualizar</v-btn>
+        </div>
       </v-container>
       
       <v-container>
