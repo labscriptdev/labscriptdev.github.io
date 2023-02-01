@@ -81,13 +81,11 @@
             // as: 'raw',
           }));
 
-          console.log('/lab', files);
-
           return files
             .filter(([path, file]) => !!file.meta)
             .map(([path, file]) => {
               return {
-                slug: file.__file.split('/').at(-2).replace(/^index$/g, ''),
+                slug: path.split('/').at(-2).replace(/^index$/g, ''),
                 icon: 'mdi-circle',
                 name: 'Default',
                 active: false,
