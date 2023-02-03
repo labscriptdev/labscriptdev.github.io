@@ -1,6 +1,6 @@
 <template>
   <app-layout title="Clockify" container-width="100%">
-    <app-calendar
+    <!-- <app-calendar
       v-model="clockify.date"
       :dates="clockify.timeEntry.items.map(item => ({ date: item.timeInterval.start, ...item }))"
     >
@@ -10,7 +10,9 @@
           {{ (d.dates.reduce((total, dd) => (total+dd.workedMinutes), 0) / 60).toFixed(2) }}
         </div>
       </template>
-    </app-calendar>
+    </app-calendar> -->
+
+    hehe
 
     <template #drawer>
       <template v-if="clockify.ready">
