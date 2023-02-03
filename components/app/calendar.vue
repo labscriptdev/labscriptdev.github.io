@@ -107,8 +107,17 @@
     },
     methods: {
       monthAdd(n) {
-        const month = this.$dayjs(this.modelValue).add(n, 'month').format('YYYY-MM-DD');
-        this.$emit('update:modelValue', month);
+        let month = this.$dayjs(this.modelValue).add(n, 'month').set('date', 1);
+        let today = this.$dayjs();
+
+        if (month.format('YYYY-MM') == today.format('YYYY-MM')) {
+          month = month.set('date', today.get('date'));
+        }
+        else if (month.isBefore(today)) {
+          month = month.set('date', month.daysInMonth());
+        }
+        
+        this.$emit('update:modelValue', month.format('YYYY-MM-DD'));
       },
       slotBind(merge = {}) {
         return {

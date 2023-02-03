@@ -12,7 +12,26 @@
       </template>
     </app-calendar> -->
 
-    hehe
+    <div class="d-flex" style="gap:3px;">
+      <template v-for="d in result.days">
+        <div
+          class="d-flex flex-column"
+          :class="{
+            'bg-green-lighten-3': d.isPast,
+            'bg-grey-lighten-1': d.isFuture,
+          }"
+          :title="d.context"
+          style="width:calc(100% / 31); height:200px; gap:3px;"
+        >
+          <div class="text-center">{{ d.day }}</div>
+          <div class="flex-grow-1">{{ d.context }}</div>
+          <div class="text-center bg-primary" v-for="e in d.entries" style="height:5px;"></div>
+        </div>
+      </template>
+    </div>
+
+    <!-- <app-dd v-model="clockify"></app-dd> -->
+    <pre>{{ result }}</pre>
 
     <template #drawer>
       <template v-if="clockify.ready">
@@ -127,7 +146,8 @@
 </template>
 
 <script>
-  import Clockify from './Clockify';
+  import Clockify from '@/classes/Clockify';
+  // import useClockify from '@/composables/useClockify';
 
   export default {
     meta: {

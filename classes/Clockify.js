@@ -2,7 +2,9 @@ import axios from 'axios';
 import _ from 'lodash';
 import { useStorage } from '@vueuse/core';
 
-const DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.000z';
+const DATE_FORMAT = 'YYYY-MM-DD';
+const TIME_FORMAT = 'HH:mm:ss.000z';
+const DATETIME_FORMAT = `${DATE_FORMAT}T${TIME_FORMAT}`;
 
 export default class {
   constructor(params = {}) {
@@ -116,8 +118,8 @@ export default class {
       const { data } = await this.request({
         url: `/workspaces/${this.workspace.item.id}/user/${this.user.id}/time-entries`,
         params: {
-          start: $dayjs(this.date).startOf('month').format(DATE_FORMAT),
-          end: $dayjs(this.date).endOf('month').format(DATE_FORMAT),
+          start: $dayjs(this.date).startOf('month').format(DATETIME_FORMAT),
+          end: $dayjs(this.date).endOf('month').format(DATETIME_FORMAT),
         },
       });
   
@@ -133,6 +135,25 @@ export default class {
 
       this.timeEntry.loading = false;
     }, 1000);
+  }
+
+  getDays() {
+    const { $dayjs } = useNuxtApp();
+    const today = $dayjs(this.date);
+    let days = [];
+
+    for(let day = 1; day <= $dayjs(this.date).daysInMonth(); day++) {
+      const dd = $dayjs(this.date).set('date', day);
+      const date = dd.format(DATE_FORMAT);
+      const isFuture = dd.isAfter(today);
+      const isPast = dd.isBefore(today);
+      const entries = this.timeEntry.items.filter(item => {
+        return item.timeInterval.start.startsWith(date);
+      });
+      days.push({ day, date, isFuture, isPast, entries });
+    }
+
+    return days;
   }
 
   async timeEntryInterval() {
@@ -173,12 +194,15 @@ export default class {
       return Math.ceil(hoursToWork / daysToEnd);
     })();
 
+    const days = this.getDays();
+
     return {
       workedMinutes,
       amount,
       amountGoalPercent,
       amountDaysPercent,
       goalWorkDaysAvg,
+      days,
     };
   }
 };
