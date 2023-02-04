@@ -142,11 +142,19 @@
 </template>
 
 <script>
-  // import appCalendar from './calendar';
+  import _ from 'lodash';
 
   export default {
     props: {
       modelValue: {
+        type: [Boolean, String],
+        default: false,
+      },
+      dateStart: {
+        type: [Boolean, String],
+        default: false,
+      },
+      dateFinal: {
         type: [Boolean, String],
         default: false,
       },
@@ -156,7 +164,7 @@
       },
       layout: {
         type: String,
-        default: 'month',
+        default: 'month', // month | week | range | year
       },
       header: {
         type: Boolean,
@@ -171,112 +179,144 @@
         default: 5,
       },
     },
-    // components: { appCalendar },
+    
+    data() {
+      return {
+        layouts: {
+          month: {
+            name: 'month',
+            before: (month) => {
+              month.dateStart = month.dayjs.startOf('month');
+              month.dateFinal = month.dayjs.endOf('month').endOf('day');
+              return month;
+            },
+            after: (month) => {
+              month.prev = month.dayjs.add(-1, 'month').format('YYYY-MM-DD');
+              month.next = month.dayjs.add(1, 'month').format('YYYY-MM-DD');
+              month.days = this.arrChunk(month.days, 7);
+              return month;
+            },
+          },
+          week: {
+            name: 'week',
+            before: (month) => {
+              return month;
+            },
+            after: (month) => {
+              month.days = this.arrChunk(month.days, 7);
+              let found = false;
+              for(let days of month.days) {
+                if (found) break;
+                for(let day of days) {
+                  if (month.date == day.date) {
+                    month.days = days;
+                    break;
+                  }
+                }
+              }
+
+              month.prev = this.$dayjs(month.days.at(0).date).add(-1, 'day').format('YYYY-MM-DD');
+              month.next = this.$dayjs(month.days.at(-1).date).add(1, 'day').format('YYYY-MM-DD');
+              return month;
+            },
+          },
+          range: {
+            name: 'range',
+            before: (month) => {
+              month.dateStart = this.$dayjs(this.modelValue).add(-this.rangeDays, 'days');
+              month.dateFinal = this.$dayjs(this.modelValue).add(this.rangeDays, 'days').endOf('day');
+              return month;
+            },
+            after: (month) => {
+              month.prev = this.$dayjs(this.modelValue).add(-1, 'day').format('YYYY-MM-DD');
+              month.next = this.$dayjs(this.modelValue).add(1, 'day').format('YYYY-MM-DD');
+              return month;
+            },
+          },
+          year: {
+            name: 'year',
+            before: (month) => {
+              return month;
+            },
+            after: (month) => {
+              return month;
+            },
+          },
+        },
+      };
+    },
+
     computed: {
       month: {
         set(value) {},
         get() {
-          const d = this.$dayjs(this.modelValue);
-          const r = {};
-          r.date = d.format('YYYY-MM-DD');
-          r.year = d.format('YYYY');
-          r.month = d.format('MM');
-          r.day = d.format('DD');
-          r.monthName = d.format('MMMM');
-          r.daysInMonth = d.daysInMonth();
-          r.weekdayFirst = d.startOf("month").day();
-          r.weekdayLast = d.endOf("month").day();
+          const dayInfo = (dd) => {
+            let day = {};
+            day.id = dd.format();
+            day.dayjs = dd;
+            day.date = dd.format('YYYY-MM-DD');
+            day.day = dd.format('DD');
+            day.month = dd.format('MM');
+            day.year = dd.format('YYYY');
+            day.week = {
+              day: dd.day(),
+              abbr: dd.format('ddd').toUpperCase(),
+              name: dd.format('dddd'),
+            };
+
+            day.current = {
+              day: day.date == r.date,
+              month: day.month == r.month,
+            };
+
+            return day;
+          };
+          
+          let r = {};
+          r.dayjs = this.$dayjs(this.modelValue);
+          r.date = r.dayjs.format('YYYY-MM-DD');
+          r.year = r.dayjs.format('YYYY');
+          r.month = r.dayjs.format('MM');
+          r.day = r.dayjs.format('DD');
+          r.monthName = r.dayjs.format('MMMM');
+          r.daysInMonth = r.dayjs.daysInMonth();
+          r.weekdayFirst = r.dayjs.startOf("month").day();
+          r.weekdayLast = r.dayjs.endOf("month").day();
           r.weekdays = this.$dayjs.weekdays().map(weekday => weekday.substring(0, 3));
           r.prev = false;
           r.next = false;
+          r.dateStart = false;
+          r.dateFinal = false;
+          r.days = [];
+
+          const layout = this.layouts[ this.layout ] || this.layouts['month'];
+          r = layout.before(r);
+
           r.days = (() => {
-            let days=[];
+            const days = [];
 
-            const dayInfo = (dd) => {
-              let day = {};
-              day.id = dd.format();
-              day.date = dd.format('YYYY-MM-DD');
-              day.day = dd.format('DD');
-              day.month = dd.format('MM');
-              day.year = dd.format('YYYY');
-              day.week = {
-                day: dd.day(),
-                abbr: dd.format('ddd').toUpperCase(),
-                name: dd.format('dddd'),
-              };
-
-              day.current = {
-                day: day.date == r.date,
-                month: day.month == r.month,
-              };
-
-              return day;
-            };
-
-            if (this.layout == 'range') {
-              for(let d=-this.rangeDays; d<=this.rangeDays; d++) {
-                const dd = this.$dayjs(this.modelValue).add(d, 'day');
-                days.push(dayInfo(dd));
-              }
-            }
-            else {
-              for(let i=0; i<r.weekdayFirst; i++) {
-                const dd = d.set('date', 1).subtract(r.weekdayFirst - i, 'days');
-                days.push(dayInfo(dd));
-              }
-  
-              for(let i=1; i<=r.daysInMonth; i++) {
-                const dd = d.set('date', i);
-                days.push(dayInfo(dd));
-              }
-  
-              for(let i=r.weekdayLast+1; i<=6; i++) {
-                const dd = d.set('date', r.daysInMonth).add(i - r.weekdayLast, 'days');
-                days.push(dayInfo(dd));
-              }
+            const diff = this.$dayjs(r.dateStart).diff(r.dateFinal, 'days');
+            for(let i=0; i<Math.max(diff, diff*-1); i++) {
+              const dd = this.$dayjs(r.dateStart).add(i, 'days');
+              days.push(dayInfo(dd));
             }
 
-            days = days.map(day => {
-              if (!day.id) return day;
-              day.dates = this.dates.filter(d => {
-                return d.date.startsWith(day.date);
-              });
-              return day;
-            });
-            
             return days;
           })();
 
-          const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+          r.days = r.days.map(day => {
+            day.dates = this.dates.filter(d => {
+              return d.date.startsWith(day.date);
+            });
+            return day;
+          });
 
-          if (this.layout == 'month') {
-            r.prev = d.add(-1, 'month').format('YYYY-MM-DD');
-            r.next = d.add(1, 'month').format('YYYY-MM-DD');
-            r.days = chunk(r.days, 7);
-          }
-          
-          else if (this.layout == 'week') {
-            r.days = chunk(r.days, 7);
-            let found = false;
-            for(let days of r.days) {
-              if (found) break;
-              for(let day of days) {
-                if (r.date == day.date) {
-                  r.days = days;
-                  break;
-                }
-              }
-            }
+          r = layout.after(r);
 
-            r.prev = this.$dayjs(r.days.at(0).date).add(-1, 'day').format('YYYY-MM-DD');
-            r.next = this.$dayjs(r.days.at(-1).date).add(1, 'day').format('YYYY-MM-DD');
-          }
-
-          else if (this.layout == 'range') {
-            r.prev = this.$dayjs(this.modelValue).add(-1, 'day').format('YYYY-MM-DD');
-            r.next = this.$dayjs(this.modelValue).add(1, 'day').format('YYYY-MM-DD');
-          }
-
+          // this.$debounce(() => {
+          //   this.$emit('update:dateStart', r.dateStart);
+          //   this.$emit('update:dateFinal', r.dateFinal);
+          // }, 200);
           return r;
         },
       },
@@ -298,6 +338,9 @@
           });
         }
         return months;
+      },
+      arrChunk(arr, size) {
+        return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
       },
     },
   };

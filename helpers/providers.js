@@ -78,9 +78,7 @@ export const request = (params = {}) => {
 
 // this.$debounce(() => {}, 1000)
 export const debounce = (callback, time=1000) => {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => { callback.apply(this, args); }, time);
-  };
+  const debid = 'debounce_'+ btoa(callback.toString());
+  if (window[debid]) clearTimeout(window[debid]);
+  window[debid] = setTimeout(callback, time);
 };

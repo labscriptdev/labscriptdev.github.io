@@ -1,10 +1,13 @@
 <template>
   <app-layout title="Clockify" container-width="100%">
     <v-select label="Display" v-model="calendarDisplay" :items="['year', 'month', 'week', 'range']"></v-select>
+    <pre>{{ { dateStart, dateFinal } }}</pre>
     <app-calendar
       v-model="clockify.date"
       :layout="calendarDisplay"
       :dates="clockify.timeEntry.items.map(item => ({ date: item.timeInterval.start, ...item }))"
+      v-model:dateStart="dateStart"
+      v-model:dateFinal="dateFinal"
     >
       <template #day="d" v-if="calendarDisplay=='range'">
         <div class="bg-grey-lighten-4">
@@ -192,6 +195,8 @@
     data() {
       return {
         calendarDisplay: 'range',
+        dateStart: false,
+        dateFinal: false,
         clockify: new Clockify(),
       };
     },
