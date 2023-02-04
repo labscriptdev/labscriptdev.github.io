@@ -77,7 +77,7 @@
           },
           {
             title: 'aaa',
-            value: 'https://{s}.tiles.mapbox.com/v3/[YOUR_MAPBOX_KEY]/{z}/{x}/{y}.png',
+            value: 'https://tile.mapzen.com/mapzen/terrain/v1/normal/{z}/{x}/{y}.png',
           },
         ],
       };

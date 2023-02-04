@@ -1,18 +1,31 @@
 <template>
   <app-layout title="Clockify" container-width="100%">
-    <!-- <app-calendar
+    <v-select label="Display" v-model="calendarDisplay" :items="['year', 'month', 'week', 'range']"></v-select>
+    <app-calendar
       v-model="clockify.date"
+      :layout="calendarDisplay"
       :dates="clockify.timeEntry.items.map(item => ({ date: item.timeInterval.start, ...item }))"
     >
-      <template #day="d">
-        <div class="text-h3 py-4">{{ d.day }}</div>
-        <div>
-          {{ (d.dates.reduce((total, dd) => (total+dd.workedMinutes), 0) / 60).toFixed(2) }}
+      <template #day="d" v-if="calendarDisplay=='range'">
+        <div class="bg-grey-lighten-4">
+          <div class="text-h6 text-center py-4">{{ d.day }}</div>
+          <div class="d-flex flex-column justify-end bg-grey-lighten-3" style="height:300px; gap:2px;">
+            <div
+              v-for="dd in d.dates"
+              :style="`height: ${dd.workedMinutes / 1440 * 100}%; background:red;`"
+              class="bg-grey-lighten-2"
+            >
+              <pre>{{ (dd.workedMinutes / 60 % 60).toFixed(2) }}hs</pre>
+            </div>
+          </div>
+          <div class="text-center">
+            {{ (d.dates.reduce((total, dd) => (total+dd.workedMinutes), 0) / 60).toFixed(2) }}hs
+          </div>
         </div>
       </template>
-    </app-calendar> -->
+    </app-calendar>
 
-    <div class="d-flex" style="gap:3px;">
+    <!-- <div class="d-flex" style="gap:3px;">
       <template v-for="d in result.days">
         <div
           class="d-flex flex-column"
@@ -24,14 +37,15 @@
           style="width:calc(100% / 31); height:200px; gap:3px;"
         >
           <div class="text-center">{{ d.day }}</div>
+          <div class="text-center">{{ d.weekday }}</div>
           <div class="flex-grow-1">{{ d.context }}</div>
           <div class="text-center bg-primary" v-for="e in d.entries" style="height:5px;"></div>
         </div>
       </template>
-    </div>
+    </div> -->
 
     <!-- <app-dd v-model="clockify"></app-dd> -->
-    <pre>{{ result }}</pre>
+    <!-- <pre>{{ result }}</pre> -->
 
     <template #drawer>
       <template v-if="clockify.ready">
@@ -177,6 +191,7 @@
 
     data() {
       return {
+        calendarDisplay: 'range',
         clockify: new Clockify(),
       };
     },

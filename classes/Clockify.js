@@ -11,7 +11,7 @@ export default class {
     const { $dayjs } = useNuxtApp();
 
     this.ready = false;
-    this.date = params.date || $dayjs().startOf('month').format('YYYY-MM-DD');
+    this.date = params.date || $dayjs().format('YYYY-MM-DD');
 
     this.storage = useStorage('clockify', {
       token: '',
@@ -144,13 +144,14 @@ export default class {
 
     for(let day = 1; day <= $dayjs(this.date).daysInMonth(); day++) {
       const dd = $dayjs(this.date).set('date', day);
+      const weekday = dd.format('ddd');
       const date = dd.format(DATE_FORMAT);
       const isFuture = dd.isAfter(today);
       const isPast = dd.isBefore(today);
       const entries = this.timeEntry.items.filter(item => {
         return item.timeInterval.start.startsWith(date);
       });
-      days.push({ day, date, isFuture, isPast, entries });
+      days.push({ day, date, weekday, isFuture, isPast, entries });
     }
 
     return days;
