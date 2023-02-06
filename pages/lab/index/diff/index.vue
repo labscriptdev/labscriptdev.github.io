@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12" md="6">
         <div>Original</div>
-        <app-monaco style="height:40vh;" v-model="original"></app-monaco>
+        <app-monaco style="height:40vh;" v-model="original" @update:modelValue="parseDiffGit($event)"></app-monaco>
       </v-col>
       <v-col cols="12" md="6">
         <div>Modified</div>
@@ -30,5 +30,22 @@
       original: '',
       modified: '',
     }),
+
+    methods: {
+      parseDiffGit(code) {
+        console.clear();
+        if (111 == ['<<<<<<<', '=======', '>>>>>>>'].map(src => code.includes(src) ? 1 : 0).join('')) {
+          let [ original, modified ] = code.split('=======');
+          
+          original = original.split("\n");
+          original.shift();
+          this.original = original.join("\n");
+
+          modified = modified.split("\n");
+          modified.pop();
+          this.modified = modified.join("\n");
+        }
+      },
+    },
   };
 </script>
