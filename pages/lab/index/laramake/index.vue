@@ -72,7 +72,7 @@
     </v-row>
 
     <!-- <pre>{{ laramake }}</pre> -->
-    <pre>{{ laramake }}</pre>
+    <!-- <pre>{{ laramake }}</pre> -->
   </app-layout>
 </template>
 
@@ -161,10 +161,11 @@
       { name: 'group_id', fk: { table: 'app_group', field: 'id' } },
     ] });
 
-    const toPascalCase = str => str
-      .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
-      .map(x => x.charAt(0).toUpperCase() + x.slice(1).toLowerCase())
-      .join('');
+    const toPascalCase = str => {
+      return (str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g) || [])
+        .map(x => (x || '').charAt(0).toUpperCase() + x.slice(1).toLowerCase())
+        .join('');
+    }
 
     const files = computed(() => {
       let files = [];
@@ -172,7 +173,7 @@
       table.value.list.forEach(table => {
         const tableName = toPascalCase(table.name);
         files.push({
-          file: `/app/Models/${table.name}.php`,
+          file: `/app/Models/${tableName}.php`,
           content: (() => {
             const fillable = table.fields
               .filter(field => !['id', 'created_at', 'updated_at', 'deleted_at'].includes(field.name))
