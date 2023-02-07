@@ -33,7 +33,6 @@
 
     methods: {
       parseDiffGit(code) {
-        console.clear();
         if (111 == ['<<<<<<<', '=======', '>>>>>>>'].map(src => code.includes(src) ? 1 : 0).join('')) {
           let [ original, modified ] = code.split('=======');
           
@@ -42,6 +41,8 @@
           this.original = original.join("\n");
 
           modified = modified.split("\n");
+          modified.shift();
+          modified.pop();
           modified.pop();
           this.modified = modified.join("\n");
         }
