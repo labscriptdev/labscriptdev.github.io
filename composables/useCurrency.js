@@ -14,6 +14,11 @@ export default function(params = {}) {
   const to = ref(params.to);
   const rates = ref([]);
 
+  const converted = (value, code=null) => {
+    code = code || to.value;
+    return value * rates.value[ code ] || 1;
+  };
+
   const refresh = async () => {
     loading.value = true;
     const { data } = await $axios.get(`https://api.exchangerate.host/latest?base=${from.value}`);
@@ -33,6 +38,7 @@ export default function(params = {}) {
     loading,
     from,
     to,
+    converted,
     rates,
   };
 };

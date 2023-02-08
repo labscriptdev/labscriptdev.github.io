@@ -4,7 +4,6 @@
       class="overflow-auto"
       ref="scroll"
       @wheel.prevent.stop="$refs.scroll.scroll({ left: $refs.scroll.scrollLeft + $event.deltaY*4, top: 0, behavior: 'smooth' });"
-      style="transition: all 300ms ease;"
     >
       <div class="d-flex" style="gap:5px;">
         <template v-for="d in clockify2.dates">
@@ -27,7 +26,7 @@
               <div>{{ d.date.format('ddd') }}</div>
               <div>{{ d.date.format('DD') }}</div>
             </div>
-            <div class="flex-grow-1 d-flex flex-column justify-end" style="gap:2px;">
+            <div class="flex-grow-1 d-flex flex-column justify-end" style="gap:3px;">
               <div
                 v-for="e in d.entries"
                 :title="e.description"
@@ -52,10 +51,35 @@
       <div>{{ clockify2.timeEntry.working.workedMinutes }} minutos</div>
     </v-alert>
 
+    <br>
+
+    <v-card>
+      <v-table>
+        <colgroup>
+          <col width="200px">
+          <col width="*">
+          <col width="120px">
+          <col width="120px">
+        </colgroup>
+        <tbody>
+          <tr v-for="([k, r]) in Object.entries(clockify2.result)">
+            <th>{{ k }}</th>
+            <th>{{ r.description }}</th>
+            <td>{{ r.value }}</td>
+            <td>{{ r.formatted }}</td>
+          </tr>
+        </tbody>
+      </v-table>
+    </v-card>
+
+    <br>
+
     <v-row no-gutter>
       <v-col cols="4" class="overflow-auto">
         <v-text-field v-model="clockify2.dateStart" label="Start" />
         <v-text-field v-model="clockify2.dateFinal" label="Final" />
+        <pre>clockify2.timeEntry.workedMinutes: {{ clockify2.timeEntry.workedMinutes }}</pre>
+        <!-- <pre>clockify2.storage: {{ clockify2.storage }}</pre> -->
         <pre>clockify2.result: {{ clockify2.result }}</pre>
         <pre>clockify2.dates: {{ clockify2.dates }}</pre>
       </v-col>

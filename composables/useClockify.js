@@ -162,11 +162,44 @@ export default function(params = {}) {
       return ![0, 6].includes(date.day());
     });
 
-    let workMinutes = { expected: (60 * 8 * workingDays.length) };
-    workMinutes.worked = timeEntry.value.workedMinutes;
-    workMinutes.percent = workMinutes.worked / workMinutes.expected * 100;
+    const dataItem = (params) => {
+      params = {
+        description: '',
+        value: 0,
+        formatted: (value) => value,
+        ...params
+      };
 
-    return { workMinutes };
+      if (typeof params.formatted=='function') {
+        params.formatted = params.formatted(params.value);
+      }
+
+      return params;
+    };
+
+    let r = {};
+
+    r.rangeWorkExpected = dataItem({
+      description: `Tempo total esperado para trabalhar em ${workingDays.length} dias úteis (em minutos)`,
+      value: 60 * 8 * workingDays.length,
+    });
+
+    r.rangeWorkWorked = dataItem({
+      description: 'Tempo total trabalhado (em minutos)',
+      value: timeEntry.value.workedMinutes,
+    });
+
+    r.rangeWorkWorkedPercent = dataItem({
+      description: 'Percentual de tempo trabalhado',
+      value: r.rangeWorkWorked.value / r.rangeWorkExpected.value * 100,
+    });
+
+    r.amountTotal = dataItem({
+      description: `Total amount to receive (${storage.value.currencyFrom})`,
+      value: (timeEntry.value.workedMinutes / 60) * storage.value.amountPerHour,
+    });
+
+    return r;
   });
 
   watch([ dateStart, dateFinal ], async ([ dateStartNew, dateFinalNew ]) => {
