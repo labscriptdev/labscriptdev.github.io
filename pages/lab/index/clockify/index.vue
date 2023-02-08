@@ -1,7 +1,21 @@
 <template>
   <app-layout title="Clockify" container-width="100%">
+    <v-row no-gutter>
+      <v-col cols="4">
+        <pre>clockify2: {{ clockify2 }}</pre>
+      </v-col>
+      <v-col cols="4">
+        <v-text-field v-model="calendarDate.date" label="Date" />
+        <pre>calendarDate: {{ calendarDate }}</pre>
+      </v-col>
+      <v-col cols="4">
+        <v-text-field v-model="calendarRange.rangeStart" label="Start" />
+        <v-text-field v-model="calendarRange.rangeFinal" label="Final" />
+        <pre>calendarRange: {{ calendarRange }}</pre>
+      </v-col>
+    </v-row>
+
     <v-select label="Display" v-model="calendarDisplay" :items="['year', 'month', 'week', 'range']"></v-select>
-    <pre>{{ { dateStart, dateFinal } }}</pre>
     <app-calendar
       v-model="clockify.date"
       :layout="calendarDisplay"
@@ -164,7 +178,8 @@
 
 <script>
   import Clockify from '@/classes/Clockify';
-  // import useClockify from '@/composables/useClockify';
+  import useClockify from '@/composables/useClockify';
+  import useCalendar from '@/composables/useCalendar';
 
   export default {
     meta: {
@@ -194,6 +209,12 @@
 
     data() {
       return {
+        clockify2: useClockify(),
+        calendarDate: useCalendar(),
+        calendarRange: useCalendar({
+          rangeStart: '2023-01-01T00:00:00.000Z',
+          rangeFinal: '2023-01-05T00:00:00.000Z',
+        }),
         calendarDisplay: 'range',
         dateStart: false,
         dateFinal: false,
