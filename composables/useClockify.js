@@ -1,13 +1,20 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useStorage } from '@vueuse/core';
 
+import duration from 'dayjs/plugin/duration';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
 export default function(params = {}) {
   const { $dayjs, $axios } = useNuxtApp();
+  $dayjs.extend(duration);
+  $dayjs.extend(relativeTime);
 
   params = {
     storageKey: 'clockify',
     dateStart: $dayjs().startOf('month').format('YYYY-MM-DDTHH:mm:ss.000z'),
     dateFinal: $dayjs().endOf('month').format('YYYY-MM-DDTHH:mm:ss.000z'),
+    currencyFrom: 'USD',
+    currencyTo: 'BRL',
     timeEntryParse: entry => entry,
     ...params
   };
@@ -23,8 +30,9 @@ export default function(params = {}) {
     amountPerHour: 13,
     amountCurrency: "BRL",
     amountGoal: 1000,
-    currencyFrom: "AUD",
-    currencyTo: "BRL",
+    currencyFrom: params.currencyFrom,
+    currencyTo: params.currencyTo,
+    securityMode: false,
   }));
 
   const request = async (params) => {
@@ -33,6 +41,32 @@ export default function(params = {}) {
       url: [ 'https://api.clockify.me/api/v1', params.url.replace(/^\/|\/$/g, '') ].join('/'),
       headers: { 'X-Api-Key': storage.value.token },
     });
+  };
+
+  const currency = ref({
+    loading: false,
+    currencyFrom: params.currencyFrom,
+    currencyTo: params.currencyTo,
+    rates: {},
+  });
+
+  const currencyLoad = async () => {
+    currency.value.loading = true;
+    const { data } = await $axios.get(`https://api.exchangerate.host/latest?base=${storage.value.currencyFrom}`);
+    currency.value.rates = data.rates;
+    currency.value.loading = false;
+  };
+
+  const currencyFormat = (number, decimals=2, dsep=',', tsep='.') => {
+    let [ n1, n2 ] = parseFloat(number).toFixed(decimals).split('.');
+    n1 = n1.split('').reverse().join('').replace(/(\d{3})/g, `$1${tsep}`).split('').reverse().join('');
+    return [n1, n2].join(dsep).replace(new RegExp(`^\\${tsep}`, 'g'), '');
+  };
+
+  const currencyConvert = (value, format=true) => {
+    const code = storage.value.currencyTo;
+    value = value * currency.value.rates[ code ] || 1;
+    return format ? currencyFormat(value) : value;
   };
 
   const user = ref({
@@ -129,6 +163,36 @@ export default function(params = {}) {
     });
   };
 
+  const timeHumanize = (minutes) => {
+    let format = [
+      {
+        value: Math.floor(minutes / 60 / 24 / 30),
+        signal: 'mês',
+      },
+      {
+        value: Math.floor(minutes / 60 / 24),
+        signal: 'dia(s)',
+      },
+      {
+        value: Math.floor(minutes / 60),
+        signal: 'hs',
+      },
+      {
+        value: minutes % 60,
+        signal: 'm',
+      },
+    ]
+    .filter(item => item.value > 0)
+    .map(item => item.value+item.signal)
+    .join(', ');
+
+    return format;
+
+    // console.clear();
+    // console.log(JSON.stringify(format, ' ', 2));
+    // return $dayjs.duration(minutes, "minutes").humanize();
+  };
+
   const ready = computed(() => {
     return user.value.data
       && workspace.value.data.length>=1
@@ -170,11 +234,9 @@ export default function(params = {}) {
         ...params
       };
 
-      for(let i in params) {
-        if (typeof params[i] == 'function') {
-          params[i] = params[i](params);
-        }
-      }
+      if (typeof params.value=='function') params.value = params.value(params);
+      if (typeof params.description=='function') params.description = params.description(params);
+      if (typeof params.formatted=='function') params.formatted = params.formatted(params);
 
       return params;
     };
@@ -182,28 +244,44 @@ export default function(params = {}) {
     let r = {};
 
     r.rangeWorkExpected = dataItem({
-      description: `Tempo total esperado para trabalhar em ${workingDays.length} dias úteis (em minutos)`,
+      description: `Tempo total esperado para trabalhar (${workingDays.length} dias úteis)`,
       value: 60 * 8 * workingDays.length,
+      formatted: (me) => `${(me.value/60).toFixed(0)} horas`,
     });
 
     r.rangeWorkWorked = dataItem({
-      description: 'Tempo total trabalhado (em minutos)',
+      description: 'Tempo total trabalhado',
       value: timeEntry.value.workedMinutes,
+      formatted: (me) => `${(me.value/60).toFixed(0)} horas`,
     });
 
     r.rangeWorkWorkedPercent = dataItem({
       description: (me) => `${me.value.toFixed(0)}% do mês trabalhado`,
       value: r.rangeWorkWorked.value / r.rangeWorkExpected.value * 100,
+      formatted: me => me.value.toFixed(0)+'%',
     });
 
     r.amountTotal = dataItem({
-      description: `Total amount to receive (${storage.value.currencyFrom})`,
+      description: `Total para receber`,
       value: (timeEntry.value.workedMinutes / 60) * storage.value.amountPerHour,
+      formatted: (me) => `${currencyFormat(me.value)} (${storage.value.currencyFrom}) / ${currencyConvert(me.value)} (${storage.value.currencyTo})`,
+    });
+
+    r.rangeWorkDayAverage = dataItem({
+      description: (me) => `Quantidade de horas diárias para alcançar a meta`,
+      value: (me) => {
+        const daysToEnd = Math.abs($dayjs().diff(dateFinal.value, 'days'));
+        const amountMissing = storage.value.amountGoal - r.amountTotal.value;
+        const hoursToWork = amountMissing / storage.value.amountPerHour;
+        return Math.ceil(hoursToWork / daysToEnd);
+      },
+      formatted: me => `${me.value} horas / dia`,
     });
 
     r.amountGoal = dataItem({
-      description: `Meta mensal (${storage.value.currencyFrom})`,
+      description: `Meta mensal`,
       value: storage.value.amountGoal,
+      formatted: (me) => `${currencyFormat(me.value)} (${storage.value.currencyFrom}) / ${currencyConvert(me.value)} (${storage.value.currencyTo})`,
     });
     
     r.amountGoalPercent = dataItem({
@@ -215,11 +293,13 @@ export default function(params = {}) {
     return r;
   });
 
-  watch([ dateStart, dateFinal ], async ([ dateStartNew, dateFinalNew ]) => {
+  watch([ dateStart, dateFinal, storage ], async ([ dateStartNew, dateFinalNew ]) => {
+    await currencyLoad();
     await timeEntryLoad();
   });
 
   onMounted(async () => {
+    await currencyLoad();
     await userLoad();
     await workspaceLoad();
     await timeEntryLoad();
@@ -237,12 +317,17 @@ export default function(params = {}) {
     dateStart,
     dateFinal,
     storage,
+    currency,
+    currencyLoad,
+    currencyFormat,
+    currencyConvert,
     user,
     userLoad,
     workspace,
     workspaceLoad,
     timeEntry,
     timeEntryLoad,
+    timeHumanize,
     dates,
     result,
   };
