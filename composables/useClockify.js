@@ -166,12 +166,14 @@ export default function(params = {}) {
       params = {
         description: '',
         value: 0,
-        formatted: (value) => value,
+        formatted: (me) => me.value,
         ...params
       };
 
-      if (typeof params.formatted=='function') {
-        params.formatted = params.formatted(params.value);
+      for(let i in params) {
+        if (typeof params[i] == 'function') {
+          params[i] = params[i](params);
+        }
       }
 
       return params;
@@ -190,13 +192,24 @@ export default function(params = {}) {
     });
 
     r.rangeWorkWorkedPercent = dataItem({
-      description: 'Percentual de tempo trabalhado',
+      description: (me) => `${me.value.toFixed(0)}% do mês trabalhado`,
       value: r.rangeWorkWorked.value / r.rangeWorkExpected.value * 100,
     });
 
     r.amountTotal = dataItem({
       description: `Total amount to receive (${storage.value.currencyFrom})`,
       value: (timeEntry.value.workedMinutes / 60) * storage.value.amountPerHour,
+    });
+
+    r.amountGoal = dataItem({
+      description: `Meta mensal (${storage.value.currencyFrom})`,
+      value: storage.value.amountGoal,
+    });
+    
+    r.amountGoalPercent = dataItem({
+      description: (me) => `${me.value.toFixed(0)}% do valor da meta alcançada`,
+      value: r.amountTotal.value / storage.value.amountGoal * 100,
+      formatted: me => me.value.toFixed(0)+'%',
     });
 
     return r;

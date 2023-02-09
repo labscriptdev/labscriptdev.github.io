@@ -45,6 +45,32 @@
       </div>
     </div>
 
+    <div class="d-flex flex-column" style="gap:5px;">
+      <v-progress-linear
+        :model-value="clockify2.result.rangeWorkWorkedPercent.value"
+        color="light-green-darken-4"
+        height="16"
+        :striped="clockify2.timeEntry.working"
+        style="font-size:10px;"
+        rounded
+      >
+        {{ clockify2.result.rangeWorkWorkedPercent.description }}
+      </v-progress-linear>
+  
+      <v-progress-linear
+        :model-value="clockify2.result.amountGoalPercent.value"
+        color="light-green-darken-4"
+        height="16"
+        :striped="clockify2.timeEntry.working"
+        style="font-size:10px;"
+        rounded
+      >
+        {{ clockify2.result.amountGoalPercent.description }}
+      </v-progress-linear>
+    </div>
+
+    <br>
+
     <v-alert color="success" v-if="clockify2.timeEntry.working">
       <div>Working:</div>
       <div>{{ clockify2.timeEntry.working.description }}</div>
@@ -63,8 +89,8 @@
         </colgroup>
         <tbody>
           <tr v-for="([k, r]) in Object.entries(clockify2.result)">
-            <th>{{ k }}</th>
-            <th>{{ r.description }}</th>
+            <td>{{ k }}</td>
+            <td>{{ r.description }}</td>
             <td>{{ r.value }}</td>
             <td>{{ r.formatted }}</td>
           </tr>
