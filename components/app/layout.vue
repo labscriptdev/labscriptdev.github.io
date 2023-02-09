@@ -86,8 +86,8 @@
 
 <style>
 /* width */
-::-webkit-scrollbar {width: 5px;}
-::-webkit-scrollbar-track {background: transparent;}
-::-webkit-scrollbar-thumb {background-color: #ffffff77;}
+::-webkit-scrollbar {width:15px; height:15px;}
+::-webkit-scrollbar-track {background: #fff;}
+::-webkit-scrollbar-thumb {background-color: #ddd; border: solid 4px #fff;}
 /* ::-webkit-scrollbar-thumb:hover {background: #70707088;} */
 </style>

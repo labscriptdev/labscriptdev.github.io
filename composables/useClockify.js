@@ -146,13 +146,17 @@ export default function(params = {}) {
       clearTimeout(_timeEntryInterval);
     }
 
-    _timeEntryInterval = setInterval(() => {
+    _timeEntryInterval = setInterval(async() => {
       timeEntry.value.data = timeEntry.value.data.map(timeEntryParse);
       let working = timeEntry.value.data.filter(entry => !entry.timeInterval.end);
       timeEntry.value.working = working[0] || false;
       timeEntry.value.workedMinutes = timeEntry.value.data.reduce((total, entry) => {
         return total + entry.workedMinutes;
       }, 0);
+
+      if (59 == $dayjs().format('s')) {
+        await timeEntryLoad();
+      }
     }, 1000);
   };
 
