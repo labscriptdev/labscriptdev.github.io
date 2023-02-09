@@ -101,6 +101,7 @@ export default function(params = {}) {
 
   const timeEntry = ref({
     loading: false,
+    refreshCounter: 0,
     workedMinutes: 0,
     working: false,
     data: [],
@@ -147,6 +148,7 @@ export default function(params = {}) {
     }
 
     _timeEntryInterval = setInterval(async() => {
+      timeEntry.value.refreshCounter = 59 - parseInt($dayjs().format('s'));
       timeEntry.value.data = timeEntry.value.data.map(timeEntryParse);
       let working = timeEntry.value.data.filter(entry => !entry.timeInterval.end);
       timeEntry.value.working = working[0] || false;
@@ -154,7 +156,7 @@ export default function(params = {}) {
         return total + entry.workedMinutes;
       }, 0);
 
-      if (59 == $dayjs().format('s')) {
+      if (0 == timeEntry.value.refreshCounter) {
         await timeEntryLoad();
       }
     }, 1000);

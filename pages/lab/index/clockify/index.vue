@@ -1,112 +1,104 @@
 <template>
   <app-layout title="Clockify" container-width="100%">
-    <v-slide-group show-arrows center-active>
-      <v-slide-group-item
-        v-for="d in clockify.dates"
-        :key="d.id"
-      >
-        <div
-          class="d-flex flex-column border rounded mx-1"
-          :class="{
-            'bg-green-lighten-4': d.is.today,
-            'bg-grey-lighten-4': !d.is.today,
-          }"
-          style="gap:2px; padding:2px; min-width:70px; max-width:70px; height:300px;"
-        >
-          <div
-            class="text-center py-2 fw-bold rounded"
-            :class="{
-              'bg-green-lighten-2': d.is.today,
-              'bg-grey-lighten-2': !d.is.today,
-            }"
-            style="font-size:12px;"
+    <v-row>
+      <v-col cols="12" lg="12">
+        <v-slide-group show-arrows center-active>
+          <v-slide-group-item
+            v-for="d in clockify.dates"
+            :key="d.id"
           >
-            <div>{{ d.date.format('ddd') }}</div>
-            <div>{{ d.date.format('DD') }}</div>
-            <div style="white-space:nowrap; font-size:10px;">&nbsp; {{ clockify.timeHumanize(d.entries.reduce((a, b) => a + b.workedMinutes, 0)) }}</div>
-          </div>
-          <div class="flex-grow-1 d-flex flex-column justify-end" style="gap:3px;">
             <div
-              v-for="e in d.entries"
-              :title="`${e.description} - ${e.workedMinutes} minutes worked`"
-              class="text-center overflow-hidden d-flex align-center justify-center rounded"
+              class="d-flex flex-column border rounded mx-1"
               :class="{
-                'bg-green-lighten-2': (clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
-                'bg-grey-lighten-2': !(clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
+                'bg-green-lighten-4': d.is.today,
+                'bg-grey-lighten-4': !d.is.today,
               }"
-              :style="{ height: `${e.workedMinutesPercent}%` }"
-              style="font-size:10px; white-space:nowrap;"
+              style="gap:2px; padding:2px; min-width:70px; max-width:70px; height:300px;"
             >
-              <div>
-                {{ clockify.timeHumanize(e.workedMinutes) }}
+              <div
+                class="text-center py-2 fw-bold rounded"
+                :class="{
+                  'bg-green-lighten-2': d.is.today,
+                  'bg-grey-lighten-2': !d.is.today,
+                }"
+                style="font-size:12px;"
+              >
+                <div>{{ d.date.format('ddd') }}</div>
+                <div>{{ d.date.format('DD') }}</div>
+                <div style="white-space:nowrap; font-size:10px;">&nbsp; {{ clockify.timeHumanize(d.entries.reduce((a, b) => a + b.workedMinutes, 0)) }}</div>
+              </div>
+              <div class="flex-grow-1 d-flex flex-column justify-end" style="gap:3px;">
+                <div
+                  v-for="e in d.entries"
+                  :title="`${e.description} - ${e.workedMinutes} minutes worked`"
+                  class="text-center overflow-hidden d-flex align-center justify-center rounded"
+                  :class="{
+                    'bg-green-lighten-2': (clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
+                    'bg-grey-lighten-2': !(clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
+                  }"
+                  :style="{ height: `${e.workedMinutesPercent}%` }"
+                  style="font-size:10px; white-space:nowrap;"
+                >
+                  <div>
+                    {{ clockify.timeHumanize(e.workedMinutes) }}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </v-slide-group-item>
-    </v-slide-group>
-
-    <br>
-
-    <div class="d-flex flex-column" style="gap:5px;">
-      <v-progress-linear
-        :model-value="clockify.result.rangeWorkWorkedPercent.value"
-        color="light-green-darken-4"
-        height="16"
-        :striped="!!clockify.timeEntry.working"
-        style="font-size:10px;"
-        rounded
-      >
-        {{ clockify.result.rangeWorkWorkedPercent.description }}
-      </v-progress-linear>
-  
-      <v-progress-linear
-        :model-value="clockify.result.amountGoalPercent.value"
-        color="light-green-darken-4"
-        height="16"
-        :striped="!!clockify.timeEntry.working"
-        style="font-size:10px;"
-        rounded
-      >
-        {{ clockify.result.amountGoalPercent.description }}
-      </v-progress-linear>
-    </div>
-
-    <br>
-
-    <v-alert color="success" v-if="clockify.timeEntry.working">
-      <div>Working:</div>
-      <div>{{ clockify.timeEntry.working.description }}</div>
-      <div>{{ clockify.timeEntry.working.workedMinutes }} minutos</div>
-    </v-alert>
-
-    <br>
-
-    <v-card>
-      <v-table>
-        <tbody>
-          <tr v-for="([k, r]) in Object.entries(clockify.result)">
-            <!-- <td>{{ k }}</td> -->
-            <td>{{ r.description }}</td>
-            <!-- <td>{{ r.value }}</td> -->
-            <td>{{ r.formatted }}</td>
-          </tr>
-        </tbody>
-      </v-table>
-    </v-card>
-
-    <br>
-
-    <!-- <v-row no-gutter>
-      <v-col cols="4" class="overflow-auto">
-        <v-text-field v-model="clockify.dateStart" label="Start" />
-        <v-text-field v-model="clockify.dateFinal" label="Final" />
-        <pre>{{ clockify.timeHumanize(100) }}</pre>
-        <pre>clockify.currency: {{ clockify.currency }}</pre>
-        <pre>clockify.result: {{ clockify.result }}</pre>
-        <pre>clockify.dates: {{ clockify.dates }}</pre>
+          </v-slide-group-item>
+        </v-slide-group>
       </v-col>
-    </v-row> -->
+
+      <v-col cols="12" lg="6">
+        <v-card>
+          <v-table>
+            <tbody>
+              <tr v-for="([k, r]) in Object.entries(clockify.result)">
+                <!-- <td>{{ k }}</td> -->
+                <td>{{ r.description }}</td>
+                <!-- <td>{{ r.value }}</td> -->
+                <td>{{ r.formatted }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" lg="6">
+        <div class="d-flex flex-column" style="gap:5px;">
+          <v-progress-linear
+            :model-value="clockify.result.rangeWorkWorkedPercent.value"
+            color="light-green-darken-4"
+            height="16"
+            :striped="!!clockify.timeEntry.working"
+            style="font-size:10px;"
+            rounded
+          >
+            {{ clockify.result.rangeWorkWorkedPercent.description }}
+          </v-progress-linear>
+      
+          <v-progress-linear
+            :model-value="clockify.result.amountGoalPercent.value"
+            color="light-green-darken-4"
+            height="16"
+            :striped="!!clockify.timeEntry.working"
+            style="font-size:10px;"
+            rounded
+          >
+            {{ clockify.result.amountGoalPercent.description }}
+          </v-progress-linear>
+        </div>
+    
+        <br>
+    
+        <v-alert color="success" v-if="clockify.timeEntry.working">
+          <div>Working:</div>
+          <div>{{ clockify.timeEntry.working.description }}</div>
+          <div>{{ clockify.timeEntry.working.workedMinutes }} minutos</div>
+        </v-alert>
+      </v-col>
+    </v-row>
+    
 
     <template #drawer>
       <template v-if="clockify.user.data">
@@ -168,7 +160,6 @@
                       :label="`Meta (${clockify.storage.currencyFrom})`"
                       v-model.number="clockify.storage.amountGoal"
                       type="number"
-                      :hide-details="true"
                       :suffix="`${clockify.currencyConvert(clockify.storage.amountGoal)} ${clockify.storage.currencyTo}`"
                       :class="{ 'security-mode': clockify.storage.securityMode }"
                     />
@@ -176,7 +167,7 @@
                     <v-switch
                       v-model="clockify.storage.securityMode"
                       hide-details
-                      :label="clockify.storage.securityMode? 'Hidden': 'Shown'"
+                      :label="clockify.storage.securityMode? 'Protegendo valores sensíveis': 'Exibindo valores sensíveis'"
                     ></v-switch>
                   </v-card-text>
                   <v-divider />
@@ -199,8 +190,10 @@
           :label="`À receber (${clockify.storage.currencyFrom})`"
           :model-value="clockify.currencyFormat(clockify.result.amountTotal.value)"
           :suffix="`${clockify.currencyConvert(clockify.result.amountTotal.value)} ${clockify.storage.currencyTo}`"
+          :hide-details="true"
           readonly
         />
+        <div class="text-disabled text-caption text-right mt-1">Atualizando em {{ clockify.timeEntry.refreshCounter }}</div>
       </v-card-text>
     </template>
   </app-layout>
