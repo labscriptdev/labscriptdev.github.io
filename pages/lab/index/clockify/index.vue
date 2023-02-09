@@ -1,53 +1,50 @@
 <template>
   <app-layout title="Clockify" container-width="100%">
-    <div
-      class="overflow-auto"
-      ref="scroll"
-      @wheel.prevent.stop="$refs.scroll.scroll({ left: $refs.scroll.scrollLeft + $event.deltaY*4, top: 0, behavior: 'smooth' });"
-    >
-      <div class="d-flex" style="gap:5px;">
-        <template v-for="d in clockify.dates">
+    <v-slide-group show-arrows center-active>
+      <v-slide-group-item
+        v-for="d in clockify.dates"
+        :key="d.id"
+      >
+        <div
+          class="d-flex flex-column border rounded mx-1"
+          :class="{
+            'bg-green-lighten-4': d.is.today,
+            'bg-grey-lighten-4': !d.is.today,
+          }"
+          style="gap:2px; padding:2px; min-width:70px; max-width:70px; height:300px;"
+        >
           <div
-            class="d-flex flex-column border"
+            class="text-center py-2 fw-bold rounded"
             :class="{
-              'bg-green-lighten-4': d.is.today,
-              'bg-grey-lighten-4': !d.is.today,
+              'bg-green-lighten-2': d.is.today,
+              'bg-grey-lighten-2': !d.is.today,
             }"
-            style="gap:2px; padding:2px; min-width:70px; max-width:70px; height:300px;"
+            style="font-size:12px;"
           >
+            <div>{{ d.date.format('ddd') }}</div>
+            <div>{{ d.date.format('DD') }}</div>
+            <div style="white-space:nowrap; font-size:10px;">&nbsp; {{ clockify.timeHumanize(d.entries.reduce((a, b) => a + b.workedMinutes, 0)) }}</div>
+          </div>
+          <div class="flex-grow-1 d-flex flex-column justify-end" style="gap:3px;">
             <div
-              class="text-center py-2 fw-bold"
+              v-for="e in d.entries"
+              :title="`${e.description} - ${e.workedMinutes} minutes worked`"
+              class="text-center overflow-hidden d-flex align-center justify-center rounded"
               :class="{
-                'bg-green-lighten-2': d.is.today,
-                'bg-grey-lighten-2': !d.is.today,
+                'bg-green-lighten-2': (clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
+                'bg-grey-lighten-2': !(clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
               }"
-              style="font-size:12px;"
+              :style="{ height: `${e.workedMinutesPercent}%` }"
+              style="font-size:10px; white-space:nowrap;"
             >
-              <div>{{ d.date.format('ddd') }}</div>
-              <div>{{ d.date.format('DD') }}</div>
-              <div style="white-space:nowrap; font-size:10px;">&nbsp; {{ clockify.timeHumanize(d.entries.reduce((a, b) => a + b.workedMinutes, 0)) }}</div>
-            </div>
-            <div class="flex-grow-1 d-flex flex-column justify-end" style="gap:3px;">
-              <div
-                v-for="e in d.entries"
-                :title="`${e.description} - ${e.workedMinutes} minutes worked`"
-                class="text-center overflow-hidden d-flex align-center justify-center"
-                :class="{
-                  'bg-green-lighten-2': (clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
-                  'bg-grey-lighten-2': !(clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
-                }"
-                :style="{ height: `${e.workedMinutesPercent}%` }"
-                style="font-size:10px; white-space:nowrap;"
-              >
-                <div>
-                  {{ clockify.timeHumanize(e.workedMinutes) }}
-                </div>
+              <div>
+                {{ clockify.timeHumanize(e.workedMinutes) }}
               </div>
             </div>
           </div>
-        </template>
-      </div>
-    </div>
+        </div>
+      </v-slide-group-item>
+    </v-slide-group>
 
     <br>
 
