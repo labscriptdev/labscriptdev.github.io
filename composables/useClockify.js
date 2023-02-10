@@ -11,13 +11,16 @@ export default function(params = {}) {
 
   params = {
     storageKey: 'clockify',
-    dateStart: $dayjs().startOf('month').format('YYYY-MM-DDTHH:mm:ss.000z'),
-    dateFinal: $dayjs().endOf('month').format('YYYY-MM-DDTHH:mm:ss.000z'),
+    dateStart: null,
+    dateFinal: null,
     currencyFrom: 'USD',
     currencyTo: 'BRL',
     timeEntryParse: entry => entry,
     ...params
   };
+
+  params.dateStart = params.dateStart || $dayjs().startOf('month').format('YYYY-MM-DDTHH:mm:ss.000z');
+  params.dateFinal = params.dateFinal || $dayjs().endOf('month').format('YYYY-MM-DDTHH:mm:ss.000z');
 
   const dateStart = ref(params.dateStart || null);
   // const _dateStart = () => $dayjs(dateStart.value);
