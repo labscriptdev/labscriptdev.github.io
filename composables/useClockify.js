@@ -13,6 +13,7 @@ export default function(params = {}) {
     storageKey: 'clockify',
     dateStart: null,
     dateFinal: null,
+    today: null,
     currencyFrom: 'USD',
     currencyTo: 'BRL',
     timeEntryParse: entry => entry,
@@ -27,6 +28,8 @@ export default function(params = {}) {
 
   const dateFinal = ref(params.dateFinal || null);
   // const _dateFinal = () => $dayjs(dateFinal.value);
+
+  const today = ref($dayjs(params.today || undefined).set('hour', 0).set('minute', 0).set('second', 0));
 
   const storage = ref(useStorage(params.storageKey, {
     token: '',
@@ -325,6 +328,7 @@ export default function(params = {}) {
     ready,
     dateStart,
     dateFinal,
+    today,
     storage,
     currency,
     currencyLoad,

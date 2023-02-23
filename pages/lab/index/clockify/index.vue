@@ -2,10 +2,13 @@
   <app-layout title="Clockify" container-width="100%">
     <v-row>
       <v-col cols="12" lg="12">
-        <v-slide-group show-arrows center-active>
+        <v-slide-group
+          :model-value="clockify.today.format('YYYY-MM-DD')"
+          show-arrows center-active>
           <v-slide-group-item
             v-for="d in clockify.dates"
             :key="d.id"
+            :value="d.date.format('YYYY-MM-DD')"
           >
             <div
               class="d-flex flex-column border rounded mx-1"
