@@ -1,6 +1,69 @@
 <template>
   <app-layout title="Clockify" container-width="100%">
     <v-row>
+      <v-col cols="12">
+        <div class="d-flex align-center bg-primary pa-2 mb-3 rounded">
+          <v-btn @click="clockify.monthAdd(-1)">Mês anterior</v-btn>
+          <div class="flex-grow-1 text-center text-h4">
+            {{ $dayjs.utc(clockify.params.dateStart).format('MMMM') }}
+            {{ $dayjs.utc(clockify.params.dateStart).format('YYYY') }}
+          </div>
+          <v-btn @click="clockify.monthAdd(1)">Próximo mês</v-btn>
+        </div>
+        <v-slide-group
+          :model-value="$dayjs(clockify.params.dateToday).format('YYYY-MM-DD')"
+          show-arrows
+          center-active
+        >
+          <v-slide-group-item
+            v-for="d in clockify.dates"
+            :key="d.id"
+            :value="d.dayjs.format('YYYY-MM-DD')"
+          >
+            <div
+              class="d-flex flex-column border rounded mx-1"
+              :class="{
+                'bg-green-lighten-4': d.is.today,
+                'bg-grey-lighten-4': !d.is.today,
+              }"
+              style="gap:2px; padding:2px; min-width:70px; max-width:70px; height:300px;"
+            >
+              <div
+                class="text-center py-2 fw-bold rounded"
+                :class="{
+                  'bg-green-lighten-2': d.is.today,
+                  'bg-grey-lighten-2': !d.is.today,
+                }"
+                style="font-size:12px;"
+              >
+                <div>{{ d.dayjs.format('ddd') }}</div>
+                <div>{{ d.dayjs.format('DD') }}</div>
+                <div style="white-space:nowrap; font-size:10px;">&nbsp; {{ clockify.timeHumanize(d.entries.reduce((a, b) => a + b.workedMinutes, 0)) }}</div>
+              </div>
+              <div class="flex-grow-1 d-flex flex-column justify-end" style="gap:3px;">
+                <div
+                  v-for="e in d.entries"
+                  :title="`${e.description} - ${e.workedMinutes} minutes worked`"
+                  class="text-center overflow-hidden d-flex align-center justify-center rounded"
+                  :class="{
+                    'bg-green-lighten-2': (clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
+                    'bg-grey-lighten-2': !(clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
+                  }"
+                  :style="{ height: `${e.workedMinutesPercent}%` }"
+                  style="font-size:10px; white-space:nowrap;"
+                >
+                  <div>
+                    {{ clockify.timeHumanize(e.workedMinutes) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </v-slide-group-item>
+        </v-slide-group>
+      </v-col>
+    </v-row>
+
+    <!-- <v-row>
       <v-col cols="12" lg="12">
         <v-slide-group
           :model-value="clockify.today.format('YYYY-MM-DD')"
@@ -57,9 +120,7 @@
           <v-table>
             <tbody>
               <tr v-for="([k, r]) in Object.entries(clockify.result)">
-                <!-- <td>{{ k }}</td> -->
                 <td>{{ r.description }}</td>
-                <!-- <td>{{ r.value }}</td> -->
                 <td>{{ r.formatted }}</td>
               </tr>
             </tbody>
@@ -101,7 +162,7 @@
         </v-alert>
       </v-col>
     </v-row>
-    
+    -->
 
     <template #drawer>
       <template v-if="clockify.user.data">
@@ -145,7 +206,7 @@
     
                       <v-autocomplete
                         v-model="clockify.storage.currencyFrom"
-                        :items="Object.keys(clockify.currency.rates)"
+                        :items="Object.keys(clockify.currency.data)"
                         :hide-details="true"
                         style="width:150px;"
                       ></v-autocomplete>
@@ -153,7 +214,7 @@
                       <v-autocomplete
                         label="Para"
                         v-model="clockify.storage.currencyTo"
-                        :items="Object.keys(clockify.currency.rates)"
+                        :items="Object.keys(clockify.currency.data)"
                         :hide-details="true"
                         style="width:150px;"
                       ></v-autocomplete>
@@ -188,15 +249,15 @@
 
       <v-divider />
       <v-card-text>
-        <v-text-field
+        <!-- <v-text-field
           :class="{ 'security-mode': clockify.storage.securityMode }"
           :label="`À receber (${clockify.storage.currencyFrom})`"
           :model-value="clockify.currencyFormat(clockify.result.amountTotal.value)"
           :suffix="`${clockify.currencyConvert(clockify.result.amountTotal.value)} ${clockify.storage.currencyTo}`"
           :hide-details="true"
           readonly
-        />
-        <div class="text-disabled text-caption text-right mt-1">Atualizando em {{ clockify.timeEntry.refreshCounter }}</div>
+        /> -->
+        <!-- <div class="text-disabled text-caption text-right mt-1">Atualizando em {{ clockify.timeEntry.refreshCounter }}</div> -->
       </v-card-text>
     </template>
   </app-layout>
@@ -235,11 +296,11 @@
             return entry;
           },
         }),
-        calendarDate: useCalendar(),
-        calendarRange: useCalendar({
-          rangeStart: '2023-01-01T00:00:00.000Z',
-          rangeFinal: '2023-01-05T00:00:00.000Z',
-        }),
+        // calendarDate: useCalendar(),
+        // calendarRange: useCalendar({
+        //   rangeStart: '2023-01-01T00:00:00.000Z',
+        //   rangeFinal: '2023-01-05T00:00:00.000Z',
+        // }),
         calendarDisplay: 'range',
         dateStart: false,
         dateFinal: false,

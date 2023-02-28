@@ -11,6 +11,8 @@ export const axios = axiosRequest;
 import dayjsImport from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 dayjsImport.extend(localeData);
+import dayjsUTC from 'dayjs/plugin/utc';
+dayjsImport.extend(dayjsUTC);
 export const dayjs = dayjsImport;
 
 
