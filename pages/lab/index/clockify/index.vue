@@ -63,189 +63,229 @@
       </v-col>
     </v-row>
 
-    <!-- <v-row>
-      <v-col cols="12" lg="12">
-        <v-slide-group
-          :model-value="clockify.today.format('YYYY-MM-DD')"
-          show-arrows center-active>
-          <v-slide-group-item
-            v-for="d in clockify.dates"
-            :key="d.id"
-            :value="d.date.format('YYYY-MM-DD')"
-          >
-            <div
-              class="d-flex flex-column border rounded mx-1"
-              :class="{
-                'bg-green-lighten-4': d.is.today,
-                'bg-grey-lighten-4': !d.is.today,
-              }"
-              style="gap:2px; padding:2px; min-width:70px; max-width:70px; height:300px;"
-            >
-              <div
-                class="text-center py-2 fw-bold rounded"
-                :class="{
-                  'bg-green-lighten-2': d.is.today,
-                  'bg-grey-lighten-2': !d.is.today,
-                }"
-                style="font-size:12px;"
-              >
-                <div>{{ d.date.format('ddd') }}</div>
-                <div>{{ d.date.format('DD') }}</div>
-                <div style="white-space:nowrap; font-size:10px;">&nbsp; {{ clockify.timeHumanize(d.entries.reduce((a, b) => a + b.workedMinutes, 0)) }}</div>
-              </div>
-              <div class="flex-grow-1 d-flex flex-column justify-end" style="gap:3px;">
-                <div
-                  v-for="e in d.entries"
-                  :title="`${e.description} - ${e.workedMinutes} minutes worked`"
-                  class="text-center overflow-hidden d-flex align-center justify-center rounded"
-                  :class="{
-                    'bg-green-lighten-2': (clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
-                    'bg-grey-lighten-2': !(clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
-                  }"
-                  :style="{ height: `${e.workedMinutesPercent}%` }"
-                  style="font-size:10px; white-space:nowrap;"
-                >
-                  <div>
-                    {{ clockify.timeHumanize(e.workedMinutes) }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </v-slide-group-item>
-        </v-slide-group>
-      </v-col>
+    <!-- <pre>{{ clockify.result }}</pre> -->
+    <!-- <app-dd :model-value="clockify.result"></app-dd> -->
 
-      <v-col cols="12" lg="6">
-        <v-card>
+    <br>
+    <div class="border pa-1">
+      <v-row no-gutters class="bg-primary">
+        <v-col cols="8" class="pa-3 font-weight-bold text-uppercase">
+          <v-content v-model="clockify.storage.invoiceProviderName" />
+        </v-col>
+        <v-col cols="4" class="pa-3 font-weight-bold text-uppercase">
+          <v-content v-model="clockify.storage.invoiceNumber" prepend="Invoice #" />
+        </v-col>
+      </v-row>
+  
+      <v-row no-gutters>
+        <v-col cols="12">
+          <div class="pa-3">
+            <v-content v-model="clockify.storage.invoiceProviderInfo" />
+          </div>
+          <div class="pa-3">
+            <v-content v-model="clockify.storage.invoiceContractorInfo" />
+          </div>
+        </v-col>
+        <!-- <v-col cols="12" class="border">
           <v-table>
             <tbody>
-              <tr v-for="([k, r]) in Object.entries(clockify.result)">
-                <td>{{ r.description }}</td>
-                <td>{{ r.formatted }}</td>
+              <tr>
+                <td>Invoice date</td>
+                <td>Terms</td>
+                <td>Dua date</td>
               </tr>
             </tbody>
           </v-table>
-        </v-card>
-      </v-col>
+        </v-col> -->
+  
+        <v-col cols="12">
+          <v-table v-if="clockify.result.ready">
+            <thead>
+              <tr>
+                <th class="bg-primary">Description</th>
+                <th class="bg-primary">Qty</th>
+                <th class="bg-primary">Unit. price</th>
+                <th class="bg-primary">Amount (AUD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <v-content v-model="clockify.storage.invoiceProviderServiceDescription" />
+                  {{ $dayjs.utc(clockify.params.dateStart).format('DD') }} ~
+                  {{ $dayjs.utc(clockify.params.dateFinal).format('DD') }}
+                  {{ $dayjs.utc(clockify.params.dateStart).format('MMMM') }}
+                </td>
+                <td>1</td>
+                <td>{{ clockify.currencyFormat(clockify.result.amountTotal.value) }}</td>
+                <td>{{ clockify.currencyFormat(clockify.result.amountTotal.value) }}</td>
+              </tr>
+              <tr>
+                <td><v-content v-model="clockify.storage.invoiceProviderFeeDescription" /></td>
+                <td>1</td>
+                <td>
+                  <v-content v-model="clockify.storage.invoiceFeeHusky" />
+                </td>
+                <td>{{ clockify.currencyFormat(clockify.result.amountFee.value) }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td></td>
+                <td></td>
+                <td class="bg-primary">Total</td>
+                <td class="bg-primary">{{ clockify.currencyFormat(clockify.result.amountTotal.value + clockify.result.amountFee.value) }}</td>
+              </tr>
+            </tfoot>
+          </v-table>
 
-      <v-col cols="12" lg="6">
-        <div class="d-flex flex-column" style="gap:5px;">
-          <v-progress-linear
-            :model-value="clockify.result.rangeWorkWorkedPercent.value"
-            color="light-green-darken-4"
-            height="16"
-            :striped="!!clockify.timeEntry.working"
-            style="font-size:10px;"
-            rounded
-          >
-            {{ clockify.result.rangeWorkWorkedPercent.description }}
-          </v-progress-linear>
-      
-          <v-progress-linear
-            :model-value="clockify.result.amountGoalPercent.value"
-            color="light-green-darken-4"
-            height="16"
-            :striped="!!clockify.timeEntry.working"
-            style="font-size:10px;"
-            rounded
-          >
-            {{ clockify.result.amountGoalPercent.description }}
-          </v-progress-linear>
-        </div>
-    
-        <br>
-    
-        <v-alert color="success" v-if="clockify.timeEntry.working">
-          <div>Working:</div>
-          <div>{{ clockify.timeEntry.working.description }}</div>
-          <div>{{ clockify.timeEntry.working.workedMinutes }} minutos</div>
-        </v-alert>
-      </v-col>
-    </v-row>
-    -->
+          <br>
+          <div class="bg-primary pa-3">
+            <v-content v-model="clockify.storage.invoiceThanks" placeholder="Thanks" />
+          </div>
+
+          <br>
+          <v-table>
+            <tbody>
+              <tr>
+                <td>Beneficiary</td>
+                <td><v-content v-model="clockify.storage.invoiceProviderName" /></td>
+              </tr>
+              <tr>
+                <td>Beneficiary account (IBAN)</td>
+                <td><v-content v-model="clockify.storage.invoiceProviderAccountIban" /></td>
+              </tr>
+              <tr>
+                <td>Swift code</td>
+                <td><v-content v-model="clockify.storage.invoiceProviderAccountSwiftCode" /></td>
+              </tr>
+              <tr>
+                <td>Bank</td>
+                <td><v-content v-model="clockify.storage.invoiceProviderAccountBankName" /></td>
+              </tr>
+              <tr>
+                <td>Bank Address</td>
+                <td><v-content v-model="clockify.storage.invoiceProviderAccountBankAddress" /></td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-col>
+      </v-row>
+    </div>
+
+    <pre>{{ clockify.storage }}</pre>
+    <pre>{{ clockify.result }}</pre>
+
+    <br><br><br><br><br>
+    <br><br><br><br><br>
+    <br><br><br><br><br>
+    <br><br><br><br><br>
 
     <template #drawer>
-      <template v-if="clockify.user.data">
-        <v-card-text>
-          <div class="d-flex align-center">
+      <v-card-text>
+        <div class="d-flex align-center">
+          <template v-if="clockify.user.data">
             <v-avatar>
               <v-img :src="clockify.user.data.profilePicture"></v-img>
             </v-avatar>
             <div class="fw-bold ms-3">{{ clockify.user.data.name }}</div>
-            <v-dialog>
-              <template #activator="{ props }">
-                <v-btn
-                  icon="mdi-cog"
-                  class="ms-auto"
-                  flat
-                  size="20"
-                  v-bind="props"
-                  ref="settingsBtn"
-                />
-              </template>
-    
-              <div style="width:90vw; max-width:600px!important; margin:0 auto;">
-                <v-card>
-                  <v-card-text>
-                    <a href="https://app.clockify.me/user/settings" target="_blank">
-                      Acesse sua tela de configurações Clockify para gerar o token.
-                    </a><br><br>
-                    <v-text-field
-                      label="Token"
-                      v-model="clockify.storage.token"
-                      :class="{ 'security-mode': clockify.storage.securityMode }"
-                    />
-    
-                    <div class="d-flex align-center mb-6" style="gap:15px;">
-                      <v-text-field
-                        label="Converter de"
-                        v-model.number="clockify.storage.amountPerHour"
-                        type="number"
-                        :hide-details="true"
-                      />
-    
-                      <v-autocomplete
-                        v-model="clockify.storage.currencyFrom"
-                        :items="Object.keys(clockify.currency.data)"
-                        :hide-details="true"
-                        style="width:150px;"
-                      ></v-autocomplete>
-    
-                      <v-autocomplete
-                        label="Para"
-                        v-model="clockify.storage.currencyTo"
-                        :items="Object.keys(clockify.currency.data)"
-                        :hide-details="true"
-                        style="width:150px;"
-                      ></v-autocomplete>
-                    </div>
-    
-                    <v-text-field
-                      :label="`Meta (${clockify.storage.currencyFrom})`"
-                      v-model.number="clockify.storage.amountGoal"
-                      type="number"
-                      :suffix="`${clockify.currencyConvert(clockify.storage.amountGoal)} ${clockify.storage.currencyTo}`"
-                      :class="{ 'security-mode': clockify.storage.securityMode }"
-                    />
+          </template>
+          
+          <template v-if="!clockify.user.data">
+            <div class="fw-bold ms-3">Hello Anonimous!</div>
+          </template>
 
-                    <v-switch
-                      v-model="clockify.storage.securityMode"
-                      hide-details
-                      :label="clockify.storage.securityMode? 'Protegendo valores sensíveis': 'Exibindo valores sensíveis'"
-                    ></v-switch>
-                  </v-card-text>
-                  <v-divider />
-                  <v-card-actions>
-                    <v-spacer />
-                    <v-btn @click="$refs.settingsBtn.$el.click();">Ok</v-btn>
-                  </v-card-actions>
-                </v-card>
-              </div>
-            </v-dialog>
-          </div>
-        </v-card-text>
-        <v-divider />
-      </template>
+          <v-dialog>
+            <template #activator="{ props }">
+              <v-btn
+                icon="mdi-cog"
+                class="ms-auto"
+                flat
+                size="20"
+                v-bind="props"
+                ref="settingsBtn"
+              />
+            </template>
+  
+            <div style="width:90vw; max-width:600px!important; margin:0 auto;">
+              <v-card>
+                <v-card-text>
+                  <a href="https://app.clockify.me/user/settings" target="_blank">
+                    Acesse sua tela de configurações Clockify para gerar o token.
+                  </a><br><br>
+                  <v-text-field
+                    label="Token"
+                    v-model="clockify.storage.token"
+                    :class="{ 'security-mode': clockify.storage.securityMode }"
+                  />
+  
+                  <div class="d-flex align-center mb-6" style="gap:15px;">
+                    <v-text-field
+                      label="Converter de"
+                      v-model.number="clockify.storage.amountPerHour"
+                      type="number"
+                      :hide-details="true"
+                    />
+  
+                    <v-autocomplete
+                      v-model="clockify.storage.currencyFrom"
+                      :items="Object.keys(clockify.currency.data)"
+                      :hide-details="true"
+                      style="width:150px;"
+                    ></v-autocomplete>
+  
+                    <v-autocomplete
+                      label="Para"
+                      v-model="clockify.storage.currencyTo"
+                      :items="Object.keys(clockify.currency.data)"
+                      :hide-details="true"
+                      style="width:150px;"
+                    ></v-autocomplete>
+                  </div>
+  
+                  <v-text-field
+                    :label="`Meta (${clockify.storage.currencyFrom})`"
+                    v-model.number="clockify.storage.amountGoal"
+                    type="number"
+                    :suffix="`${clockify.currencyConvert(clockify.storage.amountGoal)} ${clockify.storage.currencyTo}`"
+                    :class="{ 'security-mode': clockify.storage.securityMode }"
+                  />
+
+                  <v-switch
+                    v-model="clockify.storage.securityMode"
+                    hide-details
+                    :label="clockify.storage.securityMode? 'Protegendo valores sensíveis': 'Exibindo valores sensíveis'"
+                  ></v-switch>
+                </v-card-text>
+                <v-divider />
+                <v-card-actions>
+                  <v-spacer />
+                  <v-btn @click="$refs.settingsBtn.$el.click(); clockify.init();">Ok</v-btn>
+                </v-card-actions>
+              </v-card>
+            </div>
+          </v-dialog>
+        </div>
+      </v-card-text>
+      <v-divider />
+
+      <v-list>
+        <v-list-subheader>Workspaces</v-list-subheader>
+        <v-list-item
+          v-for="w in clockify.workspace.data"
+          :key="w.id"
+          :active="w.id==clockify.params.workspaceId"
+        >
+          {{ w.name }}
+          <template #append>
+            <v-btn
+              icon="mdi-open-in-new"
+              variant="text"
+              @click="clockify.params.workspaceId = w.id"
+            />
+          </template>
+        </v-list-item>
+      </v-list>
 
       <v-divider />
       <v-card-text>
@@ -257,7 +297,7 @@
           :hide-details="true"
           readonly
         /> -->
-        <!-- <div class="text-disabled text-caption text-right mt-1">Atualizando em {{ clockify.timeEntry.refreshCounter }}</div> -->
+        <div class="text-disabled text-caption text-right mt-1">Atualizando em {{ clockify.refreshCounter }}</div>
       </v-card-text>
     </template>
   </app-layout>
