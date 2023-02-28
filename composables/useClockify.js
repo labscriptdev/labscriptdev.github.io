@@ -32,6 +32,19 @@ export default function(options = {}) {
     currencyFrom: options.currencyFrom,
     currencyTo: options.currencyTo,
     securityMode: false,
+    invoiceNumber: '',
+    invoiceContractorInfo: '',
+    invoiceProviderName: '',
+    invoiceProviderInfo: '',
+    invoiceProviderServiceDescription: '',
+    invoiceProviderFeeDescription: '',
+    invoiceFeeHusky: 0.02,
+    invoiceThanks: '',
+    invoiceProviderAccountAddress: '',
+    invoiceProviderAccountIban: '',
+    invoiceProviderAccountSwiftCode: '',
+    invoiceProviderAccountBankName: '',
+    invoiceProviderAccountBankAddress: '',
   });
 
   const clockifyRequest = async (params) => {
@@ -54,6 +67,7 @@ export default function(options = {}) {
       error: false,
       async load() {
         this.loading = true;
+        this.data = false;
 
         try {
           const { data } = await clockifyRequest({ url: '/user' });
@@ -84,6 +98,7 @@ export default function(options = {}) {
       error: false,
       async load() {
         this.loading = true;
+        this.data = [];
 
         try {
           const { data } = await clockifyRequest({ url: '/workspaces' });
@@ -106,6 +121,7 @@ export default function(options = {}) {
         if (this.loading) clearTimeout(this.loading);
         this.loading = setTimeout(async () => {
           this.workedMinutes = 0;
+          this.data = [];
 
           try {
             const { data } = await clockifyRequest({
@@ -113,6 +129,7 @@ export default function(options = {}) {
               params: { start: r.value.params.dateStart, end: r.value.params.dateFinal },
             });
             this.data = data.map(this.timeEntryParse);
+            this.workedMinutes = this.data.reduce((a, b) => a + b.workedMinutes, 0);
           } catch(err) {
             this.error = err.response;
           }
@@ -155,10 +172,11 @@ export default function(options = {}) {
 
     currency: {
       loading: false,
-      data: false,
+      data: {},
       error: false,
       async load() {
         this.loading = true;
+        this.data = {};
 
         try {
           const { data } = await $axios.get(`https://api.exchangerate.host/latest?base=${r.value.storage.currencyFrom}`);
@@ -171,12 +189,17 @@ export default function(options = {}) {
       },
     },
 
+    rangeDays() {
+      let diff = Math.abs($dayjs(r.value.params.dateStart).diff(r.value.params.dateFinal, 'days'));
+      return Array.from(Array(diff+1).keys()).map(days => {
+        return $dayjs.utc(r.value.params.dateStart).add(days, 'days');
+      });
+    },
+
     dates: [],
 
     datesGenerate() {
-      let diff = Math.abs($dayjs(r.value.params.dateStart).diff(r.value.params.dateFinal, 'days'));
-      this.dates = Array.from(Array(diff+1).keys()).map(days => {
-        const dayjs = $dayjs.utc(r.value.params.dateStart).add(days, 'days');
+      this.dates = this.rangeDays().map(dayjs => {
         return {
           id: dayjs.format('YYYY-MM-DD'),
           dayjs,
@@ -191,9 +214,87 @@ export default function(options = {}) {
       });
     },
 
-    result: [],
+    result: {
+      ready: false,
+    },
 
-    resultGenerate() {},
+    resultGenerate() {
+      const workingDays = this.rangeDays().filter(dayjs => {
+        return ![0, 6].includes(dayjs.day());
+      });
+
+      const dataItem = (params) => {
+        params = {
+          description: '',
+          value: 0,
+          formatted: (me) => me.value,
+          ...params
+        };
+  
+        if (typeof params.value=='function') params.value = params.value(params);
+        if (typeof params.description=='function') params.description = params.description(params);
+        if (typeof params.formatted=='function') params.formatted = params.formatted(params);
+  
+        return params;
+      };
+
+      let result = { ready: true };
+
+      result.rangeWorkExpected = dataItem({
+        description: `Tempo total esperado para trabalhar (${workingDays.length} dias úteis)`,
+        value: 60 * 8 * workingDays.length,
+        formatted: (me) => `${(me.value/60).toFixed(0)} horas`,
+      });
+  
+      result.rangeWorkWorked = dataItem({
+        description: 'Tempo total trabalhado',
+        value: r.value.timeEntry.workedMinutes,
+        formatted: (me) => `${(me.value/60).toFixed(0)} horas`,
+      });
+  
+      result.rangeWorkWorkedPercent = dataItem({
+        description: (me) => `${me.value.toFixed(0)}% do mês trabalhado`,
+        value: result.rangeWorkWorked.value / result.rangeWorkExpected.value * 100,
+        formatted: me => me.value.toFixed(0)+'%',
+      });
+  
+      result.amountTotal = dataItem({
+        description: `Total para receber`,
+        value: (r.value.timeEntry.workedMinutes / 60) * r.value.storage.amountPerHour,
+        formatted: (me) => `${this.currencyFormat(me.value)} (${r.value.storage.currencyFrom}) / ${this.currencyConvert(me.value)} (${r.value.storage.currencyTo})`,
+      });
+      
+      result.amountFee = dataItem({
+        description: `Taxas`,
+        value: result.amountTotal.value * parseFloat(r.value.storage.invoiceFeeHusky || 0),
+        formatted: (me) => `${this.currencyFormat(me.value)} (${r.value.storage.currencyFrom}) / ${this.currencyConvert(me.value)} (${r.value.storage.currencyTo})`,
+      });
+  
+      result.rangeWorkDayAverage = dataItem({
+        description: (me) => `Quantidade de horas diárias para alcançar a meta`,
+        value: (me) => {
+          const daysToEnd = Math.abs($dayjs().diff(r.value.params.dateFinal, 'days'));
+          const amountMissing = r.value.storage.amountGoal - result.amountTotal.value;
+          const hoursToWork = amountMissing / r.value.storage.amountPerHour;
+          return Math.ceil(hoursToWork / daysToEnd);
+        },
+        formatted: me => `${me.value} horas / dia`,
+      });
+  
+      result.amountGoal = dataItem({
+        description: `Meta mensal`,
+        value: r.value.storage.amountGoal,
+        formatted: (me) => `${this.currencyFormat(me.value)} (${r.value.storage.currencyFrom}) / ${this.currencyConvert(me.value)} (${r.value.storage.currencyTo})`,
+      });
+      
+      result.amountGoalPercent = dataItem({
+        description: (me) => `${me.value.toFixed(0)}% do valor da meta alcançada`,
+        value: result.amountTotal.value / r.value.storage.amountGoal * 100,
+        formatted: me => me.value.toFixed(0)+'%',
+      });
+
+      this.result = result;
+    },
 
     timeHumanize(minutes) {
       return [
@@ -242,17 +343,19 @@ export default function(options = {}) {
       value = value * r.value.currency.data[ code ] || 1;
       return format ? this.currencyFormat(value) : value;
     },
+
+    async init() {
+      await r.value.user.load();
+      await r.value.workspace.load();
+      await r.value.timeEntry.load();
+      await r.value.currency.load();
+      r.value.ready = true;
+    },
   });
 
-  (async () => {
-    await r.value.user.load();
-    await r.value.workspace.load();
-    await r.value.timeEntry.load();
-    await r.value.currency.load();
-    r.value.ready = true;
-  })();
+  r.value.init();
 
-  setInterval(async () => {
+  const interval = setInterval(async () => {
     r.value.refreshCounter = 59 - parseInt($dayjs().format('s'));
 
     if (r.value.refreshCounter==0) {
@@ -264,6 +367,17 @@ export default function(options = {}) {
   watch([ r.value.params ], async ([ paramsNew ]) => {
     await r.value.currency.load();
     await r.value.timeEntry.load();
+  });
+
+  watch([ r.value.storage ], async ([ storageNew ]) => {
+    r.value.datesGenerate();
+    r.value.resultGenerate();
+  });
+
+  onMounted(() => {});
+
+  onUnmounted(() => {
+    clearInterval(interval);
   });
 
   return r;
