@@ -362,7 +362,6 @@
   import useClockify from '@/composables/useClockify';
   import useCalendar from '@/composables/useCalendar';
   import useCurrency from '@/composables/useCurrency';
-  import html2pdf from 'html2pdf.js';
 
   export default {
     meta: {
