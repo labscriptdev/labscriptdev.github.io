@@ -63,125 +63,9 @@
       </v-col>
     </v-row>
 
-    <!-- <pre>{{ clockify.result }}</pre> -->
-    <!-- <app-dd :model-value="clockify.result"></app-dd> -->
-
-    <br>
-    <div class="border pa-1">
-      <v-row no-gutters class="bg-primary">
-        <v-col cols="8" class="pa-3 font-weight-bold text-uppercase">
-          <v-content v-model="clockify.storage.invoiceProviderName" />
-        </v-col>
-        <v-col cols="4" class="pa-3 font-weight-bold text-uppercase">
-          <v-content v-model="clockify.storage.invoiceNumber" prepend="Invoice #" />
-        </v-col>
-      </v-row>
-  
-      <v-row no-gutters>
-        <v-col cols="12">
-          <div class="pa-3">
-            <v-content v-model="clockify.storage.invoiceProviderInfo" />
-          </div>
-          <div class="pa-3">
-            <v-content v-model="clockify.storage.invoiceContractorInfo" />
-          </div>
-        </v-col>
-        <!-- <v-col cols="12" class="border">
-          <v-table>
-            <tbody>
-              <tr>
-                <td>Invoice date</td>
-                <td>Terms</td>
-                <td>Dua date</td>
-              </tr>
-            </tbody>
-          </v-table>
-        </v-col> -->
-  
-        <v-col cols="12">
-          <v-table v-if="clockify.result.ready">
-            <thead>
-              <tr>
-                <th class="bg-primary">Description</th>
-                <th class="bg-primary">Qty</th>
-                <th class="bg-primary">Unit. price</th>
-                <th class="bg-primary">Amount (AUD)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <v-content v-model="clockify.storage.invoiceProviderServiceDescription" />
-                  {{ $dayjs.utc(clockify.params.dateStart).format('DD') }} ~
-                  {{ $dayjs.utc(clockify.params.dateFinal).format('DD') }}
-                  {{ $dayjs.utc(clockify.params.dateStart).format('MMMM') }}
-                </td>
-                <td>1</td>
-                <td>{{ clockify.currencyFormat(clockify.result.amountTotal.value) }}</td>
-                <td>{{ clockify.currencyFormat(clockify.result.amountTotal.value) }}</td>
-              </tr>
-              <tr>
-                <td><v-content v-model="clockify.storage.invoiceProviderFeeDescription" /></td>
-                <td>1</td>
-                <td>
-                  <v-content v-model="clockify.storage.invoiceFeeHusky" />
-                </td>
-                <td>{{ clockify.currencyFormat(clockify.result.amountFee.value) }}</td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <td></td>
-                <td></td>
-                <td class="bg-primary">Total</td>
-                <td class="bg-primary">{{ clockify.currencyFormat(clockify.result.amountTotal.value + clockify.result.amountFee.value) }}</td>
-              </tr>
-            </tfoot>
-          </v-table>
-
-          <br>
-          <div class="bg-primary pa-3">
-            <v-content v-model="clockify.storage.invoiceThanks" placeholder="Thanks" />
-          </div>
-
-          <br>
-          <v-table>
-            <tbody>
-              <tr>
-                <td>Beneficiary</td>
-                <td><v-content v-model="clockify.storage.invoiceProviderName" /></td>
-              </tr>
-              <tr>
-                <td>Beneficiary account (IBAN)</td>
-                <td><v-content v-model="clockify.storage.invoiceProviderAccountIban" /></td>
-              </tr>
-              <tr>
-                <td>Swift code</td>
-                <td><v-content v-model="clockify.storage.invoiceProviderAccountSwiftCode" /></td>
-              </tr>
-              <tr>
-                <td>Bank</td>
-                <td><v-content v-model="clockify.storage.invoiceProviderAccountBankName" /></td>
-              </tr>
-              <tr>
-                <td>Bank Address</td>
-                <td><v-content v-model="clockify.storage.invoiceProviderAccountBankAddress" /></td>
-              </tr>
-            </tbody>
-          </v-table>
-        </v-col>
-      </v-row>
-    </div>
-
-    <pre>{{ clockify.storage }}</pre>
-    <pre>{{ clockify.result }}</pre>
-
-    <br><br><br><br><br>
-    <br><br><br><br><br>
-    <br><br><br><br><br>
-    <br><br><br><br><br>
-
     <template #drawer>
+      
+      <!-- Logged user -->
       <v-card-text>
         <div class="d-flex align-center">
           <template v-if="clockify.user.data">
@@ -267,6 +151,7 @@
           </v-dialog>
         </div>
       </v-card-text>
+
       <v-divider />
 
       <v-list>
@@ -288,6 +173,7 @@
       </v-list>
 
       <v-divider />
+
       <v-card-text>
         <!-- <v-text-field
           :class="{ 'security-mode': clockify.storage.securityMode }"
@@ -297,6 +183,155 @@
           :hide-details="true"
           readonly
         /> -->
+      </v-card-text>
+
+      <v-divider />
+
+      <v-card-text>
+        <v-dialog>
+          <template #activator="{ props }">
+            <v-btn block v-bind="props" ref="downloadPdfBtn">
+              <span class="me-2">Print</span> <v-icon>mdi-printer</v-icon>
+            </v-btn>
+          </template>
+
+          <div class="mx-auto" style="width:800px; max-width:90vw;">
+            <v-card>
+              <v-card-text style="max-height:90vh; overflow:auto;">
+                <app-iframe style="height:750px;" ref="iframe">
+                  <table>
+                    <colgroup>
+                      <col width="70%">
+                      <col width="30%">
+                    </colgroup>
+                    <thead>
+                      <tr class="high">
+                        <th><v-content v-model="clockify.storage.invoiceProviderName" /></th>
+                        <th><v-content v-model="clockify.storage.invoiceNumber" prepend="Invoice #" /></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <v-content v-model="clockify.storage.invoiceProviderName" />
+                          <v-content v-model="clockify.storage.invoiceProviderInfo" />
+                          <br>
+                          <v-content v-model="clockify.storage.invoiceContractorInfo" />
+                        </td>
+                        <td></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <br>
+                  <table>
+                    <colgroup>
+                      <col width="40%">
+                      <col width="20%">
+                      <col width="20%">
+                      <col width="20%">
+                    </colgroup>
+                    <tbody>
+                      <tr class="high">
+                        <th>Description</th>
+                        <th>Qty</th>
+                        <th>Unit. price</th>
+                        <th>Amount (AUD)</th>
+                      </tr>
+                      <tr>
+                        <td>
+                          <v-content v-model="clockify.storage.invoiceProviderServiceDescription" />
+                          {{ $dayjs.utc(clockify.params.dateStart).format('DD') }} ~
+                          {{ $dayjs.utc(clockify.params.dateFinal).format('DD') }}
+                          {{ $dayjs.utc(clockify.params.dateStart).format('MMMM') }}
+                        </td>
+                        <td>1</td>
+                        <td>{{ clockify.currencyFormat(clockify.result.amountTotal.value) }}</td>
+                        <th>{{ clockify.currencyFormat(clockify.result.amountTotal.value) }}</th>
+                      </tr>
+                      <tr>
+                        <td><v-content v-model="clockify.storage.invoiceProviderFeeDescription" /></td>
+                        <td>
+                          <v-content v-model="clockify.storage.invoiceFeeHusky" />
+                        </td>
+                        <td>1</td>
+                        <th>{{ clockify.currencyFormat(clockify.result.amountFee.value) }}</th>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                        <th class="high">Total:</th>
+                        <th class="high">{{ clockify.currencyFormat(clockify.result.amountTotal.value + clockify.result.amountFee.value) }}</th>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <br>
+                  <table>
+                    <colgroup>
+                      <col width="40%">
+                      <col width="60%">
+                    </colgroup>
+                    <tbody>
+                      <tr class="high">
+                        <th>Accont info</th>
+                        <th>&nbsp;</th>
+                      </tr>
+                      <tr>
+                        <td>Beneficiary</td>
+                        <td><v-content v-model="clockify.storage.invoiceProviderName" /></td>
+                      </tr>
+                      <tr>
+                        <td>Beneficiary account (IBAN)</td>
+                        <td><v-content v-model="clockify.storage.invoiceProviderAccountIban" /></td>
+                      </tr>
+                      <tr>
+                        <td>Swift code</td>
+                        <td><v-content v-model="clockify.storage.invoiceProviderAccountSwiftCode" /></td>
+                      </tr>
+                      <tr>
+                        <td>Bank</td>
+                        <td><v-content v-model="clockify.storage.invoiceProviderAccountBankName" /></td>
+                      </tr>
+                      <tr>
+                        <td>Bank Address</td>
+                        <td><v-content v-model="clockify.storage.invoiceProviderAccountBankAddress" /></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <br>
+                  <table>
+                    <tbody>
+                      <tr>
+                        <th class="high">
+                          <v-content v-model="clockify.storage.invoiceThanks" placeholder="Thanks" />
+                        </th>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <template #style>
+                    * {box-sizing:border-box;}
+                    html, body, .v-content-text * {font-family:monospace!important; padding:0!important; margin:0!important; print-color-adjust:exact !important;}
+                    table {width:100%; border-collapse:separate; border-spacing:0; border:solid 1px #ffc762;}
+                    th, td {padding:10px; text-align:left;}
+                    tr.high th, tr.high td, th.high, td.high {background-color:#ffc762;}
+                    hr {margin:15px 0!important; border:none; border-top:solid 1px #ffc76266;}
+                  </template>
+                </app-iframe>
+              </v-card-text>
+              <v-divider />
+              <v-card-actions>
+                <v-spacer />
+                <v-btn @click="contentPrint()" color="primary">Print</v-btn>
+                <v-btn @click="$refs.downloadPdfBtn.$el.click();">Ok</v-btn>
+              </v-card-actions>
+            </v-card>
+          </div>
+        </v-dialog>
+      </v-card-text>
+
+      <v-divider />
+
+      <v-card-text>
         <div class="text-disabled text-caption text-right mt-1">Atualizando em {{ clockify.refreshCounter }}</div>
       </v-card-text>
     </template>
@@ -313,6 +348,7 @@
   import useClockify from '@/composables/useClockify';
   import useCalendar from '@/composables/useCalendar';
   import useCurrency from '@/composables/useCurrency';
+  import html2pdf from 'html2pdf.js';
 
   export default {
     meta: {
@@ -320,6 +356,46 @@
       icon: 'mdi-alarm-check',
       name: 'Clockify',
       description: 'Gerenciamento e cálculo de horas trabalhadas utilizando o app Clockify',
+    },
+
+    methods: {
+      contentPrint() {
+        const w = window.open('', '', 'height=500, width=500');
+        w.document.write(this.$refs.iframe.getIframe().value.contentWindow.document.body.innerHTML);
+        w.document.close();
+        w.print();
+        w.close();
+
+        // const documentPrint = Object.assign(document.createElement('div'), {
+        //   innerHTML: this.$refs.iframe.getIframe().value.contentWindow.document.body.innerHTML,
+        // });
+
+        // console.log(documentPrint);
+
+        // const downloadPDFHandle = () => {
+        //   const pdf = new jsPDF();
+        //   pdf.fromHTML(documentPrint, 5, 0, {
+        //     width: 170,
+        //     // elementHandlers: {
+        //     //   '#editor': function (element, renderer) {
+        //     //       return true;
+        //     //   }
+        //     // },
+        //   });
+        //   // pdf.save(this.$dayjs(this.clockify.params.dateToday).format('YYYY-MM') +'.pdf');
+        //   pdf.output('dataurlnewwindow');
+        // };
+
+        // if (typeof pdf=='undefined') {
+        //   document.body.appendChild(Object.assign(document.createElement('script'), {
+        //     src: 'https://unpkg.com/jspdf@1.5.3/dist/jspdf.min.js',
+        //     onload: downloadPDFHandle,
+        //   }));
+        // }
+        // else {
+        //   downloadPDFHandle();
+        // }
+      },
     },
 
     mounted() {
@@ -336,11 +412,6 @@
             return entry;
           },
         }),
-        // calendarDate: useCalendar(),
-        // calendarRange: useCalendar({
-        //   rangeStart: '2023-01-01T00:00:00.000Z',
-        //   rangeFinal: '2023-01-05T00:00:00.000Z',
-        // }),
         calendarDisplay: 'range',
         dateStart: false,
         dateFinal: false,
