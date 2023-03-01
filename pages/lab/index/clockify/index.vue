@@ -14,6 +14,7 @@
           :model-value="$dayjs(clockify.params.dateToday).format('YYYY-MM-DD')"
           show-arrows
           center-active
+          class="elevation-2 py-3"
         >
           <v-slide-group-item
             v-for="d in clockify.dates"
@@ -62,6 +63,19 @@
         </v-slide-group>
       </v-col>
     </v-row>
+
+    <br>
+
+    <v-table class="elevation-2">
+      <tbody>
+        <tr v-for="[attr, item] in Object.entries(clockify.result)">
+          <template v-if="attr!='ready'">
+            <td>{{ item.description }}</td>
+            <td>{{ item.formatted }}</td>
+          </template>
+        </tr>
+      </tbody>
+    </v-table>
 
     <template #drawer>
       
