@@ -8,6 +8,8 @@
       contenteditable="true"
       :data-placeholder="placeholder"
       @keyup="onChange($event)"
+      @focus="setFocused($event)"
+      @blur="setFocused($event)"
     >&nbsp;</span>
     <span class="v-content-append" v-html="append"></span>
   </div>
@@ -36,7 +38,8 @@
 
     watch: {
       modelValue(value) {
-        if (this.$el.contains(document.activeElement)) return;
+        // if (this.$el.contains(document.activeElement)) return;
+        if (this.focused) return;
         this.$refs.content.innerHTML = value;
         this.setIsEmpty();
       },
@@ -50,6 +53,9 @@
       onClick() {
         this.$refs.content.focus();
       },
+      setFocused(ev) {
+        this.focused = ev.type == 'focus';
+      },
       setIsEmpty() {
         const text = (this.$refs.content ? this.$refs.content.innerHTML : '');
         if (text=='<br>') return false;
@@ -60,6 +66,7 @@
     data() {
       return {
         isEmpty: false,
+        focused: false,
       };
     },
 
@@ -78,6 +85,8 @@
   .v-content-text {
     display: inline-block;
     outline: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
     min-width: 20px;
     min-height: 20px;
   }

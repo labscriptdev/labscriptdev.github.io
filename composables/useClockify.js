@@ -137,6 +137,7 @@ export default function(options = {}) {
           this.loading = false;
           r.value.datesGenerate();
           r.value.resultGenerate();
+          r.value.chartsGenerate();
         }, 1000);
 
         // this.loading = true;
@@ -296,6 +297,122 @@ export default function(options = {}) {
       this.result = result;
     },
 
+    charts: [],
+
+    chartsGenerate() {
+      const chartDefault = (params = {}) => {
+        params = {
+          name: 'No name',
+          colBind: { cols: 12 },
+          type: 'bar',
+          data: {},
+          options: {},
+          ...params
+        };
+
+        for(let i in params) {
+          if (typeof params[i]=='function') {
+            params[i] = params[i]();
+          }
+        }
+
+        return {
+          name: params.name,
+          colBind: params.colBind,
+          chartBind: {
+            type: params.type,
+            data: params.data,
+            options: params.options,
+          },
+        };
+      };
+
+      let charts = [];
+
+      charts.push(chartDefault({
+        name: 'Horas trabalhadas',
+        type: 'bar',
+        options: {
+          responsive: true,
+          bezierCurve: false,
+          plugins: {
+            legend: { position: 'top' },
+            title: { display: true, text: 'Horas trabalhadas' },
+            tooltip: {
+              callbacks: {
+                title: (items) => {
+                  const minutes = items.reduce((total, a) => total + a.raw, 0) % 60 * 60;
+                  return `${minutes} minutos`;
+                },
+              },
+            },
+          },
+        },
+        data: () => {
+          const labels = this.dates.map(item => item.dayjs.format('DD'));
+          const datasetData = this.dates.map(item => {
+            const workedMinutes = item.entries.reduce((total, item) => {
+              return total + item.workedMinutes;
+            }, 0);
+
+            return workedMinutes / 60;
+          });
+          return { labels, datasets: [
+            {
+              label: 'Horas trabalhadas',
+              tension: .3,
+              data: datasetData,
+              backgroundColor: (context) => {
+                return context.raw >= 8 ? 'green' : 'red';
+              },
+              // backgroundColor: (c) => '#' + (Math.random().toString(16) + '0000000').slice(2, 8),
+            },
+          ]};
+        },
+      }));
+
+      // charts.push(chartDefault({
+      //   name: 'Meta financeira',
+      //   colBind: { cols: 12, lg: 4 },
+      //   type: 'line',
+      //   options: {
+      //     plugins: {
+      //       legend: { position: 'top' },
+      //       title: { display: true, text: 'Meta financeira' },
+      //     },
+      //   },
+      //   data: {},
+      // }));
+
+      // charts.push(chartDefault({
+      //   name: 'Mês trabalhado',
+      //   colBind: { cols: 12, lg: 4 },
+      //   type: 'line',
+      //   options: {
+      //     plugins: {
+      //       legend: { position: 'top' },
+      //       title: { display: true, text: 'Mês trabalhado' },
+      //     },
+      //   },
+      //   data: {},
+      // }));
+
+      // charts.push(chartDefault({
+      //   name: 'AUD > BRL',
+      //   colBind: { cols: 12, lg: 4 },
+      //   type: 'line',
+      //   options: {
+      //     plugins: {
+      //       legend: { position: 'top' },
+      //       title: { display: true, text: 'AUD > BRL' },
+      //     },
+      //   },
+      //   data: {},
+      // }));
+
+      this.charts = charts;
+    },
+
     timeHumanize(minutes) {
       return [
         {
@@ -372,6 +489,7 @@ export default function(options = {}) {
   watch([ r.value.storage ], async ([ storageNew ]) => {
     r.value.datesGenerate();
     r.value.resultGenerate();
+    r.value.chartsGenerate();
   });
 
   onMounted(() => {});

@@ -66,6 +66,20 @@
 
     <br>
 
+    <v-row>
+      <template v-for="c in clockify.charts">
+        <v-col v-bind="c.colBind">
+          <app-chartjs
+            style="height:300px;"
+            class="elevation-2 pa-3"
+            v-bind="c.chartBind"
+          />
+        </v-col>
+      </template>
+    </v-row>
+
+    <br>
+
     <v-table class="elevation-2">
       <tbody>
         <tr v-for="[attr, item] in Object.entries(clockify.result)">
