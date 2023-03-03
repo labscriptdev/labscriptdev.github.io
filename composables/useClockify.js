@@ -330,6 +330,50 @@ export default function(options = {}) {
       let charts = [];
 
       charts.push(chartDefault({
+        name: 'Tarefas',
+        colBind: { cols: 12 },
+        type: 'bar',
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false, position: 'top' },
+            title: { display: true, text: 'Tarefas' },
+            tooltip: {
+              callbacks: {
+                title: () => false,
+                label: (chart) => ' '+ chart.dataset.label,
+                footer: (items) => {
+                  return '     '+ items.map(item => item.raw).join('') +' horas';
+                },
+              },
+            },
+          },
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true },
+          },
+        },
+        data: () => {
+          const labels = this.dates.map(item => item.dayjs.format('DD'));
+
+          let datasets = [];
+
+          Object.entries(this.dates).forEach(([ i, date]) => {
+            Object.entries(date.entries).forEach(([ ii, entry ]) => {
+              let data = this.dates.map((item, index) => {
+                if (index!=i) return 0;
+                return entry.workedMinutes / 60;
+              });
+              datasets.push({ label: entry.description, data });
+            });
+          });
+
+          // console.log(JSON.stringify({ labels, datasets }, ' ', 2));
+          return { labels, datasets };
+        },
+      }));
+
+      charts.push(chartDefault({
         name: 'Horas trabalhadas',
         type: 'bar',
         options: {
@@ -370,7 +414,7 @@ export default function(options = {}) {
           ]};
         },
       }));
-
+      
       // charts.push(chartDefault({
       //   name: 'Meta financeira',
       //   colBind: { cols: 12, lg: 4 },

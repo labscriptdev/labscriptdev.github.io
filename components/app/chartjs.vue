@@ -39,6 +39,8 @@
     if (!canvas.value || !chart) return;
     chart.options = { ...propsNew.options };
     chart.data = { ...propsNew.data };
+    chart.options.animation = false;
+    chart.options.transitions.active.animation.duration = 0;
     chart.update();
   });
 </script>
