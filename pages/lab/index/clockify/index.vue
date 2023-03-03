@@ -73,6 +73,7 @@
             style="height:300px;"
             class="elevation-2 pa-3"
             v-bind="c.chartBind"
+            @chart="c.chartLoad"
           />
         </v-col>
       </template>

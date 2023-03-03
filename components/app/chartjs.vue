@@ -5,10 +5,11 @@
 </template>
 
 <script setup>
-  import { ref, defineProps, watch, onMounted } from 'vue';
+  import { ref, defineProps, watch, onMounted, defineEmits } from 'vue';
   import Chart from 'chart.js/auto';
 
   const canvas = ref(null);
+  const emit = defineEmits(['load']);
 
   const props = defineProps({
     type: {
@@ -33,6 +34,7 @@
       data: props.data,
       options: props.options,
     });
+    emit('chart', chart);
   });
 
   watch([ props ], ([ propsNew ]) => {
@@ -42,5 +44,6 @@
     chart.options.animation = false;
     chart.options.transitions.active.animation.duration = 0;
     chart.update();
+    emit('chart', chart);
   });
 </script>

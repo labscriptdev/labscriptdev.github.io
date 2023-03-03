@@ -3,6 +3,7 @@ import { useStorage } from '@vueuse/core';
 
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import axios from 'axios';
 
 export default function(options = {}) {
   const { $dayjs, $axios } = useNuxtApp();
@@ -176,17 +177,22 @@ export default function(options = {}) {
       data: {},
       error: false,
       async load() {
-        this.loading = true;
-        this.data = {};
-
-        try {
-          const { data } = await $axios.get(`https://api.exchangerate.host/latest?base=${r.value.storage.currencyFrom}`);
-          this.data = data.rates;
-        } catch(err) {
-          this.error = err.response;
+        if (this.loading) {
+          clearTimeout(this.loading);
         }
 
-        this.loading = false;
+        this.loading = setTimeout(async () => {
+          this.data = {};
+  
+          try {
+            const { data } = await $axios.get(`https://api.exchangerate.host/latest?base=${r.value.storage.currencyFrom}`);
+            this.data = data.rates;
+          } catch(err) {
+            this.error = err.response;
+          }
+  
+          this.loading = false;
+        }, 1000);
       },
     },
 
@@ -307,11 +313,13 @@ export default function(options = {}) {
           type: 'bar',
           data: {},
           options: {},
+          chartLoad: () => {},
           ...params
         };
 
         for(let i in params) {
           if (typeof params[i]=='function') {
+            if (i=='chartLoad') continue;
             params[i] = params[i]();
           }
         }
@@ -319,6 +327,7 @@ export default function(options = {}) {
         return {
           name: params.name,
           colBind: params.colBind,
+          chartLoad: params.chartLoad,
           chartBind: {
             type: params.type,
             data: params.data,
@@ -372,87 +381,69 @@ export default function(options = {}) {
           return { labels, datasets };
         },
       }));
+      
+      // TODO: Marcar se valor da moeda está subindo ou caindo
+      charts.push(chartDefault({
+        name: 'Exchange',
+        colBind: { cols: 6 },
+        type: 'line',
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' },
+            title: { display: true, text: 'Exchange' },
+          },
+        },
+        data: {},
+        chartLoad: async (chart) => {
+          chart.data.labels = this.dates.map(item => item.dayjs.format('DD'));
+
+          const params = {
+            start_date: $dayjs.utc(this.params.dateStart).format('YYYY-MM-DD'),
+            end_date: $dayjs.utc(this.params.dateFinal).format('YYYY-MM-DD'),
+            symbols: `${this.storage.currencyFrom},${this.storage.currencyTo}`,
+          };
+
+          const { data } = await axios.get('https://api.exchangerate.host/timeseries', { params });
+          
+          chart.data.datasets = [
+            {
+              label: this.storage.currencyFrom,
+              data: Object.values(data.rates).map(rate => rate[ this.storage.currencyFrom ] || null),
+              tension: 0.3,
+            },
+            {
+              label: this.storage.currencyTo,
+              data: Object.values(data.rates).map(rate => rate[ this.storage.currencyTo ] || null),
+              tension: 0.3,
+            },
+          ];
+
+          chart.update();
+        },
+      }));
 
       charts.push(chartDefault({
-        name: 'Horas trabalhadas',
+        name: 'Meta x valor alcançado',
+        colBind: { cols: 6 },
         type: 'bar',
         options: {
           responsive: true,
-          bezierCurve: false,
+          indexAxis: 'y',
           plugins: {
-            legend: { position: 'top' },
-            title: { display: true, text: 'Horas trabalhadas' },
-            tooltip: {
-              callbacks: {
-                title: (items) => {
-                  const minutes = items.reduce((total, a) => total + a.raw, 0) % 60 * 60;
-                  return `${minutes} minutos`;
-                },
-              },
-            },
+            legend: { position: 'bottom' },
+            title: { display: true, text: 'Meta x valor alcançado' },
           },
         },
         data: () => {
-          const labels = this.dates.map(item => item.dayjs.format('DD'));
-          const datasetData = this.dates.map(item => {
-            const workedMinutes = item.entries.reduce((total, item) => {
-              return total + item.workedMinutes;
-            }, 0);
-
-            return workedMinutes / 60;
-          });
-          return { labels, datasets: [
-            {
-              label: 'Horas trabalhadas',
-              tension: .3,
-              data: datasetData,
-              backgroundColor: (context) => {
-                return context.raw >= 8 ? 'green' : 'red';
-              },
-              // backgroundColor: (c) => '#' + (Math.random().toString(16) + '0000000').slice(2, 8),
-            },
-          ]};
+          const labels = [''];
+          const datasets = [
+            { label: 'Total', data: [ this.storage.amountGoal ], },
+            { label: 'Alcançado', data: [ this.result.amountTotal.value ], },
+          ];
+          return { labels, datasets };
         },
       }));
-      
-      // charts.push(chartDefault({
-      //   name: 'Meta financeira',
-      //   colBind: { cols: 12, lg: 4 },
-      //   type: 'line',
-      //   options: {
-      //     plugins: {
-      //       legend: { position: 'top' },
-      //       title: { display: true, text: 'Meta financeira' },
-      //     },
-      //   },
-      //   data: {},
-      // }));
-
-      // charts.push(chartDefault({
-      //   name: 'Mês trabalhado',
-      //   colBind: { cols: 12, lg: 4 },
-      //   type: 'line',
-      //   options: {
-      //     plugins: {
-      //       legend: { position: 'top' },
-      //       title: { display: true, text: 'Mês trabalhado' },
-      //     },
-      //   },
-      //   data: {},
-      // }));
-
-      // charts.push(chartDefault({
-      //   name: 'AUD > BRL',
-      //   colBind: { cols: 12, lg: 4 },
-      //   type: 'line',
-      //   options: {
-      //     plugins: {
-      //       legend: { position: 'top' },
-      //       title: { display: true, text: 'AUD > BRL' },
-      //     },
-      //   },
-      //   data: {},
-      // }));
 
       this.charts = charts;
     },
