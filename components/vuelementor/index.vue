@@ -7,13 +7,11 @@
       <div style="display:flex;" :style="getStyle(data.modelValue.style)">
         <div v-for="r in data.modelValue.rows" :style="getStyle(r.style)">
           <template v-for="e in r.elements">
-            <div @click="edit=e">
+            <div @click="editRow=r; editElement=e;">
               <component
                 :is="e.is"
-                v-bind="e.bind"
-                v-model="e.bind"
+                v-model="e.model"
                 :editable="false"
-                v-on="{ click: log }"
               />
             </div>
           </template>
@@ -28,16 +26,36 @@
       <div>
         <v-text-field v-model="data.modelValue.name" />
 
-        <div v-if="edit">
-          <component :is="edit.is" v-bind="getBind(edit.bind)" :editable="true" />
-          <pre>{{ edit }}</pre>
+        <div v-if="editElement">
+          <component
+            :is="editElement.is"
+            v-model="editElement.model"
+            :editable="true"
+          />
         </div>
+
+        <div v-if="editRow">
+          <v-tabs v-model="previewSize">
+            <v-tab v-for="(s, s_attr) in sizes" :value="s_attr">
+              <v-icon>{{ s.icon }}</v-icon>
+            </v-tab>
+          </v-tabs>
+          <v-window v-model="previewSize">
+            <v-window-item v-for="(s, s_attr) in sizes" :value="s_attr" class="pt-3">
+              <template v-for="[attr, values] in Object.entries(editRow.style)">
+                <v-text-field :label="attr" v-model="editRow.style[ attr ][ s_attr ]" />
+              </template>
+            </v-window-item>
+          </v-window>
+        </div>
+
+        <pre>{{ { previewSize, editElement, editRow } }}</pre>
       </div>
       
     </div>
   </div>
 
-  <pre>{{ { props, edit, data, elements } }}</pre>
+  <pre>{{ { props, data } }}</pre>
 
   <!-- <v-navigation-drawer
     :model-value="true"
@@ -50,9 +68,18 @@
   </v-navigation-drawer> -->
 </template>
 
+<script>
+  import vuelementorElCard from './el/card.vue';
+
+  export default {
+    components: {
+      vuelementorElCard,
+    },
+  };
+</script>
+
 <script setup>
   import { ref, computed, watch, defineProps, defineEmits } from 'vue';
-  import vuelementorElCard from './el/card.vue';
 
   const props = defineProps({
     modelValue: {
@@ -65,7 +92,20 @@
     // 'update:modelValue',
   ]);
 
-  const edit = ref(false);
+  const editElement = ref(false);
+  const editRow = ref(false);
+
+  const previewSize = ref('default');
+  const sizes = ref({
+    default: {
+      width: 0,
+      icon: 'mdi-monitor',
+    },
+    mobile: {
+      width: 700,
+      icon: 'mdi-cellphone',
+    },
+  });
 
   const data = ref({
     modelValue: {
@@ -93,8 +133,8 @@
         },
         elements: [
           {
-            is: vuelementorElCard,
-            bind: { body: 'A dsjgdhsa gf dj d' },
+            is: 'vuelementorElCard',
+            model: { body: 'A dsjgdhsa gf dj d' },
           },
         ],
       },
@@ -107,8 +147,8 @@
         },
         elements: [
           {
-            is: vuelementorElCard,
-            bind: { title: 'Card B' },
+            is: 'vuelementorElCard',
+            model: { title: 'Card B' },
           },
         ],
       },
@@ -123,10 +163,6 @@
     });
   });
 
-  const elements = [
-    vuelementorElCard,
-  ];
-
   const getStyle = (styleObj) => {
     styleObj = JSON.parse(JSON.stringify(styleObj));
     for(let i in styleObj) {
@@ -137,16 +173,8 @@
       styleObj[i] = styleObj[i]['default'] || null;
     }
 
-    console.log(JSON.stringify(styleObj, ' ', 2));
+    // console.log(JSON.stringify(styleObj, ' ', 2));
     return styleObj;
-  };
-
-  const getBind = (bind) => {
-    console.log(bind);
-    return {
-      ...bind,
-      '@update:title': 'log($event)',
-    };
   };
 
   const log = console.log;
