@@ -13,9 +13,9 @@
             </tr>
           </thead>
           <tbody style="font-family:monospace;">
-            <tr v-for="(m, i) in tour.team.data">
+            <tr v-for="(t, i) in tour.team.data">
               <td>{{ i+1 }}</td>
-              <td>{{ m.name }}</td>
+              <td>{{ t.name }}</td>
               <td>
                 <v-btn flat size="x-small" icon="mdi-close" @click="tour.team.remove(t)" />
               </td>
@@ -42,12 +42,26 @@
             <tr v-for="(g, i) in tour.match.groups">
               <td width="10px">{{ i+1 }}</td>
               <td>{{ g.name }}</td>
-              <td>{{ g.teams.join(', ') }}</td>
+              <td>{{ g.teams.length }}</td>
               <td>{{ g.matches.length }}</td>
             </tr>
           </tbody>
         </v-table>
+
+        <template v-if="tour.match.brackets.length">
+          <br>
+          <v-row no-gutters class="align-center">
+            <v-col class="pa-2" v-for="step in [ ...Array(tour.match.brackets[0].bracket_step+1).keys() ].reverse()">
+              <div class="pa-2 text-center font-weight-bold text-uppercase">{{ tour.match.bracketStepName(step) }}</div>
+              <div class="pa-2 mt-2 border" v-for="m in tour.match.brackets.filter(b => b.bracket_step==step)">
+                xxx vs xxx
+              </div>
+            </v-col>
+          </v-row>
+        </template>
+
         <br>
+
         <v-table class="border">
           <thead>
             <tr>
@@ -112,8 +126,9 @@
         options: {
           groupMaxTeams: 4,
         },
-        matches: [],
         groups: [],
+        brackets: [],
+        matches: [],
         default(data={}) {
           return {
             uuid: r.value.uuid(),
@@ -130,117 +145,98 @@
           };
         },
         isBracketable(number=null) {
-          number = number || r.value.team.data.length;
+          if (number===null) number = r.value.team.data.length;
+          if (Array.isArray(number)) number = number.length;
           return [ 2, 4, 8, 16 ].includes(number);
         },
-        generate() {
-          console.clear();
+        bracketStepName(n) {
+          let names = ['Final', 'Semifinal', 'Quartas de final', 'Oitavas de final'];
+          return names[ n ] || false;
+        },
+        createGroups(teamsTotal) {
+          if (Array.isArray(teamsTotal)) teamsTotal = teamsTotal.length;
+
+          let groups = [ ...Array( Math.ceil(teamsTotal / this.options.groupMaxTeams) ).keys() ].map(index => {
+            return {
+              name: `Grupo ${index+1}`,
+              teams: [],
+              matches: [],
+            };
+          });
+
+          for(let t=0; t<teamsTotal; t++) {
+            const groupIndex = t % groups.length;
+            groups[ groupIndex ].teams.push(null);
+          }
+
+          groups.forEach((group, groupIndex) => {
+            for(let i=0; i<group.teams.length; i++) {
+              for(let ii=i; ii<group.teams.length; ii++) {
+                if (i==ii) continue;
+                group.matches.push(this.default({
+                  group: groupIndex,
+                  _teams: [ i , ii ],
+                }));
+              }
+            }
+          });
+
           let matches = [];
-          const arrShuffle = ([...arr]) => { let m = arr.length; while (m) { const i = Math.floor(Math.random() * m--); [arr[m], arr[i]] = [arr[i], arr[m]]; } return arr; };
-
-          // Commands:
-          // Create groups if is teams number is not bracketable
-          // Create brackets if is teams number bracketable
-
-
-          // Create groups if is teams number is not bracketable
-          (() => {
-            if (this.isBracketable()) return;
-            let groupTeams = arrShuffle(r.value.team.data).map(team => team.uuid);
-  
-            let groups = [ ...Array( Math.ceil(r.value.team.data.length / this.options.groupMaxTeams) ).keys() ];
-            const teamsPerGroup = Math.ceil(r.value.team.data.length / groups.length);
-  
-            groups = groups.map((group, index) => {
-              group = {
-                id: index,
-                name: `Group ${index+1}`,
-                teams: [],
-                matches: [],
-              };
-
-              for(let i=0; i<teamsPerGroup; i++) {
-                if (!groupTeams.at(0)) continue;
-                group.teams.push(groupTeams.shift());
-              }
-
-              for(let i=0; i<group.teams.length; i++) {
-                for(let ii=i+1; ii<group.teams.length; ii++) {
-                  // console.log(`${i}-${ii}`);
-                  group.matches.push(this.default({
-                    team1_id: group.teams[i],
-                    team2_id: group.teams[ii],
-                    group: group.id,
-                  }));
-                }
-              }
-
-              return group;
+          groups.forEach(group => {
+            group.matches.forEach(match => {
+              matches.push(match);
             });
+          });
 
-            for(let group of groups) {
-              for(let match of group.matches) {
-                matches.push(match);
-              }
+          return { groups, matches };
+        },
+        createBrackets(teamsTotal) {
+          if (Array.isArray(teamsTotal)) teamsTotal = teamsTotal.length;
+          if (!this.isBracketable(teamsTotal)) return [];
+          let matches = [];
+
+          // let submatches = [ ...Array( Math.ceil(teamsTotal / 2) ).keys() ].map(i => this.default());
+          let matchesTotal = teamsTotal;
+          while(matchesTotal/2 > 1) {
+            matchesTotal = matchesTotal / 2;
+            for(let m=0; m<matchesTotal; m++) {
+              matches.push(this.default({
+                bracket_step: matchesTotal/2,
+              }));
             }
+          }
 
-            this.groups = groups;
-          })();
+          matches.push(this.default({ bracket_step: 0 }));
 
+          return { matches };
+        },
+        generate() {
+          const objClone = obj => { if (obj === null) return null; let clone = Object.assign({}, obj); Object.keys(clone).forEach(key => (clone[key] = typeof obj[key] === 'object' ? objClone(obj[key]) : obj[key]) ); if (Array.isArray(obj)) { clone.length = obj.length; return Array.from(clone); } return clone; };
+          const arrShuffle = ([...arr]) => { let m = arr.length; while (m) { const i = Math.floor(Math.random() * m--); [arr[m], arr[i]] = [arr[i], arr[m]]; } return arr; };
+          const arrChunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size) );
+          
+          let teams = arrShuffle(objClone(r.value.team.data));
+          
+          console.clear();
+          let { matches, groups } = this.isBracketable() ? this.createBrackets(teams) : this.createGroups(teams);
 
-
-          // Create brackets if is teams number bracketable
-          (() => {
-            if (this.isBracketable()) {
-              let match = this.default();
-              arrShuffle(r.value.team.data).forEach(team => {
-                // console.log(JSON.stringify({ team, match }, ' ', 2));
-                if (!match.team1_id) {
-                  match.team1_id = team.uuid;
-                  return;
-                }
-  
-                match.team2_id = team.uuid;
-                match.bracket_step = r.value.team.data.length / 4;
-                matches.push(match);
-                match = this.default();
-              });
+          if (matches.length>1 && groups) {
+            if (this.isBracketable(groups)) {
+              matches = [ ...matches, ...this.createBrackets(groups).matches ];
             }
-  
-            let matchesSegmentParent = matches;
-            let matchesSegmentData = [];
-            let matchesSegmentTotal = matches.length;
-            while(matchesSegmentTotal>1) {
-              let newMatch = this.default();
-              matchesSegmentParent.forEach(match => {
-                if (!newMatch.parent1_id) {
-                  newMatch.parent1_id = match.uuid;
-                  return;
-                }
-  
-                newMatch.bracket_step  = match.bracket_step? match.bracket_step-1: false;
-                newMatch.parent2_id = match.uuid;
-                matchesSegmentData.push(newMatch);
-                newMatch = this.default();
-              });
-  
-              matchesSegmentData.forEach(match => {
-                matches.push(match);
-              });
-  
-              matchesSegmentParent = matchesSegmentData;
-              matchesSegmentData = [];
-              matchesSegmentTotal = matchesSegmentTotal/2;
+            else {
+              matches = [ ...matches, ...this.createGroups(groups).matches ];
             }
-  
-            // for(let i=matches.length-1; i>=0; i--) {
-            //   let match = matches[i];
-            //   match.bracket_step = ((matches.length-1)-i)/2;
-            //   console.log(match);
-            // }
-          })();
+          }
 
-          this.matches = matches;
+          /* à partir de 17 times, da merda, porque sobram 2 grupos (2 times vencedores) e deveria criar uma bracket
+          portanto a logica acima não deveria ser if, mas um while verificando se a quantidade de partidas geradas
+          é maior do que 1, enquanto for, vai gerando partidas.
+          */
+
+          this.groups = groups || [];
+          this.brackets = matches.filter(m => m.bracket_step !== false);
+          this.matches = matches || [];
         },
       },
     });

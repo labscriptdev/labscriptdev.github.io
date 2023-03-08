@@ -25,11 +25,10 @@
     </v-app-bar>
 
     <!-- Content -->
-    <v-main class="bg-grey-lighten-2" style="height:100vh; overflow:auto!important;">
+    <v-main class="bg-grey-lighten-2" style="height:100vh; position:relative; overflow:auto!important;">
       <v-container
         class="pa-0 pa-lg-5 mx-auto"
         :style="{maxWidth: containerWidth}"
-        style="height:100%; overflow:auto; overflow:auto!important;"
       >
         <v-card
           :style="{height: (useDisplay.lgAndUp? 'auto': '100%')}"
