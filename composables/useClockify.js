@@ -303,13 +303,12 @@ export default function(options = {}) {
       this.result = result;
     },
 
-    charts: [],
+    chart: {},
 
     chartsGenerate() {
       const chartDefault = (params = {}) => {
         params = {
           name: 'No name',
-          colBind: { cols: 12 },
           type: 'bar',
           data: {},
           options: {},
@@ -326,7 +325,6 @@ export default function(options = {}) {
 
         return {
           name: params.name,
-          colBind: params.colBind,
           chartLoad: params.chartLoad,
           chartBind: {
             type: params.type,
@@ -336,11 +334,11 @@ export default function(options = {}) {
         };
       };
 
-      let charts = [];
+      let chart = {};
 
-      charts.push(chartDefault({
+      // Tarefas / dia
+      chart.tasksPerDay = chartDefault({
         name: 'Tarefas',
-        colBind: { cols: 12 },
         type: 'bar',
         options: {
           responsive: true,
@@ -380,12 +378,40 @@ export default function(options = {}) {
           // console.log(JSON.stringify({ labels, datasets }, ' ', 2));
           return { labels, datasets };
         },
-      }));
+      });
+
+      // Horas tarefa /dia
+      chart.hourPerDay = chartDefault({
+        name: 'Tarefas',
+        type: 'bar',
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false, position: 'top' },
+            title: { display: true, text: 'Tarefas' },
+          },
+        },
+        data: () => {
+          const labels = this.dates.map(item => item.dayjs.format('DD'));
+          console.clear();
+
+          const datasets = [{
+            label: 'Aaa',
+            data: this.dates.map(item => {
+              return item.entries.reduce((total, entry) => {
+                return (entry.workedMinutes / 60) + total;
+              }, 0);
+            }),
+          }];
+
+          console.log(JSON.stringify({ datasets }, ' ', 2));
+          return { labels, datasets };
+        },
+      });
       
       // TODO: Marcar se valor da moeda está subindo ou caindo
-      charts.push(chartDefault({
+      chart.exchange = chartDefault({
         name: 'Exchange',
-        colBind: { cols: 6 },
         type: 'line',
         options: {
           responsive: true,
@@ -421,11 +447,10 @@ export default function(options = {}) {
 
           chart.update();
         },
-      }));
+      });
 
-      charts.push(chartDefault({
+      chart.targetValue = chartDefault({
         name: 'Meta x valor alcançado',
-        colBind: { cols: 6 },
         type: 'bar',
         options: {
           responsive: true,
@@ -443,9 +468,9 @@ export default function(options = {}) {
           ];
           return { labels, datasets };
         },
-      }));
+      });
 
-      this.charts = charts;
+      this.chart = chart;
     },
 
     timeHumanize(minutes) {

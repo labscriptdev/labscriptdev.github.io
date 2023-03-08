@@ -66,17 +66,19 @@
 
     <br>
 
-    <v-row>
-      <template v-for="c in clockify.charts">
-        <v-col v-bind="c.colBind">
-          <app-chartjs
-            style="height:300px;"
-            class="elevation-2 pa-3"
-            v-bind="c.chartBind"
-            @chart="c.chartLoad"
-          />
-        </v-col>
-      </template>
+    <v-row no-gutters>
+      <v-col cols="12" md="8">
+        <v-row no-gutters>
+          <v-col cols="12"><app-chartjs style="height:300px;" v-if="clockify.chart.tasksPerDay" v-bind="clockify.chart.tasksPerDay.chartBind" @chart="clockify.chart.tasksPerDay.chartLoad" /></v-col>
+          <v-col cols="12"><app-chartjs style="height:300px;" v-if="clockify.chart.hourPerDay" v-bind="clockify.chart.hourPerDay.chartBind" @chart="clockify.chart.hourPerDay.chartLoad" /></v-col>
+        </v-row>
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-row no-gutters>
+          <v-col cols="12"><app-chartjs style="height:300px;" v-if="clockify.chart.exchange" v-bind="clockify.chart.exchange.chartBind" @chart="clockify.chart.exchange.chartLoad" /></v-col>
+          <v-col cols="12"><app-chartjs style="height:300px;" v-if="clockify.chart.targetValue" v-bind="clockify.chart.targetValue.chartBind" @chart="clockify.chart.targetValue.chartLoad" /></v-col>
+        </v-row>
+      </v-col>
     </v-row>
 
     <br>
