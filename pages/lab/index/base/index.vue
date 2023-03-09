@@ -20,7 +20,7 @@
   export default {
     meta: {
       active: false,
-      icon: 'mdi-globe',
+      icon: 'mdi-circle',
       name: 'Base',
       description: 'Base file structure',
     },

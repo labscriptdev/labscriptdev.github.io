@@ -1,1 +1,0 @@
-import{X as e,o as t,f as o}from"./entry.4720f2c8.js";const s={mounted(){this.$router.push("/lab/whatsapp")}};function a(n,r,c,p,u,d){return t(),o("div",null," Default demo ")}const l=e(s,[["render",a]]);export{l as default};
