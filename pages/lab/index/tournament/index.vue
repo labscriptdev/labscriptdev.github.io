@@ -1,7 +1,7 @@
 <template>
   <app-layout>
     <v-row>
-      <v-col cols="3" class="border">
+      <v-col cols="12" lg="3" class="border">
         <v-btn block @click="tour.team.add()">team add</v-btn>
         <br>
         <v-table class="border rounded">
@@ -24,11 +24,11 @@
         </v-table>
       </v-col>
 
-      <v-col cols="3" class="border">
-        <pre>{{ tour }}</pre>
+      <v-col cols="12" lg="3" class="border">
+        <pre>{{ tour.match }}</pre>
       </v-col>
       
-      <v-col cols="6" class="border">
+      <v-col cols="12" lg="6" class="border">
         <v-table class="border">
           <thead>
             <tr>
@@ -50,15 +50,22 @@
 
         <template v-if="tour.match.brackets.length">
           <br>
-          <v-row no-gutters class="align-center">
-            <v-col class="pa-2" v-for="step in [ ...Array(tour.match.brackets[0].bracket_step+1).keys() ].reverse()">
-              <div class="pa-2 text-center font-weight-bold text-uppercase">{{ tour.match.bracketStepName(step) }}</div>
-              <div class="pa-2 mt-2 border" v-for="m in tour.match.brackets.filter(b => b.bracket_step==step)">
-                xxx vs xxx
+          <div class="d-flex mb-2">
+            <div class="flex-grow-1" :style="`max-width:${100 / tour.match.brackets.length}%;`" v-for="b in tour.match.brackets" :key="b.uuid">
+              <div class="font-weight-bold text-uppercase text-center">{{ b.name }}</div>
+            </div>
+          </div>
+          <div class="d-flex align-center">
+            <div class="flex-grow-1" :style="`max-width:${100 / tour.match.brackets.length}%;`" v-for="b in tour.match.brackets" :key="b.uuid">
+              <div class="my-1 pa-1" v-for="m in b.matches" :key="m.uuid">
+                <v-select v-model="m.team1_id" :items="tour.team.data" v-bind="{ itemValue: 'uuid', itemTitle: 'name', hideDetails: true, density: 'compact' }" />
+                <div class="mt-1"></div>
+                <v-select v-model="m.team2_id" :items="tour.team.data" v-bind="{ itemValue: 'uuid', itemTitle: 'name', hideDetails: true, density: 'compact' }" />
               </div>
-            </v-col>
-          </v-row>
+            </div>
+          </div>
         </template>
+        <pre>{{ tour.match.brackets }}</pre>
 
         <br>
 
@@ -133,14 +140,14 @@
           return {
             uuid: r.value.uuid(),
             name: '',
-            team1_id: false,
+            team1_id: null,
             team1_points: 0,
-            team2_id: false,
+            team2_id: null,
             team2_points: 0,
-            parent1_id: false,
-            parent2_id: false,
-            bracket_step: false, // 0:final, 1:semifinal, 2:quarters, 3:octaves, etc
-            group: false,
+            parent1_id: null,
+            parent2_id: null,
+            bracket_step: null, // 0:final, 1:semifinal, 2:quarters, 3:octaves, etc
+            group: null,
             ...data
           };
         },
@@ -153,7 +160,7 @@
           let names = ['Final', 'Semifinal', 'Quartas de final', 'Oitavas de final'];
           return names[ n ] || false;
         },
-        createGroups(teamsTotal) {
+        createGroups(teamsTotal, teams=[]) {
           if (Array.isArray(teamsTotal)) teamsTotal = teamsTotal.length;
 
           let groups = [ ...Array( Math.ceil(teamsTotal / this.options.groupMaxTeams) ).keys() ].map(index => {
@@ -190,18 +197,25 @@
 
           return { groups, matches };
         },
-        createBrackets(teamsTotal) {
+        createBrackets(teamsTotal, teams=[]) {
           if (Array.isArray(teamsTotal)) teamsTotal = teamsTotal.length;
           if (!this.isBracketable(teamsTotal)) return [];
           let matches = [];
 
           // let submatches = [ ...Array( Math.ceil(teamsTotal / 2) ).keys() ].map(i => this.default());
           let matchesTotal = teamsTotal;
+          let groupWave = -1;
           while(matchesTotal/2 > 1) {
+            groupWave++;
             matchesTotal = matchesTotal / 2;
+
             for(let m=0; m<matchesTotal; m++) {
+              let team1 = groupWave==0 ? (teams[ m*2 ] || null) : null;
+              let team2 = groupWave==0 ? (teams[ m*2+1 ] || null) : null;
               matches.push(this.default({
-                bracket_step: matchesTotal/2,
+                team1_id: team1? team1.uuid: null,
+                team2_id: team2? team2.uuid: null,
+                bracket_step: ([0,1,1,2,2,2,2,3,3,3,3,3,3,3,3])[matchesTotal],
               }));
             }
           }
@@ -218,7 +232,15 @@
           let teams = arrShuffle(objClone(r.value.team.data));
           
           console.clear();
-          let { matches, groups } = this.isBracketable() ? this.createBrackets(teams) : this.createGroups(teams);
+          let { matches, groups } = this.isBracketable() ?
+            this.createBrackets(teams, teams):
+            this.createGroups(teams, teams);
+
+          // for(let i=0; i<teams.length/2; i++) {
+          //   const match = matches[i];
+          //   match.team1_id = teams[ i*2 ].uuid;
+          //   match.team2_id = teams[ i*2+1 ].uuid;
+          // }
 
           if (matches.length>1 && groups) {
             if (this.isBracketable(groups)) {
@@ -234,8 +256,19 @@
           é maior do que 1, enquanto for, vai gerando partidas.
           */
 
+          // let brackets = [ matches.filter(m => m.bracket_step !== false).map(m => m.bracket_step) ];
+          let brackets = (matches[0] ? [ ...Array(matches[0].bracket_step).keys() ].reverse() : []).map(index => {
+            return {
+              uuid: r.value.uuid(),
+              name: this.bracketStepName(index),
+              matches: matches.filter(m => m.bracket_step == index),
+            };
+          });
+
+          // console.log(JSON.stringify(matches.map(({ team1_id, team2_id }) => ({ team1_id, team2_id })), ' ', 1));
+
           this.groups = groups || [];
-          this.brackets = matches.filter(m => m.bracket_step !== false);
+          this.brackets = brackets || [];
           this.matches = matches || [];
         },
       },
@@ -249,7 +282,7 @@
   };
 
   const tour = useTournamentBracketsGenerator();
-  // for(let i=1; i<=5; i++) tour.value.team.add();
+  for(let i=1; i<=16; i++) tour.value.team.add();
 </script>
 
 <script>

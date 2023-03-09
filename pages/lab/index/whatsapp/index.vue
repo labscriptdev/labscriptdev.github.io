@@ -4,7 +4,7 @@
     v-bind="{
       drawerShow: false,
       fluid: false,
-      containerStyle: 'max-width:800px',
+      containerWidth: '700px',
     }"
   >
     <v-row>
