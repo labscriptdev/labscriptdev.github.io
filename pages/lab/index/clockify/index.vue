@@ -386,6 +386,7 @@
       icon: 'mdi-alarm-check',
       name: 'Clockify',
       description: 'Gerenciamento e cálculo de horas trabalhadas utilizando o app Clockify',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/clockify',
     },
 
     methods: {

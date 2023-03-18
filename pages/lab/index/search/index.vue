@@ -46,6 +46,7 @@
       icon: 'mdi-magnify',
       name: 'Busca global',
       description: 'Ferramenta para auxiliar na busca de qualquer coisa: de pessoas à produtos',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/search',
     },
     
     data() {

@@ -24,6 +24,7 @@
       icon: 'mdi-set-left',
       name: 'Ferramenta diff',
       description: 'Comparação de códigos, textos e afins',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/diff',
     },
 
     data: () => ({

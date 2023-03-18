@@ -64,6 +64,7 @@
       icon: 'mdi-whatsapp',
       name: 'Whatsapp Link',
       description: 'Gerar link para whatsapp de maneira rápida e fácil',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/whatsapp',
     },
     
     methods: {

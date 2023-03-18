@@ -64,6 +64,7 @@
       icon: 'mdi-calculator',
       name: 'Calculadora de gastos',
       description: 'Calculadora de gastos com divisão por pessoas e tempo de uso',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/calcdiv',
     },
 
     mounted() {

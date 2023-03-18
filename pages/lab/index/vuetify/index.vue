@@ -86,6 +86,7 @@
       icon: 'mdi-vuetify',
       name: 'Vuetify',
       description: 'Vuetify',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/vuetify',
     },
     
     methods: {

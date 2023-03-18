@@ -98,6 +98,7 @@
       icon: 'mdi-qrcode',
       name: 'QR Code',
       description: 'Gerador dos principais tipos de QRcode',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/qrcode',
     },
 
     computed: {

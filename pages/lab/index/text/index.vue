@@ -27,6 +27,7 @@
       icon: 'mdi-text-box-edit-outline',
       name: 'Ferramentas de texto',
       description: 'Conversores, analisadores e ferramentas úteis para gerencimento de texto',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/text',
     },
     
     data() {

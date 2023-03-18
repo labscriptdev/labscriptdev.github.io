@@ -125,6 +125,7 @@
       icon: 'mdi-bookmark-plus-outline',
       name: 'Bookmark App',
       description: 'Gera aplicações que rodam diretamente da barra de favoritos.',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/bookapp',
     },
 
     mounted() {

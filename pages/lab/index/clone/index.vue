@@ -53,6 +53,7 @@
       icon: 'mdi-content-copy',
       name: 'App Clone',
       description: 'Vuetify app clone view',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/clone',
     },
 
     data() {

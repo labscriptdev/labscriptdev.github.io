@@ -25,6 +25,7 @@
       icon: 'mdi-file-download-outline',
       name: 'Gerador de arquivo',
       description: 'Aplicação para gerar arquivos com tamanhos exatos',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/filesize-generator',
     },
 
     data: () => ({

@@ -24,6 +24,7 @@
       icon: 'mdi-slot-machine',
       name: 'Loteria',
       description: 'Aplicação de simulação lotérica',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/lotto',
     },
 
     data() {

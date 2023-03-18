@@ -16,8 +16,8 @@ dayjsImport.extend(dayjsUTC);
 export const dayjs = dayjsImport;
 
 
-// this.$dev
-export const dev = process.env.NODE_ENV !== 'production';
+// this.$devMode
+export const devMode = process.env.NODE_ENV !== 'production';
 
 
 // this.$log

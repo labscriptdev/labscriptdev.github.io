@@ -292,6 +292,7 @@
       icon: 'mdi-tournament',
       name: 'Tournament',
       description: 'Tournament bracket generator',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/tournament',
     },
   };
 </script>

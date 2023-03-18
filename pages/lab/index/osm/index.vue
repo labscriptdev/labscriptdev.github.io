@@ -38,6 +38,7 @@
       icon: 'mdi-map',
       name: 'OSM',
       description: 'Open Street Map',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/osm',
     },
 
     data() {

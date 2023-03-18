@@ -87,6 +87,25 @@
       </v-container>
     </v-app-bar>
 
+    <div
+      v-if="pageCurrent && pageCurrent.source"
+      style="position:fixed; bottom:10px; right:10px; z-index:999;"
+    >
+      <v-tooltip>
+        Source code
+
+        <template #activator="{ props }">
+          <v-btn
+            color="primary"
+            icon="mdi-xml"
+            :href="pageCurrent.source"
+            target="_blank"
+            v-bind="props"
+          />
+        </template>
+      </v-tooltip>
+    </div>
+
     <!-- Content -->
     <v-main class="bg-grey-lighten-2" style="height:100vh; position:relative; overflow:auto!important;">
       <v-container
@@ -143,6 +162,9 @@
           return JSON.stringify(item).toLowerCase().includes(this.page.params.q.toLowerCase());
         });
       },
+      pageCurrent() {
+        return this.page.data.filter(page => `/lab/${page.slug}` == this.$route.fullPath).at(0) || null;
+      },
     },
 
     data() {
@@ -171,6 +193,9 @@
                   order: 0,
                   ...(file.meta || {})
                 };
+              })
+              .filter(item => {
+                return this.$devMode || item.active;
               })
               .sort((a, b) => {
                 if (a.order < b.order) return -1;

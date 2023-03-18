@@ -85,6 +85,7 @@
       icon: 'mdi-laravel',
       name: 'Gerador Laravel',
       description: 'Criar arquivos para o frameworl Laravel baseado em estrutura de banco de dados',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/laramake',
     },
 
     data() {

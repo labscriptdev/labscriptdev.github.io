@@ -23,6 +23,7 @@
       icon: 'mdi-circle',
       name: 'Base',
       description: 'Base file structure',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/base',
     },
 
     data() {

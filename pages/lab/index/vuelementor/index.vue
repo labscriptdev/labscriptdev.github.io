@@ -26,6 +26,7 @@
       icon: 'mdi-vuejs',
       name: 'Vuelementor',
       description: 'Vuelementor component',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/vuelementor',
     },
 
     data() {

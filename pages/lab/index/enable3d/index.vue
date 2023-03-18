@@ -54,6 +54,7 @@
       icon: 'mdi-cube',
       name: 'Enable 3D',
       description: 'Aplicação para gerar arquivos com tamanhos exatos',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/enable3d',
     },
 
     // data: () => ({
