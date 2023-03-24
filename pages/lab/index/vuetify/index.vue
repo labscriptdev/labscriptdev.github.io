@@ -1,130 +1,288 @@
 <template>
-  <app-layout>
-    <!-- <v-card>
-      <v-tabs v-model="tab">
-        <template v-for="t in [{name:'Background', field:'bg'}, {name:'Text', field:'text'}]">
-          <v-tab :value="t.field">{{ t.name }}</v-tab>
-        </template>
-      </v-tabs>
-      <v-card-text>
-        <v-window v-model="tab">
-          <template v-for="t in [{name:'Background', field:'bg'}, {name:'Text', field:'text'}]">
-            <v-window-item :value="t.field">
-              <div class="d-flex flex-wrap">
-                <template v-for="c in colorClasses()">
-                  <v-tooltip>
-                    <pre>{{ c[ t.field ] }}</pre>
-                    <template #activator="{ props }">
-                      <div
-                        v-bind="props"
-                        :class="[ c[ t.field ], 'text-center', 'border' ]"
-                        style="width:calc(100% / 16); padding:5px;"
-                        @click="useClipboard.copy(c.bg)"
-                      >
-                        text
-                      </div>
-                    </template>
-                  </v-tooltip>
+  <app-layout v-bind="{ containerCard: false }">
+    <v-defaults-provider :defaults="defaults">
+      <v-row>
+        <v-col cols="12" md="4">
+          <v-card title="Form">
+            <v-card-text>
+              <v-text-field label="Text field" />
+              <v-select label="Select" />
+              <v-autocomplete label="Autocomplete" />
+              <v-combobox label="Combobox" />
+              <v-file-input label="File input" />
+              <v-textarea label="Textarea" />
+            </v-card-text>
+            <v-card-actions class="border-t">
+              <v-spacer />
+              <v-btn>Save</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+  
+        <v-col cols="12" md="4">
+          <v-card>
+            <v-list>
+              <v-list-item prepend-avatar="https://cdn.vuetifyjs.com/images/john.png" title="John Leider" subtitle="john@google.com">
+                <template #append>
+                  <v-btn
+                    size="small"
+                    variant="text"
+                    icon="mdi-menu-down"
+                  />
                 </template>
+              </v-list-item>
+            </v-list>
+
+            <v-divider />
+    
+            <v-tabs>
+              <v-tab>Tab 1</v-tab>
+              <v-tab>Tab 2</v-tab>
+              <v-tab>Tab 3</v-tab>
+            </v-tabs>
+    
+            <v-list>
+              <v-list-item prepend-icon="mdi-circle">Item 1</v-list-item>
+              <v-list-item prepend-icon="mdi-circle">Item 2</v-list-item>
+              <v-list-item prepend-icon="mdi-circle">Item 3</v-list-item>
+            </v-list>
+
+            <v-divider />
+            
+            <v-table
+              v-bind="{
+                fixedHeader: true,
+                height: '300px',
+              }"
+            >
+              <thead>
+                <tr>
+                  <td>field1</td>
+                  <td>field2</td>
+                  <td>field3</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="n in 10">
+                  <td>field1 {{ n }}</td>
+                  <td>field1 {{ n }}</td>
+                  <td>field1 {{ n }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td>footer1</td>
+                  <td>footer2</td>
+                  <td>footer3</td>
+                </tr>
+              </tfoot>
+            </v-table>
+          </v-card>
+        </v-col>
+  
+        <v-col cols="12" md="4">
+          <v-card>
+            <v-img cover height="200" src="https://cdn.vuetifyjs.com/images/cards/cooking.png" />
+  
+            <v-card-item>
+              <v-card-title>Cafe Badilico</v-card-title>
+  
+              <v-card-subtitle>
+                <span class="me-1">Local Favorite</span>
+  
+                <v-icon
+                  color="error"
+                  icon="mdi-fire-circle"
+                  size="small"
+                ></v-icon>
+              </v-card-subtitle>
+            </v-card-item>
+  
+            <v-card-text>
+              <v-row class="mx-0">
+                <v-rating
+                  :model-value="4.5"
+                  color="amber"
+                  density="compact"
+                  half-increments
+                  readonly
+                  size="small"
+                ></v-rating>
+  
+                <div class="text-grey ms-4">
+                  4.5 (413)
+                </div>
+              </v-row>
+  
+              <div class="my-4 text-subtitle-1">
+                $ • Italian, Cafe
               </div>
-            </v-window-item>
-          </template>
-        </v-window>
-      </v-card-text>
-    </v-card> -->
+  
+              <div>Small plates, salads & sandwiches - an intimate setting with 12 indoor seats plus patio seating.</div>
+            </v-card-text>
+  
+            <v-card-item>
+              <v-timeline density="compact" align="start">
+                <v-timeline-item>Item description</v-timeline-item>
+                <v-timeline-item>Item description</v-timeline-item>
+                <v-timeline-item>Item description</v-timeline-item>
+              </v-timeline>
+            </v-card-item>
+  
+            <v-divider />
+  
+            <v-card-title>Tonight's availability</v-card-title>
+  
+            <div class="px-4">
+              <v-chip-group>
+                <v-chip>5:30PM</v-chip>
+                <v-chip>7:30PM</v-chip>
+                <v-chip>8:00PM</v-chip>
+                <v-chip>9:00PM</v-chip>
+              </v-chip-group>
+            </div>
+  
+            <v-card-actions>
+              <v-spacer />
+              <v-btn color="primary" variant="tonal">Reserve</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-defaults-provider>
 
-    <v-row class="pa-5">
-      <!-- <v-col cols="12" md="4"></v-col>
-      <v-col cols="12" md="4"></v-col> -->
-      <v-col cols="12" md="3">
-        <v-card>
-          <v-toolbar density="compact">
-            <v-toolbar-title>Form</v-toolbar-title>
-            <v-btn icon="mdi-logout"></v-btn>
-          </v-toolbar>
-          <v-card-text>
-            <v-text-field label="Text field" />
-            <v-text-field label="Password" type="password" />
-            <v-textarea label="Textarea" />
-          </v-card-text>
-          <v-divider />
-          <v-card-actions>
-            <v-btn color="success">Save</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" md="9">
-        --
+    <br>
+    <v-row no-gutters>
+      <v-col cols="2" v-for="c in color.data" :key="c" :class="`bg-${c} text-center py-1`">
+        {{ c }}
       </v-col>
     </v-row>
-
-    <app-alert v-model="useClipboard.copied" type="snackbar" color="success">
-      Texto copiado: {{ useClipboard.text }}
-    </app-alert>
+    
+    <pre>{{ color }}</pre>
 
     <template #drawer>
-      <div class="d-flex flex-wrap">
-        <div
-          v-for="c in colorClasses()"
-          :class="[c.bg, 'py-1', 'px-2']"
-          @click="useClipboard.copy(c.name)"
-        >
-          {{ c.bg }}
+      <v-defaults-provider
+        :defaults="{
+          VSelect: { variant: 'outlined', density: 'compact' },
+          VCombobox: { variant: 'outlined', density: 'compact' },
+        }"
+      >
+        <div class="pa-2">
+          <v-combobox
+            v-model="custom.color"
+            v-bind="{
+              label: 'Color',
+              items: color.data,
+            }"
+          />
+          <v-combobox
+            v-model="custom.variantInput"
+            v-bind="{
+              label: 'Variant input',
+              items: custom.options.variantInput,
+            }"
+          />
+          <v-combobox
+            v-model="custom.variantBtn"
+            v-bind="{
+              label: 'Variant BTN',
+              items: custom.options.variantBtn,
+            }"
+          />
+          <!-- <pre>custom: {{ custom }}</pre> -->
+          <!-- <pre>defaults: {{ defaults }}</pre> -->
         </div>
-      </div>
+      </v-defaults-provider>
     </template>
   </app-layout>
 </template>
 
 <script>
-  import { useClipboard } from '@vueuse/core';
-
   export default {
     meta: {
-      active: false,
+      active: true,
       icon: 'mdi-vuetify',
       name: 'Vuetify',
       description: 'Vuetify',
       source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/vuetify',
     },
-    
-    methods: {
-      colorClasses() {
-        const classes = [];
-        const aliasColors = ['primary', 'secondary', 'warning', 'error', 'info'];
-        const colors = [ ...aliasColors, 'black', 'grey', 'red', 'pink', 'purple', 'deep-purple', 'indigo', 'blue', 'light-blue', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey', 'grey'];
+  };
+</script>
 
-        for(let color of colors) {
-          classes.push({
-            name: `${color}`,
-            bg: `bg-${color}`,
-            text: `text-${color}`,
-          });
+<script setup>
+  import { ref, computed } from 'vue';
 
-          for(let type of ['lighten', 'darken', 'accent']) {
-            for(let n of [1, 2, 3, 4, 5]) {
+  const color = ref({
+    data: (() => {
+      let names = [];
+      const aliasColors = ['primary', 'secondary', 'warning', 'error', 'info'];
+      const colors = [ ...aliasColors, 'black', 'grey', 'red', 'pink', 'purple', 'deep-purple', 'indigo', 'blue', 'light-blue', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey', 'grey'];
+      const types = ['lighten', 'darken', 'accent'];
 
-              if (aliasColors.includes(color) && ['lighten', 'accent'].includes(type)) continue;
-              if (aliasColors.includes(color) && ['darken'].includes(type) && [2, 3, 4, 5].includes(n)) continue;
+      for(let color of colors) {
+        names.push(color);
 
-              classes.push({
-                name: `${color}-${type}-${n}`,
-                bg: `bg-${color}-${type}-${n}`,
-                text: `text-${color}-${type}-${n}`,
-              });
-            }
+        for(let type of types) {
+          for(let n of [1, 2, 3, 4, 5]) {
+
+            // darken e accent não tem -5
+            if (['darken', 'accent'].includes(type) && [5].includes(n)) continue;
+
+            // cores primárias não tem types
+            if (aliasColors.includes(color) && types.includes(type)) continue;
+
+            // cores sem dark, lighten, accent
+            if (['black', 'white'].includes(color) && ['lighten', 'darken', 'accent'].includes(type)) continue;
+
+            // cores sem accent
+            if (['grey', 'brown', 'blue-grey'].includes(color) && ['accent'].includes(type)) continue;
+
+            names.push(`${color}-${type}-${n}`);
           }
         }
-        return classes;
-      },
-    },
+      }
 
-    data() {
-      return {
-        tab: 'bg',
-        useClipboard: useClipboard(),
-      };
+      return names;
+    }) (),
+  });
+
+  const custom = ref({
+    color: 'primary',
+    variantInput: 'filled',
+    variantInputBtn: 'elevated',
+    options: {
+      variantInput: ['outlined', 'plain', 'underlined', 'filled', 'solo'],
+      variantBtn: ['flat', 'text', 'elevated', 'tonal', 'outlined', 'plain'],
     },
-  };
+  });
+
+  const defaults = computed(() => ({
+    VTabs: {
+      color: custom.value.color,
+    },
+    VTimelineItem: {
+      dotColor: custom.value.color,
+    },
+    VBtn: {
+      variant: custom.value.variantBtn,
+    },
+    VTextField: {
+      variant: custom.value.variantInput,
+    },
+    VSelect: {
+      variant: custom.value.variantInput,
+    },
+    VAutocomplete: {
+      variant: custom.value.variantInput,
+    },
+    VCombobox: {
+      variant: custom.value.variantInput,
+    },
+    VFileInput: {
+      variant: custom.value.variantInput,
+    },
+    VTextarea: {
+      variant: custom.value.variantInput,
+    },
+  }));
 </script>

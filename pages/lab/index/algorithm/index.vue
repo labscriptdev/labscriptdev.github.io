@@ -20,7 +20,7 @@
 <script>
   export default {
     meta: {
-      active: false,
+      active: true,
       icon: 'mdi-code-json',
       name: 'Algorithms',
       description: 'Types of algorithms',

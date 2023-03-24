@@ -19,24 +19,24 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 		components: vuetifyComponents,
 		directives: vuetifyDirectives,
 		icons: { defaultSet: 'mdi' },
-		defaults: (() => {
-			let inputs = {
-				density: 'comfortable',
-				variant: 'outlined',
-			};
+		// defaults: (() => {
+		// 	let inputs = {
+		// 		density: 'comfortable',
+		// 		variant: 'outlined',
+		// 	};
 
-			return {
-				global: {
-					density: 'compact',
-				},
-				VBtn: { density: 'default' },
-				VAutocomplete: { ...inputs },
-				VTextField: { ...inputs },
-				VTextarea: { ...inputs },
-				VSelect: { ...inputs },
-				VCombobox: { ...inputs },
-			};
-		})(),
+		// 	return {
+		// 		global: {
+		// 			density: 'compact',
+		// 		},
+		// 		VBtn: { density: 'default' },
+		// 		VAutocomplete: { ...inputs },
+		// 		VTextField: { ...inputs },
+		// 		VTextarea: { ...inputs },
+		// 		VSelect: { ...inputs },
+		// 		VCombobox: { ...inputs },
+		// 	};
+		// })(),
 		theme: {
 			defaultTheme: 'light',
 			themes: {
