@@ -1,96 +1,99 @@
 <!-- https://www.youtube.com/watch?v=EFg3u_E6eHU&ab_channel=SpanningTree -->
 <template>
-  <v-row>
-    <v-col cols="12" lg="6">
-      <div class="d-flex align-center" style="gap:15px;">
-        <div style="max-width:200px;">
-          <v-text-field
-            v-model="test.randomSize"
-            v-bind="{
-              type: 'number',
-              hideDetails: true,
-            }"
-          />
+  <v-defaults-provider
+    :defaults="{
+      VTextField: {
+        variant: 'outlined',
+        density: 'compact',
+      },
+    }"
+  >
+    <div class="font-weight-bold">Objetivo: encontrar o menor caminho entre os pontos</div>
+    <br>
+    <v-row>
+      <v-col cols="12" lg="6">
+        <div class="d-flex align-center" style="gap:15px;">
+          <div style="max-width:200px;">
+            <v-text-field
+              v-model="test.randomSize"
+              v-bind="{
+                type: 'number',
+                hideDetails: true,
+              }"
+            />
+          </div>
+          <div class="flex-grow-1">
+            <v-btn block @click="test.addRandom();">Create {{ test.randomSize }} points</v-btn>
+          </div>
         </div>
-        <div class="flex-grow-1">
-          <v-btn block @click="test.addRandom();">Create {{ test.randomSize }} points</v-btn>
+        
+        <br><br>
+        <div class="d-flex" style="gap:10px;">
+          <div class="flex-grow-1">
+            <div>Find path from</div>
+            <v-text-field
+              v-model.number="points.path.from"
+              v-bind="{ type: 'number', hideDetails: true, min: 0, max: points.items.length-1 }"
+            />
+          </div>
+          <div class="flex-grow-1">
+            <div>To</div>
+            <v-text-field
+              v-model.number="points.path.to"
+              v-bind="{ type: 'number', hideDetails: true, min: 0, max: points.items.length-1 }"
+            />
+          </div>
         </div>
-      </div>
-      
-      <br>
-      <div>All points:</div>
-      <v-table class="border">
-        <colgroup>
-          <col width="*">
-          <col width="150px">
-          <col width="150px">
-        </colgroup>
-        <tbody>
-          <tr v-for="p in points.items">
-            <td>{{ p.id }}</td>
-            <td><input type="number" v-model="p.x" style="width:100%;"></td>
-            <td><input type="number" v-model="p.y" style="width:100%;"></td>
-          </tr>
-        </tbody>
-      </v-table>
-      <!-- <pre>{{ points.path }}</pre> -->
-    </v-col>
-    <v-col cols="12" lg="6">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:400px;" class="border bg-grey-lighten-4">
-        <template v-for="c in points.connections">
-          <line v-bind="c.bind" style="stroke:#ff000088; stroke-width:.5;" />
-        </template>
+  
+        <br>
+        <div>Paths:</div>
+        <v-table class="border">
+          <thead>
+            <tr>
+              <td>From</td>
+              <td>To</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in points.path.items">
+              <td>{{ p.from }}</td>
+              <td>{{ p.to }}</td>
+            </tr>
+          </tbody>
+        </v-table>
+        
+      </v-col>
+      <v-col cols="12" lg="6">
+        <svg
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+          style="width:100%; margin:0 auto;"
+          class="border bg-grey-lighten-4"
+          @mouseup.prevent="drag.stop($event)"
+        >
+          <template v-for="c in points.connections">
+            <line v-bind="c.bind" style="stroke:#ff000088; stroke-width:.5;" />
+          </template>
 
-        <template v-for="p in points.items">
-          <g
-            :transform="`translate(${p.x}, ${p.y})`"
-          >
-            <circle cx="0" cy="0" r="5" stroke="black" stroke-width="1" fill="red" />
-            <text x="0" y="0" text-anchor="middle" alignment-baseline="middle" font-size="3px">{{ p.id }}</text>
-          </g>
-        </template>
-
-        <template v-for="c in points.path.items">
-          <line v-bind="c.bind" style="stroke:#00ff0088; stroke-width:2;" />
-        </template>
-      </svg>
-
-      <br><br>
-      <div class="d-flex" style="gap:10px;">
-        <div class="flex-grow-1">
-          <div>Find path from</div>
-          <v-text-field
-            v-model.number="points.path.from"
-            v-bind="{ type: 'number', hideDetails: true, min: 0, max: points.items.length-1 }"
-          />
-        </div>
-        <div class="flex-grow-1">
-          <div>To</div>
-          <v-text-field
-            v-model.number="points.path.to"
-            v-bind="{ type: 'number', hideDetails: true, min: 0, max: points.items.length-1 }"
-          />
-        </div>
-      </div>
-
-      <br>
-      <div>Paths:</div>
-      <v-table class="border">
-        <thead>
-          <tr>
-            <td>From</td>
-            <td>To</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="p in points.path.items">
-            <td>{{ p.from }}</td>
-            <td>{{ p.to }}</td>
-          </tr>
-        </tbody>
-      </v-table>
-    </v-col>
-  </v-row>
+          <template v-for="c in points.path.items">
+            <line v-bind="c.bind" style="stroke:#00ff0088; stroke-width:2;" />
+          </template>
+  
+          <template v-for="p in points.items">
+            <g
+              :transform="`translate(${p.x}, ${p.y})`"
+              @mousedown.prevent="drag.init($event, p)"
+            >
+              <circle cx="0" cy="0" r="5"
+                :fill="pointColor(p)"
+              />
+              <text x="0" y="0" text-anchor="middle" alignment-baseline="middle" font-size="3px">{{ p.id }}</text>
+            </g>
+          </template>
+        </svg>
+      </v-col>
+    </v-row>
+  </v-defaults-provider>
 </template>
 
 <script>
@@ -105,6 +108,12 @@
 <script setup>
   import { ref, computed } from 'vue';
   import _ from 'lodash';
+
+  const pointColor = (point) => {
+    if (point.id==points.value.path.from) return 'green';
+    if (point.id==points.value.path.to) return 'red';
+    return 'orange';
+  };
 
   const points = ref({
     items: [],
@@ -193,17 +202,30 @@
       }
 
       this.items.forEach(p => {
-        const random = _.random(1, 3, 100 / max);
-        for(let i=0; i<=random; i++) {
-          const pointRand = _.sample(this.items);
-          if (![ p.id, ...p.connections ].includes(pointRand.id)) {
-            p.connections.push(pointRand.id);
-          }
-        }
-      });
+        let distances = this.items.map(pp => {
+          const distance = (() => {
+            const diffx = p.x - pp.x;
+            const diffy = p.y - pp.y;
+            return Math.sqrt(diffx * diffx + diffy * diffy);
+          })();
 
-      this.path.from = _.sample(this.items).id;
-      this.path.to = _.sample(this.items).id;
+          return {
+            distance,
+            fromId: p.id,
+            toId: pp.id,
+            toConnections: pp.connections,
+          };
+        });
+
+        distances = distances.filter(d => d.distance > 0);
+        distances = distances.filter(d => !d.toConnections.includes(p.id));
+        distances = _.orderBy(distances, ['distance'], ['asc']);
+        distances = _.slice(distances, 0, 3);
+
+        distances.forEach(({ toId }) => {
+          p.connections.push(toId);
+        });
+      });
     },
   });
 
@@ -212,8 +234,30 @@
     addRandom() {
       points.value.items = [];
       points.value.addRandom(this.randomSize);
+      points.value.path.from = 0;
+      points.value.path.to = 1;
     },
   });
 
   test.value.addRandom();
+
+  const drag = ref({
+    svg: false,
+    target: false,
+    point: false,
+    init(ev, point) {
+      this.svg = ev.currentTarget.closest("svg");
+      this.target = ev.currentTarget;
+      this.target.style.cursor = 'pointer';
+      this.point = point;
+      this.svg.addEventListener('mousemove', this.svgMousemove);
+    },
+    stop(ev) {
+      this.svg.removeEventListener('mousemove', this.svgMousemove);
+    },
+    svgMousemove: (ev) => {
+      drag.value.point.x = ev.offsetX / 6;
+      drag.value.point.y = ev.offsetY / 6;
+    },
+  });
 </script>
