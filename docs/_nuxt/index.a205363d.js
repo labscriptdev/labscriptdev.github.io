@@ -1,0 +1,1 @@
+import{$ as t,o as n,c as a,w as c,r as _,a as s,a0 as r}from"./entry.2acc98e4.js";const l={};function p(u,f){const e=r,o=_("v-layout");return n(),a(o,{class:"bg-grey-lighten-3"},{default:c(()=>[s(e)]),_:1})}const x=t(l,[["render",p]]);export{x as default};
