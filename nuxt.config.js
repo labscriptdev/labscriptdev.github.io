@@ -1,6 +1,4 @@
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
-import path from 'path';
-import fs from 'fs-extra';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -43,12 +41,11 @@ export default defineNuxtConfig({
     ],
   },
 
-  hooks: {
-    async 'build:done'(nuxt) {
-      const pathFrom = path.join(__dirname, '.output', 'public');
-      const pathTo = path.join(__dirname, 'docs');
-      await fs.rmSync(pathTo, { recursive: true, force: true });
-      await fs.copySync(pathFrom, pathTo);
+  nitro: {
+    output: {
+      dir: '.output',
+      serverDir: '.output/server',
+      publicDir: '../docs', //.output/public
     },
   },
 });
