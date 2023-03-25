@@ -81,7 +81,7 @@
               @mousedown.prevent="drag.init($event, p)"
               style="cursor:grab;"
             >
-              <circle cx="0" cy="0" r="5" fill="orange" />
+              <circle cx="0" cy="0" r="5" :fill="pointColor(p)" />
               <text x="0" y="0" text-anchor="middle" alignment-baseline="middle" font-size="3px">{{ p.id }}</text>
             </g>
           </template>
@@ -104,9 +104,9 @@
   import { ref, computed } from 'vue';
   import _ from 'lodash';
 
-  const pointColor = (point) => {
-    if (point.id==points.value.path.from) return 'green';
-    if (point.id==points.value.path.to) return 'red';
+  const pointColor = (p) => {
+    if (p.id==point.value.fromId) return '#00aa00';
+    if (p.id==point.value.toId) return '#ff2222';
     return 'orange';
   };
   
@@ -213,7 +213,7 @@
         ;
 
         if (options.deep==0) {
-          return Object.values(paths)
+          let r = Object.values(paths)
             .filter(p => self.toId == p.path.at(-1))
             .sort((a, b) => a.size - b.size)
             .map(p => {
@@ -238,6 +238,8 @@
               };
             })
             .at(0);
+          
+          return r || { size: 0, edges: [] };
         }
 
         return options;
