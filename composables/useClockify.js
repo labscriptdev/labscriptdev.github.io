@@ -360,7 +360,7 @@ export default function(options = {}) {
           },
         },
         data: () => {
-          const labels = this.dates.map(item => item.dayjs.format('DD'));
+          const labels = this.dates.map(item => item.dayjs.format('DD ddd'));
 
           let datasets = [];
 
@@ -391,7 +391,7 @@ export default function(options = {}) {
           },
         },
         data: () => {
-          const labels = this.dates.map(item => item.dayjs.format('DD'));
+          const labels = this.dates.map(item => item.dayjs.format('DD ddd'));
           console.clear();
 
           const datasets = [{
@@ -421,7 +421,7 @@ export default function(options = {}) {
         },
         data: {},
         chartLoad: async (chart) => {
-          chart.data.labels = this.dates.map(item => item.dayjs.format('DD'));
+          chart.data.labels = this.dates.map(item => item.dayjs.format('DD ddd'));
 
           const params = {
             start_date: $dayjs.utc(this.params.dateStart).format('YYYY-MM-DD'),
@@ -470,6 +470,27 @@ export default function(options = {}) {
       });
 
       this.chart = chart;
+    },
+
+    counter: {
+      interval: false,
+      time: 59,
+      async init() {
+        if (this.interval) clearInterval(this.interval);
+        this.interval = setInterval(async () => {
+          this.time--;
+  
+          if (this.time <= 0) {
+            await r.value.currency.load();
+            await r.value.timeEntry.load();
+            this.time = 59;
+          }
+        }, 1000);
+      },
+      async restart() {
+        this.time = 0;
+        return await this.init();
+      },
     },
 
     timeHumanize(minutes) {
@@ -525,34 +546,12 @@ export default function(options = {}) {
       await r.value.workspace.load();
       await r.value.timeEntry.load();
       await r.value.currency.load();
+      await r.value.counter.init();
       r.value.ready = true;
     },
   });
 
   r.value.init();
-
-  r.value.counter = {
-    interval: false,
-    time: 0,
-    async init() {
-      if (this.interval) clearInterval(this.interval);
-      this.interval = setInterval(async () => {
-        this.time--;
-
-        if (this.time <= 0) {
-          await r.value.currency.load();
-          await r.value.timeEntry.load();
-          this.time = 59;
-        }
-      }, 1000);
-    },
-    async restart() {
-      this.time = 0;
-      return await this.init();
-    },
-  };
-
-  r.value.counter.init();
 
   watch([ r.value.params ], async ([ paramsNew ]) => {
     await r.value.currency.load();
@@ -568,7 +567,7 @@ export default function(options = {}) {
   onMounted(() => {});
 
   onUnmounted(() => {
-    clearInterval(interval);
+    clearInterval(r.value.counter.interval);
   });
 
   return r;

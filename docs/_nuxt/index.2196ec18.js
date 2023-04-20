@@ -1,0 +1,1 @@
+import{Q as t,f as o,o as a}from"./entry.317c5f87.js";const n={meta:{icon:"mdi-numeric-0",name:"Home"},data(){return{test:!0}},methods:{say(e){console.log(e)}}};function r(e,s,c,_,l,m){return a(),o("div",null," Default page ")}const p=t(n,[["render",r]]);export{p as default};
