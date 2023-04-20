@@ -1,1 +1,0 @@
-import{Q as e,f as o,o as t}from"./entry.7d012809.js";const n={meta:{icon:"mdi-numeric-1",name:"Page 1"}};function a(c,r,_,s,i,p){return t(),o("div",null," page-1 ")}const f=e(n,[["render",a]]);export{f as default};

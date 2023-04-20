@@ -363,7 +363,13 @@
       <v-divider />
 
       <v-card-text>
-        <div class="text-disabled text-caption text-right mt-1">Atualizando em {{ clockify.refreshCounter }}</div>
+        <a
+          href="javascript:;"
+          class="d-block text-disabled text-caption text-right mt-1"
+          @click="clockify.counter.restart()"
+        >
+          Atualizando em {{ clockify.counter.time }}
+        </a>
       </v-card-text>
     </template>
   </app-layout>

@@ -58,7 +58,6 @@ export default function(options = {}) {
 
   const r = ref({
     ready: false,
-    refreshCounter: 0,
 
     params: options.params,
 
@@ -532,14 +531,28 @@ export default function(options = {}) {
 
   r.value.init();
 
-  const interval = setInterval(async () => {
-    r.value.refreshCounter = 59 - parseInt($dayjs().format('s'));
+  r.value.counter = {
+    interval: false,
+    time: 0,
+    async init() {
+      if (this.interval) clearInterval(this.interval);
+      this.interval = setInterval(async () => {
+        this.time--;
 
-    if (r.value.refreshCounter==0) {
-      await r.value.currency.load();
-      await r.value.timeEntry.load();
-    }
-  }, 1000);
+        if (this.time <= 0) {
+          await r.value.currency.load();
+          await r.value.timeEntry.load();
+          this.time = 59;
+        }
+      }, 1000);
+    },
+    async restart() {
+      this.time = 0;
+      return await this.init();
+    },
+  };
+
+  r.value.counter.init();
 
   watch([ r.value.params ], async ([ paramsNew ]) => {
     await r.value.currency.load();

@@ -1,0 +1,1 @@
+import{i as u,f as n,e as t,t as e,d as s,F as l,y as c,o as p}from"./entry.22a8e8e2.js";const i={__name:"[slug]",setup(m){const o=()=>c({test:!0}),r=u(),a=o();return(_,f)=>(p(),n(l,null,[t("pre",null,"route.params.slug: "+e(s(r).params.slug),1),t("pre",null,"lotto: "+e(s(a)),1)],64))}};export{i as default};

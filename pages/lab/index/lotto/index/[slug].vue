@@ -1,4 +1,25 @@
 <template>
+  <pre>route.params.slug: {{ route.params.slug }}</pre>
+  <pre>lotto: {{ lotto }}</pre>
+</template>
+
+<script setup>
+  import { ref } from 'vue';
+
+  const useLotto = () => {
+    return ref({
+      test: true,
+    });
+  };
+
+  const route = useRoute();
+
+  const lotto = useLotto({
+    // type: 
+  });
+</script>
+
+<!-- <template>
   <div>
     <div v-if="!lotto.response" class="text-center py-3">
       <v-progress-circular
@@ -9,10 +30,6 @@
     </div>
 
     <template v-if="lotto.response">
-      <!-- <v-card elevation="0">
-        <v-card-title>{{ lotto.response.name }}</v-card-title>
-        <v-divider />
-      </v-card> -->
       <v-row no-gutters>
         <v-col cols="4">
           <v-card-text>
@@ -134,4 +151,4 @@
       };
     },
   };
-</script>
+</script> -->
