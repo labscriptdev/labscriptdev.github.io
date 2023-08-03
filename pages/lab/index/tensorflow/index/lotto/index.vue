@@ -8,7 +8,7 @@
   export default {
     meta: {
       icon: 'mdi-numeric-1',
-      name: 'Page 1',
+      name: 'Lotto',
     },
   };
 </script>
