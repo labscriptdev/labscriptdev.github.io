@@ -281,14 +281,14 @@
     model: false,
   });
 
-  laramake.model.add({ table_name: 'user' });
-  laramake.model.add({ table_name: 'shop_store' });
-  laramake.model.add({ table_name: 'shop_product' });
-  laramake.model.add({ table_name: 'shop_product_category' });
-  laramake.model.add({ table_name: 'shop_cart' });
-  laramake.model.add({ table_name: 'shop_order' });
-  laramake.model.add({ table_name: 'shop_order_product' });
-  laramake.model.add({ table_name: 'shop_order_tax' });
-  laramake.model.update();
-  edit.model = laramake.model.list[0];
+  // laramake.model.add({ table_name: 'user' });
+  // laramake.model.add({ table_name: 'shop_store' });
+  // laramake.model.add({ table_name: 'shop_product' });
+  // laramake.model.add({ table_name: 'shop_product_category' });
+  // laramake.model.add({ table_name: 'shop_cart' });
+  // laramake.model.add({ table_name: 'shop_order' });
+  // laramake.model.add({ table_name: 'shop_order_product' });
+  // laramake.model.add({ table_name: 'shop_order_tax' });
+  // laramake.model.update();
+  // edit.model = laramake.model.list[0];
 </script>
