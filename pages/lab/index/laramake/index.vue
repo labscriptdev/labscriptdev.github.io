@@ -9,6 +9,7 @@
         <app-list v-model="laramake.model.list">
           <template #item="bind">
             <v-text-field
+              label="Table name"
               v-model="bind.item.table_name"
               :hide-details="true"
               @update:modelValue="laramake.model.update()"
@@ -22,41 +23,41 @@
           <div class="bg-grey-lighten-3 pa-4 mb-5 rounded-sm font-weight-bold">
             FIELDS
           </div>
+          
+          <app-list v-model="edit.model.fields">
+            <template #item="bind">
+              <div class="d-flex align-center" style="gap:10px;">
+                <v-text-field label="Name" v-model="bind.item.name" :hide-details="true" />
+                <v-menu offset="10" :close-on-content-click="false" location="bottom end" width="300">
+                  <template #activator="bind2">
+                    <v-btn class="px-10" size="50" v-bind="bind2.props">Type</v-btn>
+                  </template>
+                  <v-card>
+                    <v-card-title>Field details</v-card-title>
+                    <v-card-text>
+                      <v-select
+                        label="Type" v-model="bind.item.type" :hide-details="true"
+                        :items="[
+                          { value: 'id', title: 'ID' },
+                          { value: 'string', title: 'String' },
+                          { value: 'text', title: 'Text' },
+                          { value: 'date', title: 'Date' },
+                          { value: 'time', title: 'Time' },
+                          { value: 'datetime', title: 'Date time' },
+                        ]"
+                      />
+                      <v-text-field
+                        label="String size"
+                        v-model="bind.item.size"
+                        v-if="['string'].includes(bind.item.type)"
+                      />
+                    </v-card-text>
+                  </v-card>
+                </v-menu>
+              </div>
+            </template>
+          </app-list>
         </div>
-
-        <app-list v-model="edit.model.fields">
-          <template #item="bind">
-            <div class="d-flex align-center" style="gap:10px;">
-              <v-text-field label="Name" v-model="bind.item.name" :hide-details="true" />
-              <v-menu offset="10" :close-on-content-click="false" location="bottom end" width="300">
-                <template #activator="bind2">
-                  <v-btn class="px-10" size="50" v-bind="bind2.props">Type</v-btn>
-                </template>
-                <v-card>
-                  <v-card-title>Field details</v-card-title>
-                  <v-card-text>
-                    <v-select
-                      label="Type" v-model="bind.item.type" :hide-details="true"
-                      :items="[
-                        { value: 'id', title: 'ID' },
-                        { value: 'string', title: 'String' },
-                        { value: 'text', title: 'Text' },
-                        { value: 'date', title: 'Date' },
-                        { value: 'time', title: 'Time' },
-                        { value: 'datetime', title: 'Date time' },
-                      ]"
-                    />
-                    <v-text-field
-                      label="String size"
-                      v-model="bind.item.size"
-                      v-if="['string'].includes(bind.item.type)"
-                    />
-                  </v-card-text>
-                </v-card>
-              </v-menu>
-            </div>
-          </template>
-        </app-list>
         <br>
 
         <v-expansion-panels>
@@ -76,6 +77,18 @@
     </v-row>
   </app-layout>
 </template>
+
+<script>
+  export default {
+    meta: {
+      active: true,
+      icon: 'mdi-laravel',
+      name: 'Gerador Laravel',
+      description: 'Criar arquivos para o frameworl Laravel baseado em estrutura de banco de dados',
+      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/laramake',
+    },
+  };
+</script>
 
 <script setup>
   import dayjs from 'dayjs';
@@ -234,6 +247,11 @@
           content: (() => {
             let content = ['<?php', '', `namespace \\App\\Http\\Requests;`, ''];
             content.push(`class ${modelNamePascal}Request extends Request`, '{');
+            content.push(`\tpublic function rules() {`);
+            content.push(`\t\treturn [`);
+            content.push(`\t\t\t'name' => ['required'],`);
+            content.push(`\t\t]`);
+            content.push(`\t}`);
             content.push('}', '');
             return content.join("\n");
           })(),
@@ -246,7 +264,7 @@
           file: `/app/Repositories/${modelNamePascal}Repository.php`,
           content: (() => {
             let content = ['<?php', '', `namespace \\App\\Http\\Repositories;`, ''];
-            content.push(`class ${modelNamePascal}Repository extends Repository`, '{');
+            content.push(`class ${modelNamePascal}Repository`, '{');
             content.push('}', '');
             return content.join("\n");
           })(),
@@ -263,14 +281,14 @@
     model: false,
   });
 
-  // laramake.model.add({ table_name: 'user' });
-  // laramake.model.add({ table_name: 'shop_store' });
-  // laramake.model.add({ table_name: 'shop_product' });
-  // laramake.model.add({ table_name: 'shop_product_category' });
-  // laramake.model.add({ table_name: 'shop_cart' });
-  // laramake.model.add({ table_name: 'shop_order' });
-  // laramake.model.add({ table_name: 'shop_order_product' });
-  // laramake.model.add({ table_name: 'shop_order_tax' });
-  // laramake.model.update();
-  // edit.model = laramake.model.list[0];
+  laramake.model.add({ table_name: 'user' });
+  laramake.model.add({ table_name: 'shop_store' });
+  laramake.model.add({ table_name: 'shop_product' });
+  laramake.model.add({ table_name: 'shop_product_category' });
+  laramake.model.add({ table_name: 'shop_cart' });
+  laramake.model.add({ table_name: 'shop_order' });
+  laramake.model.add({ table_name: 'shop_order_product' });
+  laramake.model.add({ table_name: 'shop_order_tax' });
+  laramake.model.update();
+  edit.model = laramake.model.list[0];
 </script>

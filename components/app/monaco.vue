@@ -68,13 +68,11 @@
       value: props.modelValue,
       automaticLayout: true,
       scrollBeyondLastLine: false,
-
-      // wordWrap: 'on',
-      // wrappingStrategy: 'advanced',
-      // minimap: { enabled: false },
-      // overviewRulerLanes: 0,
-
-      ...props
+      minimap: { enabled: false },
+      wordWrap: 'on',
+      wrappingStrategy: 'advanced',
+      overviewRulerLanes: 0,
+      ...props,
     });
 
     editor.onDidChangeModelContent(() => {
