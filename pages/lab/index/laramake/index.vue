@@ -2,7 +2,7 @@
   <app-layout>
     <v-row>
       <v-col cols="4">
-        <div class="bg-grey-lighten-3 pa-4 mb-5 rounded-sm font-weight-bold">
+        <div class="bg-grey-lighten-3 pa-4 mb-5 rounded-sm font-weight-bold text-uppercase">
           TABLES
         </div>
 
@@ -20,8 +20,8 @@
       </v-col>
       <v-col cols="8">
         <div v-if="edit.model">
-          <div class="bg-grey-lighten-3 pa-4 mb-5 rounded-sm font-weight-bold">
-            FIELDS
+          <div class="bg-grey-lighten-3 pa-4 mb-5 rounded-sm font-weight-bold text-uppercase">
+            {{ edit.model.table_name }} FIELDS
           </div>
           
           <app-list v-model="edit.model.fields">
@@ -183,30 +183,41 @@
       },
 
       getMigration(model) {
+        const modelNamePascal = r.toPascalCase(model.table_name);
         return {
           file: `/database/migrations/`+ dayjs().format('YYYY_MM_DD_HHmmss_') +`create_${model.table_name}_table.php`,
           command: `php artisan make:migration create_${model.table_name}_table`,
-          content: (() => {
-            let content = ['<?php', ''];
-            content.push(`use Illuminate\\Database\\Migrations\\Migration;`);
-            content.push(`use Illuminate\\Database\\Schema\\Blueprint;`);
-            content.push(`use Illuminate\\Support\\Facades\\Schema;`);
-            content.push('', `return new class extends Migration`, '{');
-            content.push(`\tpublic function up(): void`);
-            content.push(`\t{`);
-            content.push(`\t\tSchema::create('${model.table_name}', function (Blueprint $table) {`);
-            content.push(`\t\t\t$table->id();`);
-            content.push(`\t\t\t$table->timestamps();`);
-            content.push(`\t\t});`);
-            content.push(`\t}`);
-            content.push(``);
-            content.push(`\tpublic function down(): void`);
-            content.push(`\t{`);
-            content.push(`\t\tSchema::drop('${model.table_name}');`);
-            content.push(`\t}`);
-            content.push('}', '');
-            return content.join("\n");
-          })(),
+          content: `<?php
+
+          use Illuminate\Database\Migrations\Migration;
+          use Illuminate\Database\Schema\Blueprint;
+          use Illuminate\Support\Facades\Schema;
+
+          class Create${modelNamePascal}Table extends Migration
+          {
+              /**
+               * Run the migrations.
+               *
+               * @return void
+               */
+              public function up()
+              {
+                  Schema::create('${model.table_name}', function (Blueprint $table) {
+                      $table->id();
+                      $table->timestamps();
+                  });
+              }
+
+              /**
+               * Reverse the migrations.
+               *
+               * @return void
+               */
+              public function down()
+              {
+                  Schema::dropIfExists('${model.table_name}');
+              }
+          }\n`.replace(/\n          /g, "\n"),
         };
       },
 
@@ -214,15 +225,18 @@
         const modelNamePascal = r.toPascalCase(model.table_name);
         return {
           file: `/app/Models/${modelNamePascal}.php`,
-          command: `php artisan make:controller ${modelNamePascal}Controller`,
-          content: (() => {
-            let content = ['<?php', '', `namespace \\App\\Models;`, ''];
-            content.push(`use Illuminate\\Database\\Eloquent\\Model;`, '');
-            content.push(`class ${modelNamePascal} extends Model {`);
-            content.push(`  protected $fillable = ['name'];`);
-            content.push(`}`, '');
-            return content.join("\n");
-          })(),
+          command: `php artisan make:model ${modelNamePascal}`,
+          content: `<?php
+
+          namespace App\\Models;
+
+          use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;
+          use Illuminate\\Database\\Eloquent\\Model;
+
+          class ${modelNamePascal} extends Model
+          {
+              use HasFactory;
+          }\n`.replace(/\n          /g, "\n"),
         };
       },
 
@@ -230,12 +244,17 @@
         const modelNamePascal = r.toPascalCase(model.table_name);
         return {
           file: `/app/Http/Controllers/${modelNamePascal}Controller.php`,
-          content: (() => {
-            let content = ['<?php', '', `namespace \\App\\Http\\Controllers;`, ''];
-            content.push(`class ${modelNamePascal}Controller extends Controller`, '{');
-            content.push('}', '');
-            return content.join("\n");
-          })(),
+          command: `php artisan make:controller ${modelNamePascal}Controller`,
+          content: `<?php
+
+          namespace App\\Http\\Controllers;
+
+          use Illuminate\\Http\\Request;
+
+          class ${modelNamePascal}Controller extends Controller
+          {
+              //
+          }\n`.replace(/\n          /g, "\n"),
         };
       },
 
@@ -244,17 +263,26 @@
         return {
           file: `/app/Http/Requests/${modelNamePascal}Request.php`,
           command: `php artisan make:request ${modelNamePascal}Request`,
-          content: (() => {
-            let content = ['<?php', '', `namespace \\App\\Http\\Requests;`, ''];
-            content.push(`class ${modelNamePascal}Request extends Request`, '{');
-            content.push(`\tpublic function rules() {`);
-            content.push(`\t\treturn [`);
-            content.push(`\t\t\t'name' => ['required'],`);
-            content.push(`\t\t]`);
-            content.push(`\t}`);
-            content.push('}', '');
-            return content.join("\n");
-          })(),
+          content: `<?php
+
+          namespace App\\Http\\Requests;
+
+          use Illuminate\\Foundation\\Http\\FormRequest;
+
+          class ${modelNamePascal}Request extends FormRequest
+          {
+              /**
+               * Get the validation rules that apply to the request.
+               *
+               * @return array
+               */
+              public function rules()
+              {
+                  return [
+                      'name' => ['required'],
+                  ];
+              }
+          }\n`.replace(/\n          /g, "\n"),
         };
       },
 
@@ -262,12 +290,14 @@
         const modelNamePascal = r.toPascalCase(model.table_name);
         return {
           file: `/app/Repositories/${modelNamePascal}Repository.php`,
-          content: (() => {
-            let content = ['<?php', '', `namespace \\App\\Http\\Repositories;`, ''];
-            content.push(`class ${modelNamePascal}Repository`, '{');
-            content.push('}', '');
-            return content.join("\n");
-          })(),
+          content: `<?php
+
+          namespace App\\Http\\Repositories;
+
+          class ${modelNamePascal}Repository
+          {
+              //
+          }\n`.replace(/\n          /g, "\n"),
         };
       },
     });
@@ -280,6 +310,10 @@
   const edit = reactive({
     model: false,
   });
+
+  laramake.model.add({ table_name: 'vendor_group_wordpress' });
+  laramake.model.add({ table_name: 'vendor_group_wordpress_configs' });
+  laramake.model.add({ table_name: 'vendor_vendor_group_wordpress' });
 
   // laramake.model.add({ table_name: 'user' });
   // laramake.model.add({ table_name: 'shop_store' });
