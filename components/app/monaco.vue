@@ -1,76 +1,89 @@
 <template>
-  <div ref="monaco" style="width:100%; height:300px;"></div>
+  <div
+    ref="editorRef"
+  ></div>
 </template>
 
-<script>
+<script setup>
+  import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+  import 'monaco-editor/esm/vs/basic-languages/html/html.contribution';
+  import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution';
+  import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution';
+  import 'monaco-editor/esm/vs/basic-languages/css/css.contribution';
+  import 'monaco-editor/esm/vs/basic-languages/sql/sql.contribution';
+  import 'monaco-editor/esm/vs/basic-languages/scss/scss.contribution';
+  import 'monaco-editor/esm/vs/basic-languages/php/php.contribution';
+  
   import { emmetHTML, emmetCSS, emmetJSX, expandAbbreviation } from 'emmet-monaco-es';
+  emmetHTML(monaco, ['html', 'php']);
 
-  export default {
-    props: {
-      modelValue: { default: '', type: String },
-      language: { default: 'html', type: String },
-      readOnly: { default: false, type: Boolean },
-      wordWrap: { default: 'off', type: String },
+  import { ref, reactive, watch, defineProps, defineEmits, onMounted, nextTick } from 'vue';
+
+  const props = defineProps({
+    modelValue: {
+      type: [ String ],
+      default: '',
     },
-
-    watch: {
-      modelValue(value) {
-        if (this.$el.contains(document.activeElement)) return;
-        this.setValue(value);
-        this.editorResize();
-      },
+    theme: {
+      type: [ String ],
+      default: 'vs-dark',
     },
-
-    methods: {
-      async monacoInit() {
-        const loader = await import('@monaco-editor/loader').then(m => m?.default);
-        const monaco = await loader.init();
-        emmetHTML(monaco, ['html', 'php']);
-
-        const editor = monaco.editor.create(this.$refs.monaco, {
-          value: this.modelValue,
-          language: this.language,
-          theme: 'vs-dark',
-          readOnly: this.readOnly,
-          wordWrap: this.wordWrap,
-        });
-
-        editor.getModel().onDidChangeContent(evt => {
-          this.$emit('update:modelValue', editor.getModel().getValue());
-          this.editorResize();
-        });
-
-        this.getEditor = () => editor;
-      },
-
-      getEditor() { return false; },
-
-      setValue(value) {
-        let editor = this.getEditor();
-        if (!editor) return;
-        if (! editor.getModel().setValue) return;
-        editor.getModel().setValue(value);
-      },
-
-      editorResize() {
-        let editor = this.getEditor();
-        if (! editor) return;
-        editor.layout();
-      },
-
-      onWindowResize() {
-        this.editorResize();
-      },
+    theme: {
+      type: [ String ],
+      default: 'vs-dark',
     },
-
-    mounted() {
-      this.monacoInit();
-      setTimeout(() => this.onWindowResize(), 200);
-      window.addEventListener('resize', () => this.onWindowResize());
+    language: {
+      type: [ String ],
+      default: 'html',
     },
+  });
 
-    beforeUnmount() {
-      window.addEventListener('resize', () => this.onWindowResize());
-    },
+  const emit = defineEmits([
+    'update:modelValue',
+  ]);
+
+  let editor;
+  const editorRef = ref(null);
+
+  const meta = reactive({
+    height: 100,
+  });
+
+  watch([ props ], ([ propsNew ]) => {
+    if (editor) {
+      editor.setValue(propsNew.modelValue);
+      setTimeout(monacoResize, 1);
+    }
+  });
+
+  const monacoResize = () => {
+    const width = editorRef.value.offsetWidth;
+    const height = editor.getContentHeight();
+    editor.layout({ width, height });
+    editorRef.value.style.height = `${height}px`;
   };
+
+  onMounted(() => {
+    editor = monaco.editor.create(editorRef.value, {
+      value: props.modelValue,
+      automaticLayout: true,
+      scrollBeyondLastLine: false,
+
+      // wordWrap: 'on',
+      // wrappingStrategy: 'advanced',
+      // minimap: { enabled: false },
+      // overviewRulerLanes: 0,
+
+      ...props
+    });
+
+    editor.onDidChangeModelContent(() => {
+      emit('update:modelVallue', editor.getValue());
+      monacoResize();
+    });
+    
+    nextTick(async () => {
+      setTimeout(monacoResize, 1);
+    });
+  });
 </script>

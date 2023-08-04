@@ -1,563 +1,276 @@
 <template>
   <app-layout>
-    <v-tabs v-model="tab">
-      <v-tab value="tables">Tabelas</v-tab>
-    </v-tabs>
+    <v-row>
+      <v-col cols="4">
+        <div class="bg-grey-lighten-3 pa-4 mb-5 rounded-sm font-weight-bold">
+          TABLES
+        </div>
 
-    <v-window v-model="tab">
-      <v-window-item value="tables">
-        <v-row>
-          <v-col cols="12" lg="3">
-            <v-tabs v-model="tabDatabaseTable" direction="vertical">
-              <template v-for="_table in laramake.table.list">
-                <v-tab :value="_table.id">{{ _table.name || _table.id }}</v-tab>
-              </template>
-            </v-tabs>
-            <v-btn block @click="tabDatabaseTable = laramake.table.add().id">Criar tabela</v-btn>
-          </v-col>
-          <v-col cols="12" lg="9">
-            <v-window v-model="tabDatabaseTable">
-              <template v-for="_table in laramake.table.list">
-                <v-window-item :value="_table.id">
-                  <v-text-field
-                    v-model="_table.name"
-                  >
-                    <template #prepend-inner>Tabela:</template>
-                  </v-text-field>
+        <app-list v-model="laramake.model.list">
+          <template #item="bind">
+            <v-text-field
+              v-model="bind.item.table_name"
+              :hide-details="true"
+              @update:modelValue="laramake.model.update()"
+              @focus="edit.model=bind.item"
+            />
+          </template>
+        </app-list>
+      </v-col>
+      <v-col cols="8">
+        <div v-if="edit.model">
+          <div class="bg-grey-lighten-3 pa-4 mb-5 rounded-sm font-weight-bold">
+            FIELDS
+          </div>
+        </div>
 
-                  <v-table>
-                    <colgroup>
-                      <col width="*">
-                      <col width="200px">
-                      <col width="100px">
-                    </colgroup>
-                    <thead>
-                      <tr>
-                        <th>Nome</th>
-                        <th>FK</th>
-                        <th>Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="_field in _table.fields">
-                        <td class="pa-0"><v-text-field v-model="_field.name" v-bind="{hideDetails:true}" /></td>
-                        <td class="pa-0">
-                          <div class="d-flex">
-                            <v-select v-bind="{hideDetails:true}" v-model="_field.fk.table" :items="laramake.table.list.map(item => item.name)" />
-                            <v-select v-bind="{hideDetails:true}" v-model="_field.fk.field" :items="laramake.table.fields(_field.fk.table)" />
-                          </div>
-                        </td>
-                        <td>--</td>
-                      </tr>
-                    </tbody>
-                  </v-table>
-                </v-window-item>
-              </template>
-            </v-window>
-          </v-col>
-        </v-row>
-      </v-window-item>
-    </v-window>
+        <app-list v-model="edit.model.fields">
+          <template #item="bind">
+            <div class="d-flex align-center" style="gap:10px;">
+              <v-text-field label="Name" v-model="bind.item.name" :hide-details="true" />
+              <v-menu offset="10" :close-on-content-click="false" location="bottom end" width="300">
+                <template #activator="bind2">
+                  <v-btn class="px-10" size="50" v-bind="bind2.props">Type</v-btn>
+                </template>
+                <v-card>
+                  <v-card-title>Field details</v-card-title>
+                  <v-card-text>
+                    <v-select
+                      label="Type" v-model="bind.item.type" :hide-details="true"
+                      :items="[
+                        { value: 'id', title: 'ID' },
+                        { value: 'string', title: 'String' },
+                        { value: 'text', title: 'Text' },
+                        { value: 'date', title: 'Date' },
+                        { value: 'time', title: 'Time' },
+                        { value: 'datetime', title: 'Date time' },
+                      ]"
+                    />
+                    <v-text-field
+                      label="String size"
+                      v-model="bind.item.size"
+                      v-if="['string'].includes(bind.item.type)"
+                    />
+                  </v-card-text>
+                </v-card>
+              </v-menu>
+            </div>
+          </template>
+        </app-list>
+        <br>
 
-    <v-divider class="my-5" />
-
-    <v-row no-gutters>
-      <template v-for="f in laramake.files">
-        <v-col cols="4" class="pa-1">
-          <pre class="bg-primary pa-2">{{ f.file }}</pre>
-          <pre class="bg-grey-darken-4 text-lime pa-2 overflow-auto">{{ f.content }}</pre>
-          <!-- <app-monaco :model-value="f.content" style="height:150px;" language="php" /> -->
-        </v-col>
-      </template>
+        <v-expansion-panels>
+          <template v-for="(f, i) in laramake.files">
+            <v-expansion-panel>
+              <v-expansion-panel-title>{{ i+1 }} - {{ f.file }}</v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <div class="mx-n6 mt-n2 mb-n5">
+                  <pre class="bg-blue-grey-darken-4 pa-2" v-if="f.command">{{ f.command }}</pre>
+                  <app-monaco :model-value="f.content" language="php" style="height:300px;" />
+                </div>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </template>
+        </v-expansion-panels>
+      </v-col>
     </v-row>
-
-    <!-- <pre>{{ laramake }}</pre> -->
-    <!-- <pre>{{ laramake }}</pre> -->
   </app-layout>
 </template>
 
-<script>
-  import { ref, computed } from 'vue';
+<script setup>
+  import dayjs from 'dayjs';
+  import { reactive, computed, defineProps, defineEmits } from 'vue';
 
-  export default {
-    meta: {
-      active: false,
-      icon: 'mdi-laravel',
-      name: 'Gerador Laravel',
-      description: 'Criar arquivos para o frameworl Laravel baseado em estrutura de banco de dados',
-      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/laramake',
+  const props = defineProps({
+    modelValue: {
+      type: [ String ],
+      default: '',
     },
+  });
 
-    data() {
-      return {
-        tab: 'tables',
-        tabDatabaseTable: false,
-        laramake: useLaramake(),
-      };
-    },
-  };
+  const emit = defineEmits([
+    'update:modelValue',
+  ]);
 
   const useLaramake = () => {
-    const uuid = (prefix='') => {
-      return (prefix+ [1e8] + 0).replace(/[018]/g, c =>
-        ( c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4))) ).toString(16)
-      );
-    };
+    const r = reactive({
+      model: {
+        list: [],
+        add(merge={}) {
+          merge = {
+            uuid: r.uuid(),
+            table_name: '',
+            fields: [
+              { name: 'id' },
+              { name: 'name' },
+              { name: 'created_at' },
+              { name: 'updated_at' },
+            ],
+            migration: { file: '', content: '' },
+            model: { file: '', content: '' },
+            controller: { file: '', content: '' },
+            request: { file: '', content: '' },
+            repository: { file: '', content: '' },
+            ...merge,
+          };
 
-    const fieldDefault = (merge = {}) => {
-      return {
-        id: uuid('field-'),
-        name: '',
-        type: '',
-        fk: { table: null, field: null },
-        ...merge
-      };
-    };
+          merge.fields = merge.fields.map((field) => {
+            return {
+              uuid: r.uuid(),
+              name: '',
+              type: {
+                name: '',
+                params: [],
+              },
+              ...field,
+            };
+          });
+          
+          r.model.list.push(merge);
+          r.model.update();
+        },
+        remove(model) {
+          const index = r.model.list.indexOf(model);
+          r.model.list.splice(index, 1);
+          r.model.update();
+        },
+        update() {
+          r.model.list.map((model) => {
+            model.migration = r.getMigration(model);
+            model.model = r.getModel(model);
+            model.controller = r.getController(model);
+            model.request = r.getRequest(model);
+            model.repository = r.getRepository(model);
+          });
+        },
+      },
+      files: computed(() => {
+        let files = [];
 
-    const tableFields = (table) => {
-      return [];
-    };
+        r.model.list.map((model) => {
+          if (!model.table_name) return;
+          ['migration', 'model', 'controller', 'request', 'repository'].map((attr) => {
+            files.push(model[ attr ]);
+          });
+        });
 
-    const settings = ref({
-      appName: '',
-    });
+        return files.sort((a,b) => (a.file > b.file) ? 1 : ((b.file > a.file) ? -1 : 0));
+      }),
 
-    const table = ref({
-      list: [],
-      default(merge = {}) {
-        merge.fields = (Array.isArray(merge.fields) ? merge.fields : [
-          { name: 'id', type: '' },
-          { name: 'name', type: 'varchar(255)' },
-          { name: 'created_at', type: 'datetime' },
-          { name: 'updated_at', type: 'datetime' },
-          { name: 'deleted_at', type: 'datetime' },
-        ]).map(fieldDefault);
+      uuid() {
+        return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11)
+          .replace(/[018]/g, c => (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4))) )
+          .toString(16) );
+      },
 
+      toPascalCase(str) {
+        return (str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g) || [])
+          .map(x => (x || '').charAt(0).toUpperCase() + x.slice(1).toLowerCase())
+          .join('');
+      },
+
+      getMigration(model) {
         return {
-          id: uuid('table-'),
-          name: '',
-          fields: [],
-          ...merge
+          file: `/database/migrations/`+ dayjs().format('YYYY_MM_DD_HHmmss_') +`create_${model.table_name}_table.php`,
+          command: `php artisan make:migration create_${model.table_name}_table`,
+          content: (() => {
+            let content = ['<?php', ''];
+            content.push(`use Illuminate\\Database\\Migrations\\Migration;`);
+            content.push(`use Illuminate\\Database\\Schema\\Blueprint;`);
+            content.push(`use Illuminate\\Support\\Facades\\Schema;`);
+            content.push('', `return new class extends Migration`, '{');
+            content.push(`\tpublic function up(): void`);
+            content.push(`\t{`);
+            content.push(`\t\tSchema::create('${model.table_name}', function (Blueprint $table) {`);
+            content.push(`\t\t\t$table->id();`);
+            content.push(`\t\t\t$table->timestamps();`);
+            content.push(`\t\t});`);
+            content.push(`\t}`);
+            content.push(``);
+            content.push(`\tpublic function down(): void`);
+            content.push(`\t{`);
+            content.push(`\t\tSchema::drop('${model.table_name}');`);
+            content.push(`\t}`);
+            content.push('}', '');
+            return content.join("\n");
+          })(),
         };
       },
-      add(item = {}) {
-        item = this.default(item);
-        this.list.push(item);
-        return item;
+
+      getModel(model) {
+        const modelNamePascal = r.toPascalCase(model.table_name);
+        return {
+          file: `/app/Models/${modelNamePascal}.php`,
+          command: `php artisan make:controller ${modelNamePascal}Controller`,
+          content: (() => {
+            let content = ['<?php', '', `namespace \\App\\Models;`, ''];
+            content.push(`use Illuminate\\Database\\Eloquent\\Model;`, '');
+            content.push(`class ${modelNamePascal} extends Model {`);
+            content.push(`  protected $fillable = ['name'];`);
+            content.push(`}`, '');
+            return content.join("\n");
+          })(),
+        };
       },
-      remove(item) {
-        console.log(item);
+
+      getController(model) {
+        const modelNamePascal = r.toPascalCase(model.table_name);
+        return {
+          file: `/app/Http/Controllers/${modelNamePascal}Controller.php`,
+          content: (() => {
+            let content = ['<?php', '', `namespace \\App\\Http\\Controllers;`, ''];
+            content.push(`class ${modelNamePascal}Controller extends Controller`, '{');
+            content.push('}', '');
+            return content.join("\n");
+          })(),
+        };
       },
-      fields(tableName) {
-        if (!tableName) return [];
-        return this.list.filter(table => table.name==tableName)
-          .at(0).fields.map(field => field.name);
+
+      getRequest(model) {
+        const modelNamePascal = r.toPascalCase(model.table_name);
+        return {
+          file: `/app/Http/Requests/${modelNamePascal}Request.php`,
+          command: `php artisan make:request ${modelNamePascal}Request`,
+          content: (() => {
+            let content = ['<?php', '', `namespace \\App\\Http\\Requests;`, ''];
+            content.push(`class ${modelNamePascal}Request extends Request`, '{');
+            content.push('}', '');
+            return content.join("\n");
+          })(),
+        };
+      },
+
+      getRepository(model) {
+        const modelNamePascal = r.toPascalCase(model.table_name);
+        return {
+          file: `/app/Repositories/${modelNamePascal}Repository.php`,
+          content: (() => {
+            let content = ['<?php', '', `namespace \\App\\Http\\Repositories;`, ''];
+            content.push(`class ${modelNamePascal}Repository extends Repository`, '{');
+            content.push('}', '');
+            return content.join("\n");
+          })(),
+        };
       },
     });
-
-    table.value.add({ name: 'app_user' });
-    table.value.add({ name: 'app_group' });
-    table.value.add({ name: 'app_user_group', fields: [
-      { name: 'user_id', fk: { table: 'app_user', field: 'id' } },
-      { name: 'group_id', fk: { table: 'app_group', field: 'id' } },
-    ] });
-
-    const toPascalCase = str => {
-      return (str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g) || [])
-        .map(x => (x || '').charAt(0).toUpperCase() + x.slice(1).toLowerCase())
-        .join('');
-    }
-
-    const files = computed(() => {
-      let files = [];
-
-      table.value.list.forEach(table => {
-        const tableName = toPascalCase(table.name);
-        files.push({
-          file: `/app/Models/${tableName}.php`,
-          content: (() => {
-            const fillable = table.fields
-              .filter(field => !['id', 'created_at', 'updated_at', 'deleted_at'].includes(field.name))
-              .map(field => `'${field.name}'`)
-              .join(', ');
-            const lines = ['<?php', '', `namespace \\App\\Models;`, ''];
-            lines.push('use Illuminate\\Database\\Eloquent\\Model;', '');
-            lines.push(`class ${tableName} extends Model {`);
-            lines.push(`  protected $table = '${table.name}';`);
-            lines.push(`  protected $fillable = [${fillable}];`);
-            lines.push(`}`, '');
-            return lines;
-          })(),
-        });
-      });
-      
-      table.value.list.forEach(table => {
-        const tableName = toPascalCase(table.name);
-        files.push({
-          file: `/app/Repositories/${tableName}Repository.php`,
-          content: (() => {
-            const lines = ['<?php', '', `namespace \\App\\Repositories;`, ''];
-            lines.push(`class ${tableName}Repository {`);
-            lines.push(`}`, '');
-            return lines;
-          })(),
-        });
-      });
-
-      table.value.list.forEach(table => {
-        const tableName = toPascalCase(table.name);
-        files.push({
-          file: `/app/Http/Controllers/${tableName}Controller.php`,
-          content: (() => {
-            const lines = ['<?php', '', `namespace \\App\\Http\\Controllers;`, ''];
-            lines.push(`use Illuminate\\Http\\Request;`);
-            lines.push('');
-            lines.push(`class ${tableName}Controller extends Controller {`, '');
-            lines.push(`  public function __construct() {`);
-            lines.push(`    $this->middleware('auth:api', [`);
-            lines.push(`      'except' => [],`);
-            lines.push(`    ]);`);
-            lines.push(`  }`, '');
-            lines.push(`  public function index() {`);
-            lines.push(`  }`, '');
-            lines.push(`  public function show() {`);
-            lines.push(`  }`, '');
-            lines.push(`  public function store() {`);
-            lines.push(`  }`, '');
-            lines.push(`  public function update() {`);
-            lines.push(`  }`, '');
-            lines.push(`  public function delete() {`);
-            lines.push(`  }`, '');
-            lines.push(`}`, '');
-            return lines;
-          })(),
-        });
-      });
-      
-      files.push({
-        file: `/routes/api.php`,
-        content: (() => {
-          const lines = ['<?php', ''];
-          table.value.list.forEach(table => {
-            const tableName = toPascalCase(table.name);
-            lines.push(`Route::apiResource('${table.name}', \\App\\Http\\Controllers\\${tableName}Controller::class);`);
-          });
-          lines.push('');
-          return lines;
-        })(),
-      });
-
-      return files.map(file => {
-        if (Array.isArray(file.content)) {
-          file.content = file.content.join("\n");
-        }
-        return file;
-      });
-    });
-
-    return {
-      settings,
-      table,
-      files,
-    };
+    
+    return r;
   };
 
-  class LaramakeBase {
-    constructor(params = {}) {
-      this.uuid = params.uuid || this.uuid();
-      this.onInit(params);
-    }
+  const laramake = useLaramake();
 
-    onInit(params = {}) {}
+  const edit = reactive({
+    model: false,
+  });
 
-    uuid(prefix='') {
-      return (prefix+ [1e8] + 0).replace(/[018]/g, c =>
-        ( c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4))) ).toString(16)
-      );
-    }
-
-    root() {
-      // let currentThis = this;
-      // while (currentThis) {
-      //   if (currentThis instanceof LaramakeApp) {
-      //     return currentThis;
-      //   }
-      //   currentThis = currentThis.parent();
-      // }
-    }
-
-    newInstance(staticClass, params) {
-      params = new staticClass(params);
-      let me = this;
-      params.parent = function() { return me; };
-      return params;
-    }
-
-    newInstances(staticClass, arr) {
-      return (arr || []).map(item => this.newInstance(staticClass, item));
-    }
-
-    remove(attr, uuid) {
-      if (typeof uuid=='object') uuid = uuid.uuid;
-      let items = this[attr] || [];
-      items.forEach((item, index) => {
-        if (item.uuid != uuid) return;
-        items.splice(index, 1);
-      });
-    }
-  }
-
-
-  class LaramakeApp extends LaramakeBase {
-    onInit(params = {}) {
-      this.storeId = params.storeId || false;
-
-      if (this.storageData()) {
-        params = this.storageData();
-      }
-
-      this.name = params.name || '';
-      this.database = this.newInstance(LaramakeDatabase, params.database || {});
-
-      const objProxy = new Proxy(this, {
-        set: function (target, key, value) {
-          console.log(`${key} set from ${obj.foo} to ${value}`);
-          // target[key] = value;
-          return true;
-        },
-      });
-    }
-
-    storageData() {
-      if (!this.storeId) return false;
-      try {
-        return JSON.parse(localStorage.getItem(this.storeId) || 'false') || false;
-      } catch(err) {
-        return false;
-      }
-    }
-
-    storageSave() {
-      localStorage.setItem(this.storeId, JSON.stringify(this));
-    }
-
-    databaseTableAdd(params = {}) {
-      this.database.tables.push(this.newInstance(LaramakeDatabaseTable, params));
-      this.storageSave();
-    }
-
-    databaseTableRemove(table) {
-      const index = this.database.tables.indexOf(table);
-      this.database.tables.splice(index, 1);
-      this.storageSave();
-    }
-
-    databaseTablesList() {
-      return this.database.tables.map(item => item.name);
-    }
-
-    databaseTableFieldsList(tableName) {
-      if (!tableName) return [];
-      for(let i in this.database.tables) {
-        let table = this.database.tables[i];
-        if (table.name==tableName) {
-          return table.fields.map(item => item.name);
-        }
-      }
-      return [];
-    }
-
-    projectDownload() {
-      const content = JSON.stringify(this, ' ', 2);
-      const blob = new Blob([content], { type: 'application/json' });
-
-      const link = Object.assign(document.createElement('a'), {
-        href: URL.createObjectURL(blob),
-        download: `${this.name}.json`,
-      }).click();
-    }
-
-    files() {
-      let files = [];
-
-      this.database.tables.forEach(table => {
-        try {
-          let studlyName = laravelJsStr.studly(table.name);
-          let file = `/app/Models/${studlyName}.php`;
-          let fillable = JSON.stringify(table.fields
-            .map(field => field.name)
-            .filter(field => !['created_at', 'updated_at'].includes(field))
-          ).replace(/"/g, "'");
-
-          let content = ['<?php', ''];
-          content.push(`namespace App\\Models;`, '');
-          content.push(`use Illuminate\\Database\\Eloquent\\Model;`, '');
-          content.push(`class ${studlyName} extends Model {`);
-          content.push(`  use HasFactory;`, '');
-          content.push(`  protected $table = '${table.name}';`);
-          content.push(`  protected $fillable = ${fillable};`);
-          content.push(`}`);
-
-          files.push({ file, content: content.join("\n") });
-        } catch(err) {}
-      });
-
-      this.database.tables.forEach(table => {
-        try {
-          let studlyName = laravelJsStr.studly(table.name) +'Controller';
-          let file = `/app/Http/Controllers/${studlyName}.php`;
-
-          let content = ['<?php', ''];
-          content.push(`namespace App\\Http\\Controllers;`, '');
-          content.push(`use Illuminate\\Http\\Request;`);
-          content.push(`use Illuminate\\Support\\Facades\\Route;`, '');
-          content.push(`class ${studlyName} extends Controller {`);
-          content.push(`}`);
-
-          files.push({ file, content: content.join("\n") });
-        } catch(err) {}
-      });
-
-      let content = [
-        `<?php`,
-        '',
-        'use Illuminate\\Http\\Request;',
-        'use Illuminate\\Support\\Facades\\Route;',
-        '',
-      ];
-
-      this.database.tables.forEach(table => {
-        try {
-          let studlyName = laravelJsStr.studly(table.name) +'Controller';
-          content.push(`Route::apiResource('${table.name}', '\\App\\Http\\Controllers\\${studlyName}');`);
-        } catch(err) {}
-      });
-
-      files.push({
-        file: `/routes/api.php`,
-        content: content.join("\n"),
-      });
-
-      return files;
-    }
-  }
-
-
-  class LaramakeDatabase extends LaramakeBase {
-    onInit(params = {}) {
-      this.tables = this.newInstances(LaramakeDatabaseTable, params.tables || []);
-    }
-
-    diagramSource() {
-      let source = [];
-
-      this.tables.forEach(table => {
-        source.push(`[${table.name}]`);
-        table.fields.forEach(field => {
-          let field_name = [];
-          if (field.fk_table && field.fk_field) {
-            field_name.push('+');
-          }
-          field_name.push(field.name);
-          source.push(field_name.join(''));
-        });
-        source.push('');
-      });
-
-      this.tables.forEach(table => {
-        table.fields.forEach(field => {
-          if (!field.fk_table || !field.fk_field) return;
-          source.push(`${table.name} *--* ${field.fk_table}`);
-        });
-      });
-
-      return source.join("\n");
-    }
-
-    diagramUrl() {
-      const source = this.diagramSource();
-      // console.clear(); console.log(source);
-      let data = new TextEncoder('utf-8').encode(source);
-      data = pako.deflate(data, { level: 9, to: 'string' });
-      data = btoa(data) .replace(/\+/g, '-').replace(/\//g, '_');
-      return `https://kroki.io/erd/svg/${data}`;
-    }
-  }
-
-
-  class LaramakeDatabaseTable extends LaramakeBase {
-    onInit(params = {}) {
-      this.name = params.name || '';
-      this.fields = this.newInstances(LaramakeDatabaseTableField, params.fields || [
-        { name: 'id', type: 'id' },
-        { name: 'name', type: 'string' },
-        { name: 'created_at', type: 'datetime' },
-        { name: 'updated_at', type: 'datetime' },
-      ]);
-    }
-
-    fieldAdd(param = {}) {
-      this.fields.push(this.newInstance(LaramakeDatabaseTableField, param));
-    }
-
-    fieldRemove(field) {
-      const index = this.fields.indexOf(field);
-      this.fields.splice(index, 1);
-    }
-  }
-
-
-  class LaramakeDatabaseTableField extends LaramakeBase {
-    onInit(params = {}) {
-      this.name = params.name || '';
-      this.type = params.type || '';
-      this.fk_table = params.fk_table || null;
-      this.fk_field = params.fk_field || null;
-    }
-
-    typesList() {
-      return [
-        {
-          id: 'id',
-          name: 'ID',
-          type: 'bigint',
-        },
-        {
-          id: 'string',
-          name: 'Simple text',
-          type: 'varchar(255)',
-        },
-        {
-          id: 'text',
-          name: 'Big text',
-          type: 'text',
-        },
-        {
-          id: 'enum',
-          name: 'Enum',
-          type: 'enum()',
-        },
-        {
-          id: 'datetime',
-          name: 'Date time',
-          type: 'datetime',
-        },
-        {
-          id: 'decimal',
-          name: 'Decimal',
-          type: 'decimal(10, 2)',
-        },
-        {
-          id: 'file',
-          name: 'File',
-          type: 'BLOB',
-        },
-        {
-          id: 'relation',
-          name: 'Relation',
-          type: 'bigint',
-        },
-      ];
-    }
-  };
+  // laramake.model.add({ table_name: 'user' });
+  // laramake.model.add({ table_name: 'shop_store' });
+  // laramake.model.add({ table_name: 'shop_product' });
+  // laramake.model.add({ table_name: 'shop_product_category' });
+  // laramake.model.add({ table_name: 'shop_cart' });
+  // laramake.model.add({ table_name: 'shop_order' });
+  // laramake.model.add({ table_name: 'shop_order_product' });
+  // laramake.model.add({ table_name: 'shop_order_tax' });
+  // laramake.model.update();
+  // edit.model = laramake.model.list[0];
 </script>
