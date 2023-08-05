@@ -5,53 +5,9 @@ import * as filters from '@/helpers/filters';
 
 import axios from 'axios';
 
-import 'vuetify/styles';
-import { createVuetify } from 'vuetify';
-import * as vuetifyComponents from 'vuetify/components';
-import * as vuetifyDirectives from 'vuetify/directives';
-
 import { useStorage } from '@vueuse/core';
 
 export default defineNuxtPlugin(async (nuxtApp) => {
-
-	// Vuetify
-	nuxtApp.vueApp.use(createVuetify({
-		components: vuetifyComponents,
-		directives: vuetifyDirectives,
-		icons: { defaultSet: 'mdi' },
-		// defaults: (() => {
-		// 	let inputs = {
-		// 		density: 'comfortable',
-		// 		variant: 'outlined',
-		// 	};
-
-		// 	return {
-		// 		global: {
-		// 			density: 'compact',
-		// 		},
-		// 		VBtn: { density: 'default' },
-		// 		VAutocomplete: { ...inputs },
-		// 		VTextField: { ...inputs },
-		// 		VTextarea: { ...inputs },
-		// 		VSelect: { ...inputs },
-		// 		VCombobox: { ...inputs },
-		// 	};
-		// })(),
-		theme: {
-			defaultTheme: 'light',
-			themes: {
-				light: {
-					dark: false,
-					colors: {},
-				},
-				dark: {
-					dark: true,
-					colors: {},
-				},
-			},
-		},
-	}));
-
 
 	// Axios
 	axios.interceptors.request.use(config => {

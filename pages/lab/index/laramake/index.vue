@@ -1,5 +1,7 @@
 <template>
   <app-layout>
+    <app-mermaid v-model="laramake.mermaidDiagram" />
+
     <v-row>
       <v-col cols="4">
         <div class="bg-grey-lighten-3 pa-4 mb-5 rounded-sm font-weight-bold text-uppercase">
@@ -75,6 +77,8 @@
         </v-expansion-panels>
       </v-col>
     </v-row>
+
+    <pre>laramake: {{ laramake }}</pre>
   </app-layout>
 </template>
 
@@ -155,6 +159,7 @@
             model.request = r.getRequest(model);
             model.repository = r.getRepository(model);
           });
+          r.mermaidDiagram = r.getMermaidDiagram();
         },
       },
       files: computed(() => {
@@ -169,6 +174,8 @@
 
         return files.sort((a,b) => (a.file > b.file) ? 1 : ((b.file > a.file) ? -1 : 0));
       }),
+
+      mermaidDiagram: '',
 
       uuid() {
         return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11)
@@ -300,6 +307,21 @@
           }\n`.replace(/\n          /g, "\n"),
         };
       },
+
+      getMermaidDiagram() {
+        let lines = ['erDiagram'];
+
+        r.model.list.map((model) => {
+          lines.push(`${model.table_name} {`);
+          lines.push(`\tint id`);
+          lines.push(`\tstring name`);
+          lines.push(`\tdatetime created_at`);
+          lines.push(`\tdatetime updated_at`);
+          lines.push(`}`);
+        });
+
+        return lines.join("\n");
+      },
     });
     
     return r;
@@ -311,18 +333,18 @@
     model: false,
   });
 
-  laramake.model.add({ table_name: 'vendor_group_wordpress' });
-  laramake.model.add({ table_name: 'vendor_group_wordpress_configs' });
-  laramake.model.add({ table_name: 'vendor_vendor_group_wordpress' });
+  // laramake.model.add({ table_name: 'vendor_group_wordpress' });
+  // laramake.model.add({ table_name: 'vendor_group_wordpress_configs' });
+  // laramake.model.add({ table_name: 'vendor_vendor_group_wordpress' });
 
-  // laramake.model.add({ table_name: 'user' });
-  // laramake.model.add({ table_name: 'shop_store' });
-  // laramake.model.add({ table_name: 'shop_product' });
-  // laramake.model.add({ table_name: 'shop_product_category' });
-  // laramake.model.add({ table_name: 'shop_cart' });
-  // laramake.model.add({ table_name: 'shop_order' });
-  // laramake.model.add({ table_name: 'shop_order_product' });
-  // laramake.model.add({ table_name: 'shop_order_tax' });
-  // laramake.model.update();
-  // edit.model = laramake.model.list[0];
+  laramake.model.add({ table_name: 'user' });
+  laramake.model.add({ table_name: 'shop_store' });
+  laramake.model.add({ table_name: 'shop_product' });
+  laramake.model.add({ table_name: 'shop_product_category' });
+  laramake.model.add({ table_name: 'shop_cart' });
+  laramake.model.add({ table_name: 'shop_order' });
+  laramake.model.add({ table_name: 'shop_order_product' });
+  laramake.model.add({ table_name: 'shop_order_tax' });
+  laramake.model.update();
+  edit.model = laramake.model.list[0];
 </script>
