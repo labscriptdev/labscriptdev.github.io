@@ -11,6 +11,10 @@
         >
           <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
           <l-marker :latLng="{ lat: map.center[0], lng: map.center[1] }" />
+          <l-rectangle
+            :bounds="map.rectangle.bounds"
+            ref="rectangleRef"
+          />
         </l-map>
       </v-col>
 
@@ -18,20 +22,28 @@
         {{ `https://c.tile.openstreetmap.org/${map.zoom}/${map.xy[0]}/${map.xy[1]}.png` }} <br>
         <a :href="map.osmURL" target="_blank">{{ map.osmURL }}</a><br>
         <img :src="`https://c.tile.openstreetmap.org/${map.zoom}/${map.xy[0]}/${map.xy[1]}.png`" alt="">
+        <!-- <v-list>
+          <v-list-item v-for="e in map.osm.data.elements">
+            {{ e }}
+          </v-list-item>
+        </v-list>
+        <pre>{{ map.osm.data }}</pre> -->
       </v-col>
     </v-row>
 
+    <pre>map.rectangle.bounds: {{ map.rectangle.bounds }}</pre>
     <pre>char: {{ char }}</pre>
-    <pre>map: {{ map }}</pre>
-    <pre>map2: {{ map2 }}</pre>
+    <pre>map.osm: {{ map.osm }}</pre>
+    <!-- <pre>map: {{ map }}</pre> -->
   </app-layout>
 </template>
 
 <script setup>
+  import axios from 'axios';
   import { reactive, ref, computed, onMounted } from 'vue';
 
   import 'leaflet/dist/leaflet.css';
-  import { LMap, LTileLayer, LMarker, LIcon } from '@vue-leaflet/vue-leaflet';
+  import { LMap, LTileLayer, LMarker, LIcon, LRectangle } from '@vue-leaflet/vue-leaflet';
 
   import hotkeys from 'hotkeys-js';
 
@@ -66,14 +78,30 @@
   });
 
   const mapRef = ref(null);
+  const rectangleRef = ref(null);
   const map = reactive({
+    xyid: '0-0',
     zoom: 18,
     center: [ 0, 0 ],
     xy: [ 0, 0 ],
     bboxArr: [ 0, 0, 0, 0 ],
     bboxObj: { _southWest: { lat:0, lng:0 }, _northEast: { lat:0, lng:0 } },
-    osmURL: '',
-    update() {
+    rectangle: {
+      size: .001,
+      bounds: [
+        [ 0, 0 ],
+        [ 0, 0 ],
+      ],
+    },
+    osm: {
+      url: '',
+      data: { elements: [] },
+    },
+    xToLon(x) {
+      // console.log({ x }, this.zoom);
+      return this.zoom * x;
+    },
+    async update() {
       const lat = char.coords[0];
       const lng = char.coords[1];
 
@@ -95,16 +123,53 @@
         map.xy[1] = R * Math.log((1 + sin) / (1 - sin)) / 2;
         map.xy[1] = scale * (-sphericalScale * map.xy[1] + 0.5);
         map.xy[1] = Math.floor(map.xy[1] / 256);
+        
+        map.xyid = map.xy.join('-');
       })();
+
 
       if (mapRef.value && mapRef.value.leafletObject) {
         const bbox = mapRef.value.leafletObject.getBounds();
         map.bboxObj = bbox;
         map.bboxArr = [ bbox._southWest.lat, bbox._southWest.lng, bbox._northEast.lat, bbox._northEast.lng ];
-        map.osmURL = `https://overpass-api.de/api/interpreter?data=[out:json];node(${map.bboxArr.join(',')});out;`;
-
         mapRef.value.leafletObject.panTo(map.center);
       }
+
+      // Rectangle size
+      (async () => {
+        const { size, bounds } = map.rectangle;
+
+        const loadOsmData = async () => {
+          const bbox = [ ...bounds[0], ...bounds[1] ];
+          map.osm.url = `https://overpass-api.de/api/interpreter?data=[out:json];node(${bbox.join(',')});out;`;
+          const { data } = await axios.get(map.osm.url);
+          map.osm.data = data;
+        };
+
+        if ('[[0,0],[0,0]]'==JSON.stringify(bounds)) {
+          bounds[0] = [ map.center[0]-size, map.center[1]-size ];
+          bounds[1] = [ map.center[0]+size, map.center[1]+size ];
+          await loadOsmData();
+        }
+
+        if (
+          char.coords[0] < bounds[0][0]
+          || char.coords[0] > bounds[1][0]
+          || char.coords[1] < bounds[0][1]
+          || char.coords[1] > bounds[1][1]
+        ) {
+          bounds[0] = [ map.center[0]-size, map.center[1]-size ];
+          bounds[1] = [ map.center[0]+size, map.center[1]+size ];
+          await loadOsmData();
+        }
+
+        // bounds[0] = [ map.center[0]-size, map.center[1]-size ];
+        // bounds[1] = [ map.center[0]+size, map.center[1]+size ];
+
+        if (rectangleRef.value) {
+          rectangleRef.value.leafletObject.setBounds(bounds);
+        }
+      })();
     },
   });
 
