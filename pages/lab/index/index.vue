@@ -1,7 +1,5 @@
 <template>
-  <div>
-    Default demo
-  </div>
+  <div></div>
 </template>
 
 <script>
