@@ -1,13 +1,11 @@
 <template>
   <Teleport to="body">
-    <v-navigation-drawer :model-value="true" v-if="edit.element" width="400" location="end">
+    <v-navigation-drawer :model-value="true" v-if="edit.show" width="400" location="end">
       <div class="d-flex flex-column" style="height:100vh;">
         <div>
           <v-tabs v-model="edit.tab">
             <v-tab value="elements">Elements</v-tab>
-            <v-tab value="element">Element</v-tab>
-            <v-tab value="column">Column</v-tab>
-            <v-tab value="section">Section</v-tab>
+            <v-tab value="element" v-if="edit.element">Element</v-tab>
           </v-tabs>
         </div>
 
@@ -26,52 +24,86 @@
               </v-list>
             </v-window-item>
 
-            <v-window-item value="element">
+            <v-window-item value="element" v-if="edit.element">
+              <v-list-subheader>Element</v-list-subheader>
               <component v-if="edit.element" :is="edit.element.component" v-model="edit.element.model" :editor="true" />
-            </v-window-item>
 
-            <v-window-item value="column">
-              <pre>{{ edit.column }}</pre>
-            </v-window-item>
+              <v-tabs v-model="edit.device">
+                <template v-for="d in edit.devices">
+                  <v-tab :value="d.id">
+                    <v-icon :icon="d.icon" />
+                  </v-tab>
+                </template>
+              </v-tabs>
 
-            <v-window-item value="section">
-              <pre>{{ edit.section }}</pre>
+              <v-window v-model="edit.device">
+                <template v-for="d in edit.devices">
+                  <v-window-item :value="d.id">
+                    <v-list-subheader>Column</v-list-subheader>
+                    <v-text-field label="Width" v-model="edit.column.props[ d.id ]['width']" />
+                    <!-- <pre>{{ edit.column.props[ d.id ] }}</pre> -->
+      
+                    <v-list-subheader>Section</v-list-subheader>
+                    <v-checkbox label="Full width" v-model="edit.section.props[ d.id ]['full']" />
+                    <!-- <pre>{{ edit.section.props[ d.id ] }}</pre> -->
+                  </v-window-item>
+                </template>
+              </v-window>
             </v-window-item>
           </v-window>
         </div>
 
-        <div>
-          <v-btn block v-if="edit.element" @click="edit.clear()">Close</v-btn>
+        <div class="d-flex">
+          <div class="flex-grow-1" v-if="edit.element">
+            <v-btn block @click="edit.clear()">Clear</v-btn>
+          </div>
+          <div class="flex-grow-1">
+            <v-btn block @click="edit.close()">Close</v-btn>
+          </div>
         </div>
       </div>
     </v-navigation-drawer>
   </Teleport>
 
   <div>
-    <template v-for="s in modelValue.sections">
-      <template v-for="c in s.columns">
-        <template v-for="e in c.elements">
-          <div @click="edit.set(e, c, s); edit.setTab('element');">
-            <component :is="e.component" v-model="e.model" :editor="false" />
-          </div>
+    <template v-for="d in edit.devices">
+      <template v-if="d.active">
+        <template v-for="s in modelValue.sections">
+          <v-container :class="[ s.id, 'border' ]" :fluid="s.props[ d.id ]['full']">
+            <template v-for="c in s.columns">
+              <template v-for="e in c.elements">
+                <div @click="edit.set(e, c, s); edit.setTab('element');">
+                  <component :is="e.component" v-model="e.model" :editor="false" />
+                </div>
+              </template>
+            </template>
+          </v-container>
         </template>
       </template>
     </template>
   </div>
 
   <v-row no-gutters>
-    <v-col cols="6"><pre>elements: {{ elements }}</pre></v-col>
-    <v-col cols="6"><pre>modelValue: {{ modelValue }}</pre></v-col>
+    <v-col cols="6"><pre class="overflow-auto">elements: {{ elements }}</pre></v-col>
+    <v-col cols="6"><pre class="overflow-auto">modelValue: {{ modelValue }}</pre></v-col>
+    <!-- <v-col cols="6"><pre class="overflow-auto">modelValue.sections[0].columns[0].elements: {{ modelValue.sections[0].columns[0].elements }}</pre></v-col> -->
   </v-row>
 </template>
 
 <script setup>
-  import { reactive, defineProps, defineEmits, onMounted } from 'vue';
+  import { reactive, defineProps, defineEmits, computed, onMounted } from 'vue';
+  
+  import { useDisplay } from 'vuetify';
+  const display = useDisplay();
 
   const props = defineProps({
     modelValue: {
       type: [ Object ],
       default: () => ({}),
+    },
+    editable: {
+      type: [ Boolean ],
+      default: true,
     },
   });
 
@@ -80,6 +112,7 @@
   ]);
 
   const edit = reactive({
+    show: false,
     tab: 'elements',
     element: false,
     column: false,
@@ -93,6 +126,7 @@
       edit.column.elements.push(element2);
     },
     set(element, column=null, section=null) {
+      edit.show = true;
       edit.element = element;
       edit.column = column;
       edit.section = section;
@@ -101,7 +135,29 @@
       edit.element = false;
       edit.column = false;
       edit.section = false;
+      edit.setTab('elements');
     },
+    close() {
+      edit.show = false;
+      edit.setTab('elements');
+    },
+    device: 'desktop',
+    devices: computed(() => {
+      return [
+        {
+          id: 'mobile',
+          name: 'Mobile',
+          icon: 'carbon:mobile',
+          active: display.mobile.value,
+        },
+        {
+          id: 'desktop',
+          name: 'Desktop',
+          icon: 'ph:desktop',
+          active: !display.mobile.value,
+        },
+      ];
+    }),
   });
 
   // console.clear(); console.log(import.meta);
