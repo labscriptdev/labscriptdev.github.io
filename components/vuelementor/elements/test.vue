@@ -1,6 +1,6 @@
 <template>
   <div v-if="!props.editor">
-    <v-sheet elevation="5" width="400" height="400" class="d-flex align-center justify-center">
+    <v-sheet elevation="5" width="150" height="150" class="d-flex align-center justify-center">
       <div style="white-space:pre; text-align:center;" v-html="modelValue.text"></div>
     </v-sheet>
   </div>

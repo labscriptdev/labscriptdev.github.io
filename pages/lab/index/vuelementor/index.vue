@@ -1,7 +1,7 @@
 <template>
   <app-layout>
     <vuelementor v-model="content" />
-    <pre>content: {{ content }}</pre>
+    <!-- <pre>content: {{ content }}</pre> -->
   </app-layout>
 </template>
 

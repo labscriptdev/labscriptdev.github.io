@@ -58,6 +58,11 @@
       </template>
     </template>
   </div>
+
+  <v-row no-gutters>
+    <v-col cols="6"><pre>elements: {{ elements }}</pre></v-col>
+    <v-col cols="6"><pre>modelValue: {{ modelValue }}</pre></v-col>
+  </v-row>
 </template>
 
 <script setup>
@@ -83,10 +88,9 @@
       edit.tab = tab;
     },
     addElement(element) {
-      edit.column.elements.push(element);
-      console.log(element);
-      console.log(edit.column.elements);
-      console.log(modelValue);
+      const element2 = { ...element };
+      element2.model = JSON.parse(JSON.stringify(element2.model));
+      edit.column.elements.push(element2);
     },
     set(element, column=null, section=null) {
       edit.element = element;
