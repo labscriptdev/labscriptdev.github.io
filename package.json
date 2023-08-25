@@ -30,6 +30,7 @@
     "dayjs": "^1.11.7",
     "emmet-monaco-es": "^5.1.2",
     "enable3d": "^0.25.3",
+    "fabric": "^5.3.0",
     "fs-extra": "^11.1.0",
     "gh-pages": "^4.0.0",
     "hotkeys-js": "^3.12.0",

@@ -169,7 +169,7 @@
 
     data() {
       return {
-        drawer: true,
+        drawer: null,
         useDisplay: useDisplay(),
         page: {
           params: {
