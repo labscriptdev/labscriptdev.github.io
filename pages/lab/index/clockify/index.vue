@@ -10,57 +10,52 @@
           </div>
           <v-btn @click="clockify.monthAdd(1)">Próximo mês</v-btn>
         </div>
-        <v-slide-group
-          :model-value="$dayjs(clockify.params.dateToday).format('YYYY-MM-DD')"
-          show-arrows
-          center-active
-          class="elevation-2 py-3"
-        >
-          <v-slide-group-item
-            v-for="d in clockify.dates"
-            :key="d.id"
-            :value="d.dayjs.format('YYYY-MM-DD')"
-          >
-            <div
-              class="d-flex flex-column border rounded mx-1"
-              :class="{
-                'bg-green-lighten-4': d.is.today,
-                'bg-grey-lighten-4': !d.is.today,
-              }"
-              style="gap:2px; padding:2px; min-width:70px; max-width:70px; height:300px;"
-            >
+
+        <app-carousel gap="10px" :scroll-size="600" :actions-show="false">
+          <template #default>
+            <template v-for="d in clockify.dates">
               <div
-                class="text-center py-2 fw-bold rounded"
+                class="d-flex flex-column border rounded"
                 :class="{
-                  'bg-green-lighten-2': d.is.today,
-                  'bg-grey-lighten-2': !d.is.today,
+                  'bg-green-lighten-4': d.is.today,
+                  'bg-grey-lighten-4': !d.is.today,
                 }"
-                style="font-size:12px;"
+                style="gap:2px; padding:2px; min-width:70px; max-width:70px; height:300px;"
               >
-                <div>{{ d.dayjs.format('ddd') }}</div>
-                <div>{{ d.dayjs.format('DD') }}</div>
-                <div style="white-space:nowrap; font-size:10px;">&nbsp; {{ clockify.timeHumanize(d.entries.reduce((a, b) => a + b.workedMinutes, 0)) }}</div>
-              </div>
-              <div class="flex-grow-1 d-flex flex-column justify-end" style="gap:3px;">
                 <div
-                  v-for="e in d.entries"
-                  :title="`${e.description} - ${e.workedMinutes} minutes worked`"
-                  class="text-center overflow-hidden d-flex align-center justify-center rounded"
+                  class="text-center py-2 fw-bold rounded"
                   :class="{
-                    'bg-green-lighten-2': (clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
-                    'bg-grey-lighten-2': !(clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
+                    'bg-green-lighten-2': d.is.today,
+                    'bg-grey-lighten-2': !d.is.today,
                   }"
-                  :style="{ height: `${e.workedMinutesPercent}%` }"
-                  style="font-size:10px; white-space:nowrap;"
+                  style="font-size:12px;"
                 >
-                  <div>
-                    {{ clockify.timeHumanize(e.workedMinutes) }}
+                  <div>{{ d.dayjs.format('ddd') }}</div>
+                  <div>{{ d.dayjs.format('DD') }}</div>
+                  <div style="white-space:nowrap; font-size:10px;">&nbsp; {{ clockify.timeHumanize(d.entries.reduce((a, b) => a + b.workedMinutes, 0)) }}</div>
+                </div>
+                <div class="flex-grow-1 d-flex flex-column justify-end" style="gap:3px;">
+                  <div
+                    v-for="e in d.entries"
+                    :title="`${e.description} - ${e.workedMinutes} minutes worked`"
+                    class="text-center overflow-hidden d-flex align-center justify-center rounded"
+                    :class="{
+                      'bg-green-lighten-2': (clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
+                      'bg-grey-lighten-2': !(clockify.timeEntry.working && clockify.timeEntry.working.id==e.id),
+                    }"
+                    :style="{ height: `${e.workedMinutesPercent}%` }"
+                    style="font-size:10px; white-space:nowrap;"
+                  >
+                    <div>
+                      {{ clockify.timeHumanize(e.workedMinutes) }}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </v-slide-group-item>
-        </v-slide-group>
+            </template>
+          </template>
+        </app-carousel>
+        <!-- <pre>clockify.dates: {{ clockify.dates }}</pre> -->
       </v-col>
     </v-row>
 
@@ -444,9 +439,15 @@
     data() {
       return {
         clockify: useClockify({
+          params: { month: this.$route.query.month || null },
           timeEntryParse(entry) {
             entry.workedMinutesPercent = Math.min(100, entry.workedMinutes / (60 * 14) * 100);
             return entry;
+          },
+          onDateChange: (clockify) => {
+            this.$router.push({
+              query: { month: clockify.params.month },
+            });
           },
         }),
         calendarDisplay: 'range',

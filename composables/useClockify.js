@@ -14,16 +14,34 @@ export default function(options = {}) {
     storageKey: 'clockify',
     params: {},
     timeEntryParse: (entry) => entry,
+    onDateChange: () => {},
     ...options
   };
 
   options.params = {
-    dateStart:  $dayjs().startOf('month').format('YYYY-MM-DDTHH:mm:ss.000z'),
-    dateFinal: $dayjs().endOf('month').format('YYYY-MM-DDTHH:mm:ss.000z'),
-    dateToday: $dayjs.utc().format('YYYY-MM-DDTHH:mm:ss.000z'),
-    workspaceId: false,
+    month: null,
+    dateStart: null,
+    dateFinal: null,
+    dateToday: null,
+    workspaceId: null,
     ...options.params
   };
+
+  if (options.params.month===null) {
+    options.params.month = $dayjs().startOf('month').format('YYYY-MM');
+  }
+
+  if (options.params.dateStart===null) {
+    options.params.dateStart = $dayjs().startOf('month').format(`${options.params.month}-DDTHH:mm:ss.000z`);
+  }
+  
+  if (options.params.dateFinal===null) {
+    options.params.dateFinal = $dayjs().endOf('month').format(`${options.params.month}-DDTHH:mm:ss.000z`);
+  }
+  
+  if (options.params.dateToday===null) {
+    options.params.dateToday = $dayjs.utc().format('YYYY-MM-DDTHH:mm:ss.000z');
+  }
 
   const storage = useStorage(options.storageKey, {
     token: '',
@@ -374,7 +392,6 @@ export default function(options = {}) {
             });
           });
 
-          // console.log(JSON.stringify({ labels, datasets }, ' ', 2));
           return { labels, datasets };
         },
       });
@@ -392,7 +409,6 @@ export default function(options = {}) {
         },
         data: () => {
           const labels = this.dates.map(item => item.dayjs.format('DD ddd'));
-          console.clear();
 
           const datasets = [{
             label: 'Aaa',
@@ -403,7 +419,6 @@ export default function(options = {}) {
             }),
           }];
 
-          console.log(JSON.stringify({ datasets }, ' ', 2));
           return { labels, datasets };
         },
       });
@@ -525,8 +540,10 @@ export default function(options = {}) {
     monthAdd(n) {
       const nextMonthStart = $dayjs(r.value.params.dateFinal).add(n, 'month').startOf('month');
       const nextMonthFinal = $dayjs(nextMonthStart).endOf('month');
+      r.value.params.month = nextMonthStart.format('YYYY-MM');
       r.value.params.dateStart = nextMonthStart.format('YYYY-MM-DDTHH:mm:ss.000z');
       r.value.params.dateFinal = nextMonthFinal.format('YYYY-MM-DDTHH:mm:ss.000z');
+      options.onDateChange(r.value);
     },
 
     currencyFormat(number, decimals=2, dsep=',', tsep='.') {
