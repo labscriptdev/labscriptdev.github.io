@@ -4,6 +4,7 @@
       'app-carousel',
       (props.actionsAbsolute ? 'app-carousel--actions-absolute' : null),
       `app-carousel--orientation-${props.orientation}`,
+      (props.showScrollbar ? null : 'app-carousel--hide-scrollbar'),
     ]"
   >
     <button
@@ -60,6 +61,10 @@
     scrollSize: {
       type: [ Number ],
       default: null,
+    },
+    showScrollbar: {
+      type: [ Boolean ],
+      default: false,
     },
   });
 
@@ -127,9 +132,6 @@
     overflow: auto;
     scroll-snap-type: x mandatory;
   }
-  .app-carousel--orientation-horizontal .app-carousel__content::-webkit-scrollbar {
-    display: none;
-  }
   .app-carousel--orientation-horizontal .app-carousel__content > * {
     text-align: center;
     scroll-snap-align: center;
@@ -155,5 +157,9 @@
   }
   .app-carousel--orientation-vertical .app-carousel__next {
     display: none !important;
+  }
+
+  .app-carousel--hide-scrollbar .app-carousel__content::-webkit-scrollbar {
+    display: none;
   }
 </style>

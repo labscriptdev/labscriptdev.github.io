@@ -40,7 +40,7 @@ export default function(options = {}) {
   }
   
   if (options.params.dateToday===null) {
-    options.params.dateToday = $dayjs.utc().format('YYYY-MM-DDTHH:mm:ss.000z');
+    options.params.dateToday = $dayjs().format('YYYY-MM-DDTHH:mm:ss.000z');
   }
 
   const storage = useStorage(options.storageKey, {
@@ -144,8 +144,13 @@ export default function(options = {}) {
           try {
             const { data } = await clockifyRequest({
               url: `/workspaces/${r.value.params.workspaceId}/user/${r.value.user.data.id}/time-entries`,
-              params: { start: r.value.params.dateStart, end: r.value.params.dateFinal },
+              params: {
+                start: r.value.params.dateStart,
+                end: r.value.params.dateFinal,
+                'page-size': 100,
+              },
             });
+
             this.data = data.map(this.timeEntryParse);
             this.workedMinutes = this.data.reduce((a, b) => a + b.workedMinutes, 0);
           } catch(err) {
@@ -232,6 +237,13 @@ export default function(options = {}) {
             workingDay: ![0, 6].includes(dayjs.day()),
           },
           entries: r.value.timeEntry.data.filter(entry => {
+            // console.log({ entry, dayjs });
+            
+            // console.log('----------------------------------');
+            // console.log('$dayjs', entry.timeInterval.start.substring(0, 10));
+            // console.log(' dayjs', dayjs.format('YYYY-MM-DD'));
+            // console.log(' equal', dayjs.format('YYYY-MM-DD')==entry.timeInterval.start.substring(0, 10));
+
             return $dayjs(entry.timeInterval.start).format('YYYY-MM-DD') == dayjs.format('YYYY-MM-DD');
           }),
         };
@@ -439,8 +451,8 @@ export default function(options = {}) {
           chart.data.labels = this.dates.map(item => item.dayjs.format('DD ddd'));
 
           const params = {
-            start_date: $dayjs.utc(this.params.dateStart).format('YYYY-MM-DD'),
-            end_date: $dayjs.utc(this.params.dateFinal).format('YYYY-MM-DD'),
+            start_date: $dayjs(this.params.dateStart).format('YYYY-MM-DD'),
+            end_date: $dayjs(this.params.dateFinal).format('YYYY-MM-DD'),
             symbols: `${this.storage.currencyFrom},${this.storage.currencyTo}`,
           };
 

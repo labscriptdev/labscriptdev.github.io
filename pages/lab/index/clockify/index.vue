@@ -11,7 +11,12 @@
           <v-btn @click="clockify.monthAdd(1)">Próximo mês</v-btn>
         </div>
 
-        <app-carousel gap="10px" :scroll-size="600" :actions-show="false">
+        <app-carousel
+          gap="10px"
+          :scroll-size="600"
+          :actions-show="false"
+          :show-scrollbar="true"
+        >
           <template #default>
             <template v-for="d in clockify.dates">
               <div
@@ -55,7 +60,6 @@
             </template>
           </template>
         </app-carousel>
-        <!-- <pre>clockify.dates: {{ clockify.dates }}</pre> -->
       </v-col>
     </v-row>
 
