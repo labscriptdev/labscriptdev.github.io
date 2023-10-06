@@ -1,5 +1,5 @@
 <template>
-  <div style="position:relative; height:400px; border:solid 1px red;">
+  <div style="position:relative; height:400px;">
     <div ref="gameRef" style="height:100%;"></div>
     
     <slot name="loading" v-if="!motor.reactive.ready">
@@ -44,9 +44,6 @@
     }),
     global: reactive({}),
     el: null,
-    orbitControls: true,
-    gridHelper: true,
-    physicsDebug: true,
     scene: false,
     camera: false,
     clock: false,
@@ -61,7 +58,7 @@
       instance.input = {};
       instance.motor = motor;
       for(let attr in merge) {
-        instance[ attr ] = merge[ attr ];
+        instance[ attr ] = instance[ attr ] || merge[ attr ];
       }
       return instance;
     },
@@ -87,21 +84,14 @@
         motor.scene = new THREE.Scene();
         motor.camera = new THREE.PerspectiveCamera(50, motor.reactive.width / motor.reactive.height, 1, 1000);
         motor.clock = new THREE.Clock();
+
+        motor.physics = new AmmoPhysics(motor.scene);
+        motor.physics.debug.enable();
+        motor.physics.debug.mode(1);
         
         motor.renderer = new THREE.WebGLRenderer({ antialias: true });
         motor.reactive.frame = 0;
         motor.THREE = THREE;
-        motor.physics = new AmmoPhysics(motor.scene);
-  
-        if (motor.orbitControls) {
-          motor.orbitControls = new OrbitControls(motor.camera, motor.renderer.domElement);
-          motor.camera.position.set(0, 20, 100);
-        }
-        
-        if (motor.gridHelper) {
-          const gridHelper = Array.isArray(motor.gridHelper) ? motor.gridHelper : [ 10, 10 ];
-          motor.scene.add(motor.gridHelper = new THREE.GridHelper(gridHelper[0], gridHelper[1]));
-        }
   
         motor.el.appendChild(motor.renderer.domElement);
         motor.renderer.setSize(motor.reactive.width, motor.reactive.height);
@@ -120,7 +110,29 @@
           motor.scene.userData.scripts = [];
 
           if (motor.scripts.SceneScript) {
-            const instance = motor.getScriptInstance('SceneScript');
+            const instance = motor.getScriptInstance('SceneScript', {
+              orbitControls: false,
+              gridHelper: false,
+              physicsDebug: false,
+              scene: motor.scene,
+            });
+
+            if (instance.orbitControls) {
+              instance.orbitControls = new OrbitControls(motor.camera, motor.renderer.domElement);
+              motor.camera.position.set(0, 20, 100);
+            }
+            
+            if (instance.gridHelper) {
+              const gridHelper = Array.isArray(instance.gridHelper) ? instance.gridHelper : [ 10, 10 ];
+              instance.gridHelper = new THREE.GridHelper(gridHelper[0], gridHelper[1]);
+              motor.scene.add(instance.gridHelper);
+            }
+
+            if (instance.physicsDebug && motor.physics.debug) {
+              // motor.physics.debug.enable();
+              // motor.physics.debug.mode(2048 + 4096);
+            }
+
             motor.scene.userData.scripts.push(instance);
           }
 
@@ -151,11 +163,6 @@
             });
           });
 
-          if (motor.physicsDebug && motor.physics.debug) {
-            motor.physics.debug.enable();
-            motor.physics.debug.mode(2048 + 4096);
-          }
-
           motor.reactive.ready = true;
 
           if (window.sceneInterval) {
@@ -166,13 +173,16 @@
           }
 
           window.sceneInterval = setInterval(() => {
-            if (motor.orbitControls) {
-              motor.orbitControls.update();
-            }
+            motor.scene.userData.scripts.map((script) => {
+              if (script.orbitControls) {
+                script.orbitControls.update();
+              }
+  
+              if (script.physicsDebug) {
+                motor.physics.updateDebugger();
+              }
+            });
 
-            if (motor.physicsDebug) {
-              motor.physics.updateDebugger();
-            }
 
             motor.sceneTraverseMethod('onUpdate');
             motor.physics.update(motor.clock.getDelta() * 1000);
