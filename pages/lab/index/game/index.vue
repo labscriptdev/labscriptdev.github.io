@@ -19,7 +19,7 @@
 <script>
   export default {
     meta: {
-      active: false,
+      active: true,
       icon: 'ri:game-fill',
       name: 'Game',
       description: 'Base file structure',
