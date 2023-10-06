@@ -18,6 +18,7 @@
     meta: {
       // icon: 'mdi-numeric-1',
       name: 'Roling Stones',
+      ordr: 2,
     },
   };
 </script>
@@ -31,12 +32,10 @@
   }
 
   class SceneScript extends BaseScript {
-    constructor() {
-      super();
-      // this.orbitControls = true;
-      // this.gridHelper = true;
-      // this.physicsDebug = true;
-    }
+
+    // orbitControls = true;
+    // gridHelper = true;
+    // physicsDebug = true;
 
     onCreate() {
       this.sun = this.motor.scene.getObjectByName('sun');
@@ -70,7 +69,7 @@
     }
     onUpdate() {
       this.motor.camera.lookAt(this.stone1.position);
-      // this.motor.camera.position.lerp(this.stone1.position, .005);
+      // this.motor.camera.position.lerp(this.stone1.position, .0005);
     }
   }
 </script>

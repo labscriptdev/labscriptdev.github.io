@@ -7,8 +7,9 @@
 <script>
   export default {
     meta: {
-      icon: 'mdi-numeric-0',
+      // icon: 'mdi-numeric-0',
       name: 'Home',
+      order: 0,
     },
 
     data() {

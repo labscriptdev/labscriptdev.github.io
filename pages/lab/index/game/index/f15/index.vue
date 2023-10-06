@@ -18,6 +18,7 @@
     meta: {
       // icon: 'mdi-numeric-1',
       name: 'F-15',
+      order: 1,
     },
   };
 </script>
@@ -31,6 +32,8 @@
   }
 
   class SceneScript extends BaseScript {
+    orbitControls = true;
+    
     onCreate() {
       // console.log('SceneScript.onCreate');
       this.motor.global.test = 'aaaa';
