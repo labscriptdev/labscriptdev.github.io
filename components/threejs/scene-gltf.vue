@@ -1,112 +1,199 @@
 <template>
-  <div ref="gameRef" style="height:400px;"></div>
+  <div style="position:relative; height:400px; border:solid 1px red;">
+    <div ref="gameRef" style="height:100%;"></div>
+    
+    <slot name="loading" v-if="!motor.reactive.ready">
+      <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+        <div style="background:#ffffff; padding:10px 20px;">Loading</div>
+      </div>
+    </slot>
+
+    <slot name="content" v-if="motor.reactive.ready">Content</slot>
+    <pre style="position:absolute; bottom:0; right:0;">motor.global: {{ motor.global }}</pre>
+  </div>
 </template>
 
 <script setup>
-  import { ref, onMounted, onUnmounted, defineProps } from 'vue';
+  console.clear();
+  import { ref, reactive, onMounted, onUnmounted, defineProps } from 'vue';
 
   const gameRef = ref(null);
   const props = defineProps({
-    gameClass: { type: Function },
+    scene: {
+      type: String,
+      default: '',
+    },
+    scripts: {
+      type: Array,
+      default: () => ([]),
+    },
   });
 
   import * as THREE from 'three';
   import { PhysicsLoader } from 'enable3d';
+  import { AmmoPhysics } from '@enable3d/ammo-physics';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
   import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-  const sceneInit = (options={}) => {
-    console.clear();
-    
-    options = {
-      el: null,
-      orbitControls: false,
-      gridHelper: false,
-      ...options
-    };
+  let motor = {
+    reactive: reactive({
+      ready: false,
+      width: 0,
+      height: 0,
+      frame: 0,
+    }),
+    global: reactive({}),
+    el: null,
+    orbitControls: true,
+    gridHelper: true,
+    physicsDebug: true,
+    scene: false,
+    camera: false,
+    clock: false,
+    renderer: false,
+    scripts: {},
+    events: [],
+    THREE: false,
 
-    let gameClass = new props.gameClass;
-    
-    gameClass.options = gameClass.options || {};
-    gameClass.options = { ...options, ...gameClass.options };
+    getScriptInstance(name, merge={}) {
+      const instance = new (motor.scripts[ name ] ? motor.scripts[ name ] : class {});
+      instance.keyboard = {};
+      instance.input = {};
+      instance.motor = motor;
+      for(let attr in merge) {
+        instance[ attr ] = merge[ attr ];
+      }
+      return instance;
+    },
 
-    gameClass.width = options.el.offsetWidth;
-    gameClass.height = options.el.offsetHeight;
-    gameClass.scene = new THREE.Scene();
-
-    gameClass.camera = new THREE.PerspectiveCamera(50, gameClass.width / gameClass.height, 1, 1000);
-
-    gameClass.clock = new THREE.Clock();
-    gameClass.renderer = new THREE.WebGLRenderer({ antialias: true });
-    // gameClass.renderer = new THREE.WebGPURenderer({ antialias: true });
-    gameClass.frame = 0;
-    gameClass.THREE = THREE;
-    gameClass.input = {};
-
-    options.el.appendChild(gameClass.renderer.domElement);
-    gameClass.renderer.setSize(gameClass.width, gameClass.height);
-
-    if (gameClass.options.orbitControls) {
-      gameClass.orbitControls = new OrbitControls(gameClass.camera, gameClass.renderer.domElement);
-      gameClass.camera.position.set(0, 20, 100);
-    }
-    
-    if (gameClass.options.gridHelper) {
-      const gridHelper = Array.isArray(gameClass.options.gridHelper) ? gameClass.options.gridHelper : [ 10, 10 ];
-      gameClass.scene.add(gameClass.gridHelper = new THREE.GridHelper(gridHelper[0], gridHelper[1]));
-    }
-
-    PhysicsLoader('/assets/ammo', () => {
-      (new GLTFLoader()).load('/assets/threejs/f15/scene.glb', (gltf) => {
-        gameClass.scene.add(gltf.scene);
-
-        if (window.sceneInterval) {
-          clearInterval(window.sceneInterval);
-          gameClass.frame = 0;
-          gameClass.onCreate(gameClass);
-        } else {
-          gameClass.onCreate(gameClass);
+    sceneTraverseMethod(methodName, arg1=null) {
+      motor.scene.traverse((object) => {
+        if (Array.isArray(object.userData.scripts)) {
+          object.userData.scripts.map(script => {
+            if (typeof script[ methodName ]=='function') {
+              const data = script[ methodName ](arg1);
+            }
+          });
         }
+      });
+    },
 
-        window.sceneInterval = setInterval(() => {
-          gameClass.onUpdate(gameClass);
+    onMounted() {
+      PhysicsLoader('/assets/ammo', () => {
+        motor.el = gameRef.value;
+        motor.reactive.width = motor.el.offsetWidth;
+        motor.reactive.height = motor.el.offsetHeight;
+        
+        motor.scene = new THREE.Scene();
+        motor.camera = new THREE.PerspectiveCamera(50, motor.reactive.width / motor.reactive.height, 1, 1000);
+        motor.clock = new THREE.Clock();
+        
+        motor.renderer = new THREE.WebGLRenderer({ antialias: true });
+        motor.reactive.frame = 0;
+        motor.THREE = THREE;
+        motor.physics = new AmmoPhysics(motor.scene);
+  
+        if (motor.orbitControls) {
+          motor.orbitControls = new OrbitControls(motor.camera, motor.renderer.domElement);
+          motor.camera.position.set(0, 20, 100);
+        }
+        
+        if (motor.gridHelper) {
+          const gridHelper = Array.isArray(motor.gridHelper) ? motor.gridHelper : [ 10, 10 ];
+          motor.scene.add(motor.gridHelper = new THREE.GridHelper(gridHelper[0], gridHelper[1]));
+        }
+  
+        motor.el.appendChild(motor.renderer.domElement);
+        motor.renderer.setSize(motor.reactive.width, motor.reactive.height);
+  
+        motor.events.push([ window, 'resize', (ev) => {
+          motor.reactive.width = motor.el.offsetWidth;
+          motor.reactive.height = motor.el.offsetHeight;
+          motor.renderer.setSize(motor.reactive.width, motor.reactive.height);
+        }]);
 
-          if (gameClass.options.orbitControls) {
-            gameClass.orbitControls.update();
+        props.scripts.map((script) => {
+          motor.scripts[ script.name ] = script;
+        });
+
+        (new GLTFLoader()).load(props.scene, (gltf) => {
+          motor.scene.userData.scripts = [];
+
+          if (motor.scripts.SceneScript) {
+            const instance = motor.getScriptInstance('SceneScript');
+            motor.scene.userData.scripts.push(instance);
           }
 
-          gameClass.renderer.render(gameClass.scene, gameClass.camera);
-          gameClass.frame++;
-        }, 1000/60);
+          motor.scene.add(gltf.scene);
+          
+          gltf.scene.traverse((object) => {
+            ['script0', 'script1', 'script2', 'script3', 'script4', 'script5', 'script6', 'script7', 'script8', 'script9'].map((attr) => {
+              if (object.userData[attr]) {
+                object.userData.scripts = [];
+                const instance = motor.getScriptInstance(object.userData[attr], { object });
+                object.userData.scripts.push(instance);
+                delete object.userData[attr];
+
+                motor.events.push([ document, 'keydown', (ev) => {
+                  instance.keyboard[ ev.key ] = true;
+                  if (typeof instance.onInput=='function') {
+                    instance.input = instance.onInput(instance.keyboard);
+                  }
+                }]);
+                
+                motor.events.push([ document, 'keyup', (ev) => {
+                  delete instance.keyboard[ ev.key ];
+                  if (typeof instance.onInput=='function') {
+                    instance.input = instance.onInput(instance.keyboard);
+                  }
+                }]);
+              }
+            });
+          });
+
+          if (motor.physicsDebug && motor.physics.debug) {
+            motor.physics.debug.enable();
+            motor.physics.debug.mode(2048 + 4096);
+          }
+
+          motor.reactive.ready = true;
+
+          if (window.sceneInterval) {
+            clearInterval(window.sceneInterval);
+            motor.sceneTraverseMethod('onCreate');
+          } else {
+            motor.sceneTraverseMethod('onCreate');
+          }
+
+          window.sceneInterval = setInterval(() => {
+            if (motor.orbitControls) {
+              motor.orbitControls.update();
+            }
+
+            if (motor.physicsDebug) {
+              motor.physics.updateDebugger();
+            }
+
+            motor.sceneTraverseMethod('onUpdate');
+            motor.physics.update(motor.clock.getDelta() * 1000);
+            motor.renderer.render(motor.scene, motor.camera);
+            motor.reactive.frame++;
+          }, 1000/60);
+
+          motor.events.map(([ target, event, callback ]) => {
+            target.addEventListener(event, callback);
+          });
+        });
       });
-    });
+    },
 
-    return gameClass;
+    onUnmounted() {
+      motor.events.map(([ target, event, callback ]) => {
+        target.removeEventListener(event, callback);
+      });
+    },
   };
 
-  const keyboardDownHandler = (ev) => {
-    if (gameClass && typeof gameClass.onInput=='function') {
-      gameClass.input = gameClass.onInput(ev);
-      console.log(gameClass.input);
-    }
-  };
-
-  const keyboardUpHandler = (ev) => {
-    gameClass.input = {};
-  };
-
-  let gameClass;
-  onMounted(() => {
-    gameClass = sceneInit({
-      el: gameRef.value,
-    });
-
-    document.addEventListener('keydown', keyboardDownHandler);
-    document.addEventListener('keyup', keyboardUpHandler);
-  });
-
-  onUnmounted(() => {
-    document.removeEventListener('keydown', keyboardDownHandler);
-    document.removeEventListener('keyup', keyboardUpHandler);
-  });
+  onMounted(motor.onMounted);
+  onUnmounted(motor.onUnmounted);
 </script>

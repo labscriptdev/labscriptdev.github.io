@@ -1,8 +1,16 @@
 <template>
   <threejs-scene-gltf
     style="height:600px;"
-    :game-class="f15"
-  ></threejs-scene-gltf>
+    scene="/assets/threejs/f15/scene.glb"
+    :scripts="[ SceneScript, AirplaneScript ]"
+  >
+    <!-- <template #loading>
+      <div>Loading content</div>
+    </template> -->
+    <template #content>
+      <div style="position:absolute; bottom:0; left:0;">Default content</div>
+    </template>
+  </threejs-scene-gltf>
 </template>
 
 <script>
@@ -15,62 +23,56 @@
 </script>
 
 <script setup>
-  const f15 = class {
+  class BaseScript {
+    onInput() {}
+    onCreate() {}
+    onUpdate() {}
+    onDelete() {}
+  }
 
-    options = {
-      // orbitControls: true,
-      // gridHelper: [ 100, 10 ],
-    };
+  class SceneScript extends BaseScript {
+    onCreate() {
+      // console.log('SceneScript.onCreate');
+      this.motor.global.test = 'aaaa';
+    }
+    onUpdate() {
+      // console.log('SceneScript.onUpdate');
+    }
+  }
 
-    onInput(ev) {
+  class AirplaneScript extends BaseScript {
+    onInput(keyboard) {
       return {
-        up: ev.key=='w',
-        down: ev.key=='s',
-        left: ev.key=='a',
-        right: ev.key=='d',
+        up: keyboard.w,
+        down: keyboard.s,
+        left: keyboard.a,
+        right: keyboard.d,
       };
     }
+    onCreate() {
+      this.rotationSpeed = .05;
+      this.camera = this.motor.camera;
 
-    onCreate({ THREE, scene }) {
-      this.player = scene.getObjectByName('player');
-      this.camera.position.y = 5;
-      
-      this.sun = scene.getObjectByName('sun');
-      this.sun.intensity = 1;
-
-      scene.traverse((object) => {
-        object.castShadow = true;
-        object.receiveShadow = true;
-      });
-
-      // console.log(player.userData);
+      this.sun = this.motor.scene.getObjectByName('sun');
+      this.sun.intensity = 2;
     }
-
-    onUpdate({ THREE, camera }) {
-      this.player.translateX(.5);
-
-      const lookAt = this.player.position.clone().add(new THREE.Vector3(100, 0, 0));
-      camera.lookAt(lookAt);
-      // camera.position.copy(this.player.position).add(new THREE.Vector3(-20, 10, 0));
-      camera.position.copy(this.player.position).add(new THREE.Vector3(-50, 50, 0));
-
-      const rotationSpeed = .05;
+    onUpdate() {
+      const { THREE } = this.motor;
+      this.object.translateX(.5);
+      this.camera.lookAt(this.object.position);
 
       if (this.input.up) {
-        this.player.rotateOnAxis(new THREE.Vector3(0, 0, 1), rotationSpeed);
+        this.object.rotateOnAxis(new THREE.Vector3(0, 0, 1), this.rotationSpeed);
       }
-      
       if (this.input.down) {
-        this.player.rotateOnAxis(new THREE.Vector3(0, 0, 1), -rotationSpeed);
+        this.object.rotateOnAxis(new THREE.Vector3(0, 0, 1), -this.rotationSpeed);
       }
-      
       if (this.input.left) {
-        this.player.rotateOnAxis(new THREE.Vector3(0, 1, 0), rotationSpeed);
+        this.object.rotateOnAxis(new THREE.Vector3(0, 1, 0), this.rotationSpeed);
       }
-      
       if (this.input.right) {
-        this.player.rotateOnAxis(new THREE.Vector3(0, 1, 0), -rotationSpeed);
+        this.object.rotateOnAxis(new THREE.Vector3(0, 1, 0), -this.rotationSpeed);
       }
     }
-  };
+  }
 </script>
