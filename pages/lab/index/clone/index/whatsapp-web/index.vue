@@ -1,4 +1,5 @@
 <template>
+  <!-- Firma App: https://www.figma.com/file/MLx2s0JIafLG8G359MGBNJ/WhatsApp-UI-Screens-(Community)?type=design&node-id=0-8102&mode=design&t=S4i3xqggv9zlrvBY-0 -->
   <div class="d-flex mx-auto" style="max-width:1400px;">
 
     <!-- Contacts -->
