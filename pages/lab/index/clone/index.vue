@@ -1,24 +1,7 @@
 <template>
   <app-layout :container-card="false" container-width="100%">
 
-    <div class="rounded overflow-hidden">
-      <v-system-bar
-        color="primary"
-        style="position:static!important; width:100%!important;"
-        class="pa-4"
-      >
-        <v-icon icon="mdi-wifi-strength-4"></v-icon>
-        <v-icon icon="mdi-signal" class="ms-2"></v-icon>
-        <v-icon icon="mdi-battery" class="ms-2"></v-icon>
-        <span class="ms-2">{{ $dayjs().format('HH:mm') }}</span>
-      </v-system-bar>
-      <div class="page-lab-clone-system-content bg-white" :style="style">
-        <nuxt-page />
-        <!-- <div style="position:relative; max-width:1200px; height:50%; margin:0 auto; border:solid 1px red;">
-          <nuxt-page />
-        </div> -->
-      </div>
-    </div>
+    <nuxt-page />
 
     <template #drawer>
       <v-list>
