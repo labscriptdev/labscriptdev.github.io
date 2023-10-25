@@ -1,33 +1,51 @@
 <template>
   <app-layout :container-card="false" container-width="100%">
 
-    <nuxt-page />
+    <app-device
+      :type="item.device"
+      :src="`${route.path}/${route.query.path || defaultPath}`"
+      style="height: calc(100vh - 130px);"
+    />
+
+    <!-- <ul>
+      <template v-for="_item in items">
+        <li><nuxt-link :to="`/lab/clone/${_item.path}`">{{ _item.name }}</nuxt-link></li>
+      </template>
+    </ul> -->
 
     <template #drawer>
       <v-list>
         <v-list-item
           v-for="_item in items"
           :key="_item.to"
-          :to="_item.to"
+          :to="`?path=${_item.path}`"
           :prepend-icon="_item.icon"
         >{{ _item.name }}</v-list-item>
       </v-list>
-      <v-slider :label="`Zoom: ${style.zoom}`" v-model.number="style.zoom" :min=".5" :max="2" :step="0.01" />
     </template>
   </app-layout>
 </template>
 
-<style>
-  .page-lab-clone-system-content > * {
-    position: relative;
-    height: calc(100vh - 150px) !important;
-    overflow: auto;
-  }
+<script setup>
+  import { computed } from 'vue';
 
-  /* .page-lab-clone-system-content * {
-    outline: dashed 1px #00000011;
-  } */
-</style>
+  const defaultPath = 'nubank';
+  const route = useRoute();
+
+  const items = (() => {
+    const files = Object.entries(import.meta.glob('./**/info.js', { import: 'default', eager: true }));
+    return files.map(([file, info]) => {
+      const path = file.replace('./', '').replace('/info.js', '');
+      const device = info.device || 'mobile';
+      const figma = info.figma || '';
+      return { icon: false, path, name: '', device, figma, ...info };
+    });
+  })();
+
+  const item = computed(() => {
+    return items.filter((o) => o.path == (route.query.path || defaultPath)).at(0);
+  });
+</script>
 
 <script>
   export default {
@@ -37,30 +55,6 @@
       name: 'App Clone',
       description: 'Vuetify app clone view',
       source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/clone',
-    },
-
-    data() {
-      return {
-        style: {
-          zoom: .9,
-        },
-        items: (() => {
-          let files = Object.entries(import.meta.glob('./index/**/info.js', {
-            import: 'default',
-            eager: true,
-          }));
-
-          return files.map(([file, info]) => {
-            const paths = this.$route.path.split('/').filter(path => path);
-            return {
-              icon: false,
-              to: file.replace(/.+index\/(.+?)\/.+/g, `/${paths[0]}/${paths[1]}/$1`),
-              name: '',
-              ...info
-            };
-          });
-        })(),
-      };
     },
   };
 </script>

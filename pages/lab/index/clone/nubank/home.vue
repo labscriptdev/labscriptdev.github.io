@@ -1,5 +1,5 @@
 <template>
   <div>
-    Selecione um item
+    Home
   </div>
 </template>
