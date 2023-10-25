@@ -20,7 +20,7 @@
 <script>
   export default {
     meta: {
-      active: true,
+      active: false,
       icon: 'mdi-slot-machine',
       name: 'Loteria',
       description: 'Aplicação de simulação lotérica',

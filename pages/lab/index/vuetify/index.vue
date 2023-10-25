@@ -200,7 +200,7 @@
 <script>
   export default {
     meta: {
-      active: true,
+      active: false,
       icon: 'mdi-vuetify',
       name: 'Vuetify',
       description: 'Vuetify',
