@@ -5,13 +5,8 @@
       :type="item.device"
       :src="`${route.path}/${route.query.path || defaultPath}`"
       style="height: calc(100vh - 130px);"
+      class="mx-auto"
     />
-
-    <!-- <ul>
-      <template v-for="_item in items">
-        <li><nuxt-link :to="`/lab/clone/${_item.path}`">{{ _item.name }}</nuxt-link></li>
-      </template>
-    </ul> -->
 
     <template #drawer>
       <v-list>
