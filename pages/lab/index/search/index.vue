@@ -1,37 +1,38 @@
 <template>
   <app-layout title="Buscas">
     <v-row>
-      <v-col cols="12" lg="6">
-        <v-text-field
-          label="Termo"
-          v-model="params.search"
-          append-inner-icon="mdi-magnify"
-          :hide-details="true"
+      <v-col cols="12" md="4">
+        <v-select
+          v-model="search.params.category"
+          label="Categoria"
+          :items="search.categories"
+          item-title="name"
+          item-value="id"
+          append-inner-icon="tabler:category-filled"
         />
       </v-col>
-      <v-col cols="12" lg="6">
+      <v-col cols="12" md="4">
         <v-text-field
-          label="Local"
-          v-model="params.place"
+          label="Busca"
+          v-model="search.params.term"
+          append-inner-icon="mdi-magnify"
+        />
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-text-field
+          label="Localização"
+          v-model="search.params.place"
           append-inner-icon="mdi-map-marker"
-          :hide-details="true"
         />
       </v-col>
     </v-row>
 
     <v-row>
-      <template v-for="_search in result.searchs">
-        <v-col cols="6" sm="4" md="3" lg="2">
-          <v-btn
-            class="d-flex align-center justify-center"
-            style="display:block; width:100%; height:100px;"
-            :href="_search.url"
-            target="_blank"
-          >
-            <div class="text-center">
-              <v-icon class="text-h4">{{ _search.icon }}</v-icon>
-              <div class="mt-3">{{ _search.name }}</div>
-            </div>
+      <template v-for="r in search.results">
+        <v-col cols="3">
+          <v-btn block :href="r.url" target="_blank" height="50">
+            <v-icon :icon="r.icon" />
+            <span class="ms-2">{{ r.name }}</span>
           </v-btn>
         </v-col>
       </template>
@@ -39,89 +40,113 @@
   </app-layout>
 </template>
 
-<script>
-  export default {
-    meta: {
-      active: false,
-      icon: 'mdi-magnify',
-      name: 'Busca global',
-      description: 'Ferramenta para auxiliar na busca de qualquer coisa: de pessoas à produtos',
-      source: 'https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/search',
-    },
-    
-    data() {
-      return {
-        params: {
-          search: '',
-          place: '',
-        },
-      };
-    },
+<script setup>
+import { reactive, computed } from "vue";
 
-    computed: {
-      result() {
-        const search = encodeURIComponent(this.params.search);
-        const place = encodeURIComponent(this.params.place);
-        const query = encodeURIComponent([this.params.search, this.params.place].filter(item => !!item).join(' '));
+const search = reactive({
+  params: {
+    term: "",
+    place: "",
+    category: "all",
+  },
+  categories: [
+    { id: "all", name: "Todos" },
+    { id: "people", name: "Pessoas" },
+    { id: "shop", name: "Compras" },
+    { id: "dev", name: "Desenvolvimento" },
+    { id: "social", name: "Redes sociais" },
+    { id: "job", name: "Vagas de Emprego" },
+  ],
+  results: computed(() => {
+    const slugify = (text) =>
+      text
+        .toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]+/g, "")
+        .replace(/--+/g, "-");
 
-        const categories = [
-          {id:'general', name:'Geral'},
-          {id:'people', name:'Pessoas'},
-          {id:'shop', name:'Compras'},
-          {id:'dev', name:'Desenvolvimento'},
-          {id:'social', name:'Redes sociais'},
-        ];
+    const { term, place, category } = search.params;
 
-        const searchs = [
-          {
-            icon: 'mdi-google',
-            name: 'Google',
-            url: `https://www.google.com/search?q=${query}`,
-            categories: ['general'],
-          },
-          {
-            icon: 'mdi-twitter',
-            name: 'Twitter',
-            url: `https://twitter.com/search?q=${query}&src=typed_query`,
-            categories: ['social'],
-          },
-          {
-            icon: 'mdi-facebook',
-            name: 'Facebook',
-            url: `https://www.facebook.com/search/people/?q=${query}`,
-            categories: ['social'],
-          },
-          {
-            icon: 'mdi-linkedin',
-            name: 'Linkedin',
-            url: `https://www.linkedin.com/search/results/all/?keywords=${query}&origin=GLOBAL_SEARCH_HEADER&sid=9Do`,
-            categories: ['social'],
-          },
-          {
-            icon: 'mdi-cart',
-            name: 'OLX',
-            url: `https://www.olx.com.br/brasil?q=${query}`,
-            categories: ['shop'],
-          },
-          {
-            icon: 'mdi-xml',
-            name: 'Can I Use?',
-            url: `http://caniuse.com/#search=${search}`,
-            categories: ['dev'],
-          },
-          {
-            icon: 'mdi-codepen',
-            name: 'Codepen',
-            url: `https://codepen.io/search/pens?q=${search}`,
-            categories: ['dev'],
-          },
-        ];
-
-        return {
-          categories,
-          searchs,
-        };
+    // prettier-ignore
+    const searchs = [
+      {
+        icon: "mdi-google",
+        name: "Google",
+        url: `https://www.google.com/search?q=${term}`,
+        categories: ["general"],
       },
-    },
-  };
+      {
+        icon: "mdi-twitter",
+        name: "Twitter",
+        url: `https://twitter.com/search?q=${term}&src=typed_query`,
+        categories: ["social"],
+      },
+      {
+        icon: "mdi-facebook",
+        name: "Facebook",
+        url: `https://www.facebook.com/search/people/?q=${term}`,
+        categories: ["social", "people"],
+      },
+      {
+        icon: "mdi-linkedin",
+        name: "Linkedin",
+        url: `https://www.linkedin.com/search/results/all/?keywords=${term}&origin=GLOBAL_SEARCH_HEADER&sid=9Do`,
+        categories: ["social", "people"],
+      },
+      {
+        icon: "mdi-cart",
+        name: "OLX",
+        url: `https://www.olx.com.br/brasil?q=${term}`,
+        categories: ["shop"],
+      },
+      {
+        icon: "mdi-xml",
+        name: "Can I Use?",
+        url: `http://caniuse.com/#search=${term}`,
+        categories: ["dev"],
+      },
+      {
+        icon: "mdi-codepen",
+        name: "Codepen",
+        url: `https://codepen.io/search/pens?q=${term}`,
+        categories: ["dev"],
+      },
+      {
+        icon: "ic:round-work",
+        name: "Vagas PJ",
+        url: `https://vagaspj.com.br/?sfid=421&_sf_s=${term}&_sfm_cidade=${place}`,
+        categories: ["job"],
+      },
+      {
+        icon: "ic:round-work",
+        name: "Trabalha Brasil",
+        url: `https://www.trabalhabrasil.com.br/vagas-empregos-em-${slugify(place)}/${slugify(term)}`,
+        categories: ["job"],
+      },
+    ];
+
+    return searchs.filter((s) => {
+      if (category == "all") return true;
+      return s.categories.includes(category);
+    });
+  }),
+});
+</script>
+
+<script>
+export default {
+  meta: {
+    active: true,
+    icon: "mdi-magnify",
+    name: "Busca global",
+    description:
+      "Ferramenta para auxiliar na busca de qualquer coisa: de pessoas à produtos",
+    source:
+      "https://github.com/labscriptdev/labscriptdev.github.io/tree/main/pages/lab/index/search",
+  },
+};
 </script>
