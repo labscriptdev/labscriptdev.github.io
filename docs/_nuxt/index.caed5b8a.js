@@ -1,0 +1,1 @@
+import{_ as e,e as n,o}from"./entry.76f46d94.js";const t={},c={href:"Figma Nubank"};function a(s,r){return o(),n("a",c,"https://www.figma.com/file/14NHAgcAnkdNu10z3eyXLy/Clone---Banco-Inter-(Community)?type=design&node-id=0-1&mode=design&t=hVTNdyyMjK3n5a8K-0")}const i=e(t,[["render",a]]);export{i as default};
