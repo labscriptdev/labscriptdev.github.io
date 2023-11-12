@@ -70,6 +70,8 @@ const search = reactive({
         .replace(/--+/g, "-");
 
     const { term, place, category } = search.params;
+    const termSlug = slugify(term);
+    const placeSlug = slugify(place);
 
     // prettier-ignore
     const searchs = [
@@ -124,7 +126,19 @@ const search = reactive({
       {
         icon: "ic:round-work",
         name: "Trabalha Brasil",
-        url: `https://www.trabalhabrasil.com.br/vagas-empregos-em-${slugify(place)}/${slugify(term)}`,
+        url: `https://www.trabalhabrasil.com.br/vagas-empregos-em-${placeSlug}/${termSlug}`,
+        categories: ["job"],
+      },
+      {
+        icon: "ic:round-work",
+        name: "Catho",
+        url: `https://www.catho.com.br/vagas/${termSlug}/${placeSlug}/`,
+        categories: ["job"],
+      },
+      {
+        icon: "ic:round-work",
+        name: "Glassdor",
+        url: `https://www.glassdoor.com.br/Vaga/${placeSlug}-${termSlug}-vagas-SRCH_IL.0,34_IC2514646_KO35,51.htm`,
         categories: ["job"],
       },
     ];
