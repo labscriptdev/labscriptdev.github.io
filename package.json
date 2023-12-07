@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "repository": "https://github.com/labscriptdev/labscriptdev.github.io.git",
   "author": "Jeferson Silva <jeferson.i.silva@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "dev": "bash bin/dev"
+  }
 }

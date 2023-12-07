@@ -1,14 +1,15 @@
 version: "3"
 services:
   nuxt3:
-    image: node:18.16.0
-    working_dir: /nuxt3
+    image: node:21.1.0
+    working_dir: /usr/src/app
     command: bash -c "yarn install && yarn dev"
     ports:
       - ${NUXT_PORT:-3000}:3000
       - ${VITE_PORT:-24678}:${VITE_PORT:-24678}
+      - 4000:4000
     volumes:
-      - ./nuxt3:/nuxt3
+      - ./nuxt3:/usr/src/app
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
