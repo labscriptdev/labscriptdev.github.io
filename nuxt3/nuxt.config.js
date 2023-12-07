@@ -17,7 +17,7 @@ export default defineNuxtConfig({
     },
   },
 
-  css: ["leaflet/dist/leaflet.css"],
+  css: ["@/app.scss", "leaflet/dist/leaflet.css"],
 
   modules: [
     // https://vueuse.org/guide/
