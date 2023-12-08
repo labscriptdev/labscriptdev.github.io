@@ -34,28 +34,35 @@ const emit = defineEmits(["update:modelValue"]);
 const elementRef = ref(null);
 
 const threeInit = () => {
+  // const fragment = new DocumentFragment();
+  // fragment.appendChild(elementRef.value);
+  // const object = new CSS3DObject(fragment);
+
   const object = new CSS3DObject(elementRef.value);
   object.position.set(props.x, props.y, props.z);
-  object.rotation.x = props.xr;
-  object.rotation.y = props.xy;
-  object.rotation.z = props.xz;
 
-  if (!instance.ctx.$parent.threeApp.css3dGroup) {
-    instance.ctx.$parent.threeApp.css3dGroup = new THREE.Group();
-    instance.ctx.$parent.threeApp.scene.add(
-      instance.ctx.$parent.threeApp.css3dGroup
-    );
-  }
+  // object.rotateX(props.rx);
+  // object.rotateY(props.ry);
+  // object.rotateZ(props.rz);
 
-  instance.ctx.$parent.threeApp.css3dGroup.add(object);
+  object.rotation.x = props.rx;
+  object.rotation.y = props.ry;
+  object.rotation.z = props.rz;
 
-  console.log({ ...props });
+  // if (!instance.ctx.$parent.threeApp.css3dGroup) {
+  //   instance.ctx.$parent.threeApp.css3dGroup = new THREE.Group();
+  //   instance.ctx.$parent.threeApp.scene.add(
+  //     instance.ctx.$parent.threeApp.css3dGroup
+  //   );
+  // }
+
+  // instance.ctx.$parent.threeApp.css3dGroup.add(object);
+
+  instance.ctx.$parent.threeApp.scene.add(object);
 };
 
 onMounted(() => {
   setTimeout(() => {
-    // console.clear();
-    // console.log(instance.ctx.$parent.threeApp);
     threeInit();
   }, 100);
 });

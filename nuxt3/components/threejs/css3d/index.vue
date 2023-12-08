@@ -6,7 +6,7 @@
     ></div>
 
     <slot></slot>
-    <pre>{{ threeApp }}</pre>
+    <pre>{{ threeApp.scene.children }}</pre>
   </div>
 </template>
 
@@ -25,12 +25,11 @@ const props = defineProps({
   modelValue: { type: [String], default: "" },
 });
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["create", "update", "destroy"]);
 
 // ThreeJS
 
 import * as THREE from "three";
-import { TrackballControls } from "three/addons/controls/TrackballControls.js";
 import {
   CSS3DRenderer,
   CSS3DObject,
@@ -88,19 +87,29 @@ const threeApp = reactive({
     // group.add(this.element("9ubytEsCaS0", -240, 0, 0, -Math.PI / 2));
     // this.scene.add(group);
 
-    let controls = new TrackballControls(this.camera, this.renderer.domElement);
-    controls.rotateSpeed = 4;
-
     const animate = () => {
       requestAnimationFrame(animate);
-      controls.update();
       this.renderer.render(this.scene, this.camera);
+      emit("update", this);
+      this.trigger("update", this);
     };
 
     animate();
+    emit("create", this);
+    this.trigger("create", this);
   },
   stop() {
     this.camera = false;
+  },
+  events: [],
+  on(name, callback) {
+    this.events.push({ name, callback });
+  },
+  trigger(eventName) {
+    this.events.map((item) => {
+      if (eventName != item.name) return;
+      item.callback(this);
+    });
   },
 });
 
