@@ -2,11 +2,16 @@
   <div style="border: solid 1px green; padding: 5px">
     <div
       ref="canvasRef"
-      style="width: 100%; height: 400px; border: solid 1px red"
+      style="width: 100%; height: 400px"
+      @click="app.trigger('click', { event: $event })"
     ></div>
 
-    <slot></slot>
-    <pre>{{ threeApp.scene.children }}</pre>
+    <div v-if="app.ready">
+      <slot></slot>
+    </div>
+
+    <pre>{{ app.input }}</pre>
+    <pre>{{ app.key }}</pre>
   </div>
 </template>
 
@@ -14,18 +19,13 @@
 import {
   ref,
   reactive,
-  defineProps,
   defineEmits,
   onMounted,
   onUnmounted,
   defineExpose,
 } from "vue";
 
-const props = defineProps({
-  modelValue: { type: [String], default: "" },
-});
-
-const emit = defineEmits(["create", "update", "destroy"]);
+const emit = defineEmits(["create", "update"]);
 
 // ThreeJS
 
@@ -37,32 +37,39 @@ import {
 
 const canvasRef = ref(null);
 
-const threeApp = reactive({
+const canvasEvents = {
+  keydown(ev) {
+    // console.log(ev);
+    // ctrlKey
+    // shiftKey
+    // altKey
+    app.key[ev.key] = true;
+    Object.entries(app.input).map(([key, keys]) => {
+      app.key[key] = keys.includes(ev.key);
+    });
+  },
+  keyup(ev) {
+    app.key[ev.key] = false;
+    Object.entries(app.input).map(([key, keys]) => {
+      app.key[key] = false;
+    });
+  },
+};
+
+const app = reactive({
+  ready: false,
   width: 0,
   height: 0,
   camera: false,
   scene: false,
   renderer: false,
-  element(id, x, y, z, ry) {
-    const div = document.createElement("div");
-    div.style.width = "480px";
-    div.style.height = "360px";
-    div.style.backgroundColor = "#000";
+  input: {},
+  key: {},
+  create() {
+    this.destroy();
+    console.log("init");
 
-    const iframe = document.createElement("iframe");
-    iframe.style.width = "480px";
-    iframe.style.height = "360px";
-    iframe.style.border = "0px";
-    iframe.src = ["https://www.youtube.com/embed/", id, "?rel=0"].join("");
-    div.appendChild(iframe);
-
-    const object = new CSS3DObject(div);
-    object.position.set(x, y, z);
-    object.rotation.y = ry;
-
-    return object;
-  },
-  init() {
+    this.ready = true;
     this.width = canvasRef.value.offsetWidth;
     this.height = canvasRef.value.offsetHeight;
 
@@ -72,54 +79,64 @@ const threeApp = reactive({
       1,
       5000
     );
-    this.camera.position.set(500, 350, 750);
+    // this.camera.position.set(500, 350, 750);
 
     this.scene = new THREE.Scene();
 
     this.renderer = new CSS3DRenderer();
     this.renderer.setSize(this.width, this.height);
+    canvasRef.value.textContent = "";
     canvasRef.value.appendChild(this.renderer.domElement);
 
-    // const group = new THREE.Group();
-    // group.add(this.element("SJOz3qjfQXU", 0, 0, 240, 0));
-    // group.add(this.element("Y2-xZ-1HE-Q", 240, 0, 0, Math.PI / 2));
-    // group.add(this.element("IrydklNpcFI", 0, 0, -240, Math.PI));
-    // group.add(this.element("9ubytEsCaS0", -240, 0, 0, -Math.PI / 2));
-    // this.scene.add(group);
-
     const animate = () => {
+      if (!this.ready) return;
       requestAnimationFrame(animate);
       this.renderer.render(this.scene, this.camera);
       emit("update", this);
-      this.trigger("update", this);
+      this.trigger("update");
     };
+
+    document.addEventListener("keydown", canvasEvents.keydown);
+    document.addEventListener("keyup", canvasEvents.keyup);
 
     animate();
     emit("create", this);
-    this.trigger("create", this);
+    this.trigger("create");
   },
-  stop() {
+  destroy() {
+    console.log("stop");
+    this.ready = false;
     this.camera = false;
+    this.scene = false;
+    this.renderer = false;
+    document.removeEventListener("keydown", canvasEvents.keydown);
+    document.removeEventListener("keyup", canvasEvents.keyup);
   },
   events: [],
   on(name, callback) {
+    if (typeof name == "object") {
+      Object.entries(name).map(([name, callback]) => {
+        this.events.push({ name, callback });
+      });
+      return;
+    }
     this.events.push({ name, callback });
   },
-  trigger(eventName) {
+  trigger(eventName, arg = {}) {
     this.events.map((item) => {
       if (eventName != item.name) return;
-      item.callback(this);
+      item.callback({ app: this, ...arg });
     });
   },
 });
 
 onMounted(() => {
-  threeApp.init();
+  app.create();
 });
 
 onUnmounted(() => {
-  threeApp.stop();
+  app.destroy();
 });
 
-defineExpose({ threeApp });
+defineExpose({ app });
 </script>

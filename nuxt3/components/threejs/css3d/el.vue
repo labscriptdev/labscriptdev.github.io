@@ -16,6 +16,7 @@ import {
   defineProps,
   defineEmits,
   onMounted,
+  onUnmounted,
   getCurrentInstance,
 } from "vue";
 const instance = getCurrentInstance();
@@ -33,37 +34,27 @@ const emit = defineEmits(["update:modelValue"]);
 
 const elementRef = ref(null);
 
+let app, object;
 const threeInit = () => {
-  // const fragment = new DocumentFragment();
-  // fragment.appendChild(elementRef.value);
-  // const object = new CSS3DObject(fragment);
+  app = instance.ctx.$parent.app;
 
-  const object = new CSS3DObject(elementRef.value);
+  object = new CSS3DObject(elementRef.value);
   object.position.set(props.x, props.y, props.z);
 
-  // object.rotateX(props.rx);
-  // object.rotateY(props.ry);
-  // object.rotateZ(props.rz);
+  object.rotateX(props.rx);
+  object.rotateY(props.ry);
+  object.rotateZ(props.rz);
 
-  object.rotation.x = props.rx;
-  object.rotation.y = props.ry;
-  object.rotation.z = props.rz;
-
-  // if (!instance.ctx.$parent.threeApp.css3dGroup) {
-  //   instance.ctx.$parent.threeApp.css3dGroup = new THREE.Group();
-  //   instance.ctx.$parent.threeApp.scene.add(
-  //     instance.ctx.$parent.threeApp.css3dGroup
-  //   );
-  // }
-
-  // instance.ctx.$parent.threeApp.css3dGroup.add(object);
-
-  instance.ctx.$parent.threeApp.scene.add(object);
+  app.scene.add(object);
 };
 
 onMounted(() => {
   setTimeout(() => {
     threeInit();
   }, 100);
+});
+
+onUnmounted(() => {
+  app.scene.remove(object);
 });
 </script>
