@@ -1,17 +1,50 @@
+<!--
+  https://github.com/mrdoob/three.js/blob/master/examples/css3d_youtube.html
+  https://discourse.threejs.org/t/using-webglrenderer-and-css3drenderer-together-hardly-works/2213/5
+  https://codepen.io/trusktr/pen/RjzKJx
+
+  TODO: Move camera forward without change "z"
+-->
+
 <template>
-  <div style="border: solid 1px green; padding: 5px">
+  <div
+    ref="wrapperRef"
+    @click="app.trigger('click', { event: $event })"
+    style="
+      position: relative;
+      width: 100%;
+      height: 400px;
+      overflow: hidden;
+      border: solid 1px green;
+    "
+  >
     <div
-      ref="canvasRef"
-      style="width: 100%; height: 400px"
-      @click="app.trigger('click', { event: $event })"
+      ref="webglRendererRef"
+      style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: solid 1px blue;
+      "
     ></div>
 
-    <div v-if="app.ready">
+    <div
+      ref="css3dRendererRef"
+      style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: solid 1px blue;
+      "
+    ></div>
+
+    <div v-if="app.reactive.ready">
       <slot></slot>
     </div>
-
-    <pre>{{ app.input }}</pre>
-    <pre>{{ app.key }}</pre>
   </div>
 </template>
 
@@ -35,7 +68,9 @@ import {
   CSS3DObject,
 } from "three/addons/renderers/CSS3DRenderer.js";
 
-const canvasRef = ref(null);
+const wrapperRef = ref(null);
+const css3dRendererRef = ref(null);
+const webglRendererRef = ref(null);
 
 const canvasEvents = {
   keydown(ev) {
@@ -56,22 +91,25 @@ const canvasEvents = {
   },
 };
 
-const app = reactive({
-  ready: false,
+const app = {
+  reactive: reactive({
+    ready: false,
+  }),
   width: 0,
   height: 0,
   camera: false,
   scene: false,
-  renderer: false,
+  wrapperEl: false,
   input: {},
   key: {},
   create() {
     this.destroy();
     console.log("init");
+    this.wrapperEl = wrapperRef.value;
 
-    this.ready = true;
-    this.width = canvasRef.value.offsetWidth;
-    this.height = canvasRef.value.offsetHeight;
+    this.reactive.ready = true;
+    this.width = css3dRendererRef.value.offsetWidth;
+    this.height = css3dRendererRef.value.offsetHeight;
 
     this.camera = new THREE.PerspectiveCamera(
       50,
@@ -83,15 +121,24 @@ const app = reactive({
 
     this.scene = new THREE.Scene();
 
-    this.renderer = new CSS3DRenderer();
-    this.renderer.setSize(this.width, this.height);
-    canvasRef.value.textContent = "";
-    canvasRef.value.appendChild(this.renderer.domElement);
+    this.css3dRenderer = new CSS3DRenderer();
+    this.css3dRenderer.setSize(this.width, this.height);
+    css3dRendererRef.value.textContent = "";
+    css3dRendererRef.value.appendChild(this.css3dRenderer.domElement);
+
+    this.webglRenderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+    });
+    this.webglRenderer.setSize(this.width, this.height);
+    this.webglRenderer.setClearColor(0x000000, 0);
+    webglRendererRef.value.appendChild(this.webglRenderer.domElement);
 
     const animate = () => {
-      if (!this.ready) return;
+      if (!this.reactive.ready) return;
       requestAnimationFrame(animate);
-      this.renderer.render(this.scene, this.camera);
+      this.css3dRenderer.render(this.scene, this.camera);
+      this.webglRenderer.render(this.scene, this.camera);
       emit("update", this);
       this.trigger("update");
     };
@@ -105,10 +152,11 @@ const app = reactive({
   },
   destroy() {
     console.log("stop");
-    this.ready = false;
+    this.reactive.ready = false;
     this.camera = false;
     this.scene = false;
-    this.renderer = false;
+    delete this.css3dRenderer;
+    delete this.webglRenderer;
     document.removeEventListener("keydown", canvasEvents.keydown);
     document.removeEventListener("keyup", canvasEvents.keyup);
   },
@@ -128,7 +176,7 @@ const app = reactive({
       item.callback({ app: this, ...arg });
     });
   },
-});
+};
 
 onMounted(() => {
   app.create();
