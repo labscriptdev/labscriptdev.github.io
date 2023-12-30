@@ -86,6 +86,9 @@ const onCreate = (app) => {
   const material = new THREE.MeshBasicMaterial({
     color: new THREE.Color(0x00ff00),
   });
+  material.opacity = 0;
+  material.blending = THREE.NoBlending;
+  material.side = THREE.DoubleSide;
   const obj = new THREE.Mesh(geometry, material);
   obj.position.set(100, 100, 100);
   app.scene.add(obj);

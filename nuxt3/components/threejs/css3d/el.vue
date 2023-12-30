@@ -42,7 +42,18 @@ const threeInit = () => {
   object.rotateY(props.ry);
   object.rotateZ(props.rz);
 
-  app.scene.add(object);
+  const holder = new THREE.Group();
+  holder.add(object);
+
+  const geometry = new THREE.BoxGeometry(100, 100, 100);
+  const material = new THREE.MeshBasicMaterial();
+  material.color.set("black");
+  material.opacity = 0;
+  material.blending = THREE.NoBlending;
+  material.side = THREE.DoubleSide;
+  holder.add(new THREE.Mesh(geometry, material));
+
+  app.scene.add(holder);
 };
 
 onMounted(() => {
@@ -51,7 +62,7 @@ onMounted(() => {
   }, 100);
 });
 
-onUnmounted(() => {
-  app.scene.remove(object);
-});
+// onUnmounted(() => {
+//   app.scene.remove(object);
+// });
 </script>

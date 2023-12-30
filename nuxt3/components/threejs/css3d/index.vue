@@ -19,7 +19,7 @@
     "
   >
     <div
-      ref="webglRendererRef"
+      ref="css3dRendererRef"
       style="
         position: absolute;
         top: 0;
@@ -31,7 +31,7 @@
     ></div>
 
     <div
-      ref="css3dRendererRef"
+      ref="webglRendererRef"
       style="
         position: absolute;
         top: 0;
@@ -132,7 +132,8 @@ const app = {
     });
     this.webglRenderer.setSize(this.width, this.height);
     this.webglRenderer.setClearColor(0x000000, 0);
-    webglRendererRef.value.appendChild(this.webglRenderer.domElement);
+    // webglRendererRef.value.appendChild(this.webglRenderer.domElement);
+    this.css3dRenderer.domElement.appendChild(this.webglRenderer.domElement);
 
     const animate = () => {
       if (!this.reactive.ready) return;

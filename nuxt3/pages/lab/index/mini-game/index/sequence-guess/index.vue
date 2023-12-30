@@ -178,7 +178,7 @@ const game = reactive({
   init() {
     this.status = "playing";
 
-    const colors = [
+    const colors = _.shuffle([
       "AntiqueWhite",
       "Aqua",
       "Aquamarine",
@@ -309,7 +309,7 @@ const game = reactive({
       "WhiteSmoke",
       "Yellow",
       "YellowGreen",
-    ].filter((o, i) => {
+    ]).filter((o, i) => {
       return i < this.options.totalColors;
     });
 
