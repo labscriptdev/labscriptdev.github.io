@@ -1,91 +1,94 @@
 <template>
   <div>
-    <v-text-field
-      label="Números"
-      v-model="lotto.numbersStr"
-      @keyup="lotto.numbersToArray()"
-      append-inner-icon="mdi-close"
-      @click:appendInner="
-        () => {
-          lotto.numbersStr = '';
-          lotto.numbersToArray();
-        }
-      "
-    />
+    <v-row>
+      <v-col cols="12" md="7">
+        <app-table
+          :items="lotto.response.data"
+          height="80vh"
+          v-if="lotto.response.data[0]"
+        >
+          <template #colgroup="bind">
+            <col width="80px" />
+            <col width="150px" />
+            <col width="*" />
+          </template>
 
-    <v-table class="border">
-      <tbody>
-        <template v-for="nns in lotto.table">
-          <tr>
-            <template v-for="nn in nns">
-              <td class="pa-1">
-                <div
-                  style="cursor: pointer"
-                  class="pa-2 text-center rounded bg-grey-lighten-3"
-                  :class="{
-                    'bg-primary': lotto.numbers.includes(nn),
-                  }"
-                  @click="lotto.numberToggle(nn)"
+          <template #header="bind">
+            <th>Sorteio</th>
+            <th>Data</th>
+            <th>Números</th>
+          </template>
+
+          <template #row="bind">
+            <td>{{ bind.item.number }}</td>
+            <td>{{ bind.item.date }}</td>
+            <td>
+              <div class="d-flex flex-wrap" style="gap: 6px; padding: 4px">
+                <v-btn
+                  color="grey-lighten-3"
+                  elevation="0"
+                  @click="lotto.numbersSet(bind.item.numbers)"
                 >
-                  {{ nn }}
-                </div>
-              </td>
+                  <v-icon icon="ic:round-keyboard-double-arrow-right" />
+                </v-btn>
+
+                <template v-for="nn in bind.item.numbers">
+                  <v-btn
+                    color="grey-lighten-3"
+                    elevation="0"
+                    @click="lotto.numberToggle(nn)"
+                    :class="{
+                      'bg-primary': lotto.numbers.includes(nn),
+                    }"
+                  >
+                    {{ nn }}
+                  </v-btn>
+                </template>
+              </div>
+            </td>
+          </template>
+        </app-table>
+      </v-col>
+
+      <v-col cols="12" md="5">
+        <v-text-field
+          label="Números"
+          v-model="lotto.numbersStr"
+          @keyup="lotto.numbersToArray()"
+          append-inner-icon="mdi-close"
+          @click:appendInner="
+            () => {
+              lotto.numbersStr = '';
+              lotto.numbersToArray();
+            }
+          "
+        />
+
+        <v-table class="border">
+          <tbody>
+            <template v-for="nns in lotto.table">
+              <tr>
+                <template v-for="nn in nns">
+                  <td class="pa-1">
+                    <div
+                      style="cursor: pointer"
+                      class="pa-2 text-center rounded bg-grey-lighten-3"
+                      :class="{
+                        'bg-primary': lotto.numbers.includes(nn),
+                      }"
+                      @click="lotto.numberToggle(nn)"
+                    >
+                      {{ nn }}
+                    </div>
+                  </td>
+                </template>
+              </tr>
             </template>
-          </tr>
-        </template>
-      </tbody>
-    </v-table>
-    <br />
+          </tbody>
+        </v-table>
+      </v-col>
+    </v-row>
 
-    <app-table :items="lotto.response.data" v-if="lotto.response.data[0]">
-      <template #colgroup="bind">
-        <col width="80px" />
-        <col width="*" />
-        <col width="50px" />
-        <template v-for="(nn, ii) in lotto.response.data[0].numbers">
-          <col width="50px" />
-        </template>
-      </template>
-
-      <template #header="bind">
-        <th>Sorteio</th>
-        <th>Data</th>
-        <th></th>
-        <template v-for="(nn, ii) in lotto.response.data[0].numbers">
-          <th></th>
-        </template>
-      </template>
-
-      <template #row="bind">
-        <td>{{ bind.item.number }}</td>
-        <td>{{ bind.item.date }}</td>
-        <td class="pa-1">
-          <v-btn
-            block
-            color="grey-lighten-3"
-            elevation="0"
-            @click="lotto.numbersSet(bind.item.numbers)"
-          >
-            <v-icon icon="ic:round-keyboard-double-arrow-right" />
-          </v-btn>
-        </td>
-        <template v-for="nn in bind.item.numbers">
-          <td class="pa-1">
-            <v-btn
-              block
-              color="grey-lighten-3"
-              elevation="0"
-              @click="lotto.numberToggle(nn)"
-              :class="{
-                'bg-primary': lotto.numbers.includes(nn),
-              }"
-            >
-              {{ nn }}
-            </v-btn>
-          </td>
-        </template>
-      </template>
-    </app-table>
     <br />
 
     <!-- <div class="border">

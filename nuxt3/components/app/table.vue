@@ -14,7 +14,7 @@
 
     <v-virtual-scroll :height="props.height" :items="props.items">
       <template #default="bind">
-        <v-table density="compact">
+        <v-table density="compact" class="border-b">
           <colgroup>
             <slot name="colgroup"></slot>
           </colgroup>
