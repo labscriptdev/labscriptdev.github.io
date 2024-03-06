@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import Mousetrap from 'mousetrap';
+// import Mousetrap from 'mousetrap';
 
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { RGBShiftShader } from 'three/addons/shaders/RGBShiftShader.js';

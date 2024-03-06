@@ -1,1 +1,0 @@
-import{_ as t,e as o,o as a}from"./entry.76f46d94.js";const r={meta:{name:"Home",order:0},data(){return{test:!0}},methods:{say(e){console.log(e)}}};function s(e,n,_,c,l,p){return a(),o("div",null," Default page ")}const m=t(r,[["render",s]]);export{m as default};

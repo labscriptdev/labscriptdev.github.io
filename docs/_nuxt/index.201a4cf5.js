@@ -1,0 +1,1 @@
+import{_ as t,e as o,o as s}from"./entry.0189ed9e.js";const n={meta:{icon:!1,name:"Home"},data(){return{test:!0}},methods:{say(e){console.log(e)}}};function a(e,c,r,_,l,m){return s(),o("div",null," Selecione um teste ")}const p=t(n,[["render",a]]);export{p as default};

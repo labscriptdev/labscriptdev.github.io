@@ -1,1 +1,0 @@
-import{_ as e,e as o,o as t}from"./entry.76f46d94.js";const r={meta:{icon:null,name:"Home",order:-1},props:{pages:{type:Array,default:()=>[]}}};function a(n,s,_,c,p,l){return t(),o("div",null," Choose one of the algorithms ")}const i=e(r,[["render",a]]);export{i as default};
