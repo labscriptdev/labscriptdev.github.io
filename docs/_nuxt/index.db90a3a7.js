@@ -1,1 +1,0 @@
-import{_ as e,e as o,o as t}from"./entry.0189ed9e.js";const a={meta:{icon:!1,name:"Velocidade de clique"}};function c(n,_,s,r,l,i){return t(),o("div",null," page-1 ")}const d=e(a,[["render",c]]);export{d as default};
