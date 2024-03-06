@@ -42,7 +42,8 @@
           hide-details
           @update:model-value="previsoes.submit()"
         />
-        <v-list>
+        <br>
+        <v-list elevation="1">
           <template v-for="o in previsoes.response.previsoes">
             <v-list-item>
               <div class="d-flex align-center">
@@ -52,26 +53,16 @@
             </v-list-item>
           </template>
         </v-list>
+
+        <br>
+        <v-btn block color="primary" @click="previsoes.submit()" :loading="previsoes.busy">Atualizar</v-btn>
       </v-col>
     </v-row>
-
-    <!-- 
-    
-    <v-autocomplete
-      v-if="bus.line"
-      label="Sentido"
-      :items="bus.line.ways"
-      item-title="name"
-      return-object
-      hide-details
-    /> -->
-
-    <!-- <v-btn @click="lines.submit()">lines load</v-btn> -->
-    <!-- <pre>lines: {{ lines }}</pre> -->
   </app-layout>
 </template>
 
 <script setup>
+// TODO: mapa com localização dos onibus
 import axios from 'axios';
 
 const useBusRequest = (options = {}) => {
@@ -103,9 +94,6 @@ const useBusRequest = (options = {}) => {
 
   return r;
 };
-
-// const bus = useBhbus();
-// bus.linesLoad();
 
 const lines = useBusRequest({
   value: null,
